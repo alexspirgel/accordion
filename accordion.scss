@@ -1,0 +1,13 @@
+.accordion {
+	&__item {
+		&__heading {}
+		&__content {
+			&[aria-hidden="true"] {
+				display: none;
+			}
+			&[aria-hidden="false"] {
+				display: block;
+			}
+		}
+	}
+}

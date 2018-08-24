@@ -1,0 +1,5 @@
+.accordion__item__content[aria-hidden="true"] {
+  display: none; }
+
+.accordion__item__content[aria-hidden="false"] {
+  display: block; }
