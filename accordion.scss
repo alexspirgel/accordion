@@ -1,6 +1,13 @@
 .accordion {
 	&__item {
-		&__heading {}
+		&__heading {
+			&[aria-expanded="false"] {
+				background-color: cadetblue;
+			}
+			&[aria-expanded="true"] {
+				background-color: darkseagreen;
+			}
+		}
 		&__content {
 			&[aria-hidden="true"] {
 				display: none;
@@ -11,3 +18,4 @@
 		}
 	}
 }
+h1{margin:0;}
