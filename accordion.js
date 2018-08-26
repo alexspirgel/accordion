@@ -1,13 +1,21 @@
-const testfunc = (event) => {
-	console.log(event.srcElement);
-};
-// include object extend
-var extend = function (target_object, merge_objects, deep) {
-	'use strict';
+/**
+ * Accordion v1.0.0
+ * https://github.com/alexspirgel/accordion
+ */
 
-	var extend_object = function (target_object, merge_object, deep) {
+// Import uuidv4 function.
+// import {uuid} from '../uuid/uuid,js';
+const uuid = () => {
+	return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
+};
+
+// Import extend function.
+// import {extend} from '../extend/extend.js';
+const extend = (target_object, merge_objects, deep) => {
+
+	const extendObject = (target_object, merge_object, deep) => {
 		// For each property in the merge_object.
-		for(var property in merge_object) {
+		for(let property in merge_object) {
 			// If the merge_object value is an object, is not null, and the deep flag is true.
 			if(typeof merge_object[property] === 'object' && merge_object[property] !== null && deep) {
 				// If the merge_object value is a special case.
@@ -27,8 +35,8 @@ var extend = function (target_object, merge_objects, deep) {
 					// Set the target_object value equal to an empty object.
 					target_object[property] = {};
 				}
-				// Call the extend_object function recursively.
-				extend_object(target_object[property], merge_object[property], deep);
+				// Call the extendObject function recursively.
+				extendObject(target_object[property], merge_object[property], deep);
 				// Continue to the next property, skipping the normal value assignment.
 				continue;
 			}
@@ -44,9 +52,9 @@ var extend = function (target_object, merge_objects, deep) {
 		merge_objects = [merge_objects];
 	}
 	// For each object in merge_objects.
-	for(var object = 0; object < merge_objects.length; object++) {
+	for(let object = 0; object < merge_objects.length; object++) {
 		// Extend the target_object with the merge_object.
-		extend_object(target_object, merge_objects[object], deep);
+		extendObject(target_object, merge_objects[object], deep);
 	}
 
 	// Return the extended target_object.
@@ -54,71 +62,70 @@ var extend = function (target_object, merge_objects, deep) {
 };
 
 /**
- * Accordion v1.0.0
- * https://github.com/alexspirgel/accordion
+ * Defines an accordion.
  */
 
 const Accordion = class {
 
-	/**
-	 *
-	 */
-
 	constructor(options_user) {
 
-		//
+		// Set the accordion identifying attribute.
+		this.identifier_attribute = 'data-accordion';
+		this.identifier_attribute_selector = '[' + this.identifier_attribute + ']';
+		// Set the input user options object.
 		this.options_user = options_user;
-		//
+		// Set the default options object.
 		this.options_default = {
-			"selectors": {
+			"selectors": {	
 				"accordion": ".accordion",
 				"item": ".accordion__item",
 				"heading": ".accordion__item__heading",
 				"content": ".accordion__item__content"
 			},
 			"id_prefix": "accordion",
-			"allow_multiple_open_items": true,
-			"always_one_item_open": true,
+			// "allow_multiple_open_items": true,
+			// "always_one_item_open": true,
 			"first_item_default_open": false,
-			"close_child_accordion_items": true,
-			"scroll_to_top": {
-				"enabled": true,
-				"scroll_element": window,
-				"transition": {
-					"enabled": true,
-					"duration": 500, // Transition duration in milliseconds.
-					"cancel_on_scroll": true,
-					"easing_function": (t) => {return t<0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1;} // Ease In Out Cubic.
-				}
-			},
-			"callbacks": {
-				"accordion": {
-					"initialize": {
-						"before": (accordion_element, accordion_object) => {},
-						"after": (accordion_element, accordion_object) => {}
-					}
-				},
-				"item": {
-					"initialize": {
-						"before": (item_element, accordion_object) => {},
-						"after": (item_element, accordion_object) => {}
-					},
-					"open": {
-						"before": (item_element, accordion_object) => {},
-						"after": (item_element, accordion_object) => {}
-					},
-					"close": {
-						"before": (item_element, accordion_object) => {},
-						"after": (item_element, accordion_object) => {}
-					}
-				}
-			}
+			// "close_child_accordion_items": true,
+			// "scroll_to_top": {
+			// 	"enabled": true,
+			// 	"scroll_element": window,
+			// 	"transition": {
+			// 		"enabled": true,
+			// 		"duration": 500, // Transition duration in milliseconds.
+			// 		"cancel_on_scroll": true,
+			// 		"easing_function": (t) => {return t<0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1;} // Ease In Out Cubic.
+			// 	}
+			// },
+			// "callbacks": {
+			// 	"accordion": {
+			// 		"initialize": {
+			// 			"before": (accordion_element, accordion_object) => {},
+			// 			"after": (accordion_element, accordion_object) => {}
+			// 		}
+			// 	},
+			// 	"item": {
+			// 		"initialize": {
+			// 			"before": (item_element, accordion_object) => {},
+			// 			"after": (item_element, accordion_object) => {}
+			// 		},
+			// 		"open": {
+			// 			"before": (item_element, accordion_object) => {},
+			// 			"after": (item_element, accordion_object) => {}
+			// 		},
+			// 		"close": {
+			// 			"before": (item_element, accordion_object) => {},
+			// 			"after": (item_element, accordion_object) => {}
+			// 		}
+			// 	}
+			// }
 		}; // End variable: options_default.
-		//
+
+		// Merge default options and user options into new object using the imported extend function.
 		this.options = extend({}, [this.options_default, this.options_user], true);
-		//
+		// Initialize the accordion with the merged options.
 		this.initialize(this.options);
-		//
+		// Return the reference to the accordion class instance.
 		return this;
 
 	} // End function: constructor.
@@ -127,25 +134,29 @@ const Accordion = class {
 	 *
 	 */
 
+	 openItem(event) {
+	 	console.log(event);
+	 	console.log(event.target);
+	 	console.dir(event.target);
+	 }
+
+	/**
+	 *
+	 */
+
+	 closeItem() {}
+
+	/**
+	 *
+	 */
+
+	 toggleItem() {}
+
+	/**
+	 *
+	 */
+
 	initialize(options) {
-
-		/**
-		 *
-		 */
-
-		const getNextAvailableAccordionId = (id_prefix) => {
-			// Initialize the id increment at 1.
-			let i = 1;
-			// While an id with the increment exists.
-			while(document.getElementById(id_prefix + '-' + i)) {
-				i++;
-			}
-			// Return the next available id.
-			return id_prefix + '-' + i;
-		}; // End function: getNextAvailableAccordionId.
-
-		// Initialize accordion identifying data attribute.
-		const accordion_identifier_attribute = 'data-accordion';
 		
 		//
 		// Accordion
@@ -159,29 +170,29 @@ const Accordion = class {
 			const this_accordion_element = accordion_elements[accordion_element];
 			// Attach the accordion options to the accordion element.
 			this_accordion_element.accordion_options = options;
+			// Generate UUID.
+			const this_accordion_uuid = uuid();
+			// Set this accordion selector by identifier attribute UUID.
+			const this_accordion_selector = '[' + this.identifier_attribute + '="' + this_accordion_uuid + '"]';
 			// Set the universal accordion identifier data attribute.
-			this_accordion_element.setAttribute(accordion_identifier_attribute, '');
+			this_accordion_element.setAttribute(this.identifier_attribute, this_accordion_uuid);
 			// Set the accordion aria-label attribute.
 			this_accordion_element.setAttribute('aria-label', 'Accordion Control Button Group');
-			// Get the next available accordion id.
-			const accordion_id = getNextAvailableAccordionId(options.id_prefix);
-			// Set the accordion id.
-			this_accordion_element.id = accordion_id;
 			// Initialize accordion aria-level attribute value.
 			let accordion_level = 1;
-			// Get the first parent accordion.
-			const parent_accordion = this_accordion_element.closest('[' + accordion_identifier_attribute + ']:not(#' + accordion_id + ')');
+			// Get the closest accordion (parent) that is not this accordion.
+			const parent_accordion = this_accordion_element.closest(this.identifier_attribute_selector + ':not(' + this_accordion_selector + ')');
 			// If a parent accordion exists.
 			if(parent_accordion) {
 				// Get the parent accordion first heading element.
 				const parent_heading = parent_accordion.querySelector(parent_accordion.accordion_options.selectors.heading);
-				// get the parent accordion first heading aria-level.
+				// get the parent accordion heading aria-level.
 				const parent_heading_aria_level = parent_heading.getAttribute('aria-level');
 				// Add one to the parent aria-level for the current level.
 				accordion_level = parseInt(parent_heading_aria_level) + 1;
 			}
 			// Get all child accordion elements with aria-level.
-			const aria_level_elements = this_accordion_element.querySelectorAll('[data-accordion] [aria-level]');
+			const aria_level_elements = this_accordion_element.querySelectorAll(this.identifier_attribute_selector + '[aria-level]');
 			// For each aria-level element.
 			for(let aria_level_element = 0; aria_level_element < aria_level_elements.length; aria_level_element++) {
 				// Get this current aria-level element.
@@ -197,33 +208,56 @@ const Accordion = class {
 			//
 
 			// Get accordion items.
-			const accordion_items = this_accordion_element.querySelectorAll(':scope > ' + options.selectors.item);
+			const accordion_items = this_accordion_element.querySelectorAll(this_accordion_selector + ' > ' + options.selectors.item);
+			// Attach the accordion items to the accordion element.
+			this_accordion_element.accordion_items = accordion_items;
 			// For each accordion item.
 			for(let accordion_item = 0; accordion_item < accordion_items.length; accordion_item++) {
 				// Get this current item element in the accordion.
 				const this_accordion_item = accordion_items[accordion_item];
-				// Set the accordion item id.
-				this_accordion_item.id = this_accordion_element.id + '__item-' + (accordion_item + 1);
+				// Attach the accordion parent to the accordion item element.
+				this_accordion_item.accordion_parent = this_accordion_element;
+				// Initialize aria hidden and expanded values.
+				let aria_hidden_value = 'true';
+				let aria_expanded_value = 'false';
+				// If this is the first accordion item and the first item default open option is set to true.
+				if(accordion_item === 0 && options.first_item_default_open) {
+					// Set the aria hidden and expanded values as open for the accordion item.
+					aria_hidden_value = 'false';
+					aria_expanded_value = 'true';
+				}
 
 				//
 				// Content
 				//
 
 				// Get accordion item content.
-				const accordion_item_content = this_accordion_item.querySelector(':scope > ' + options.selectors.content);
+				const accordion_item_content = this_accordion_item.querySelector(options.selectors.content);
+				// Attach the accordion item content to the accordion item element.
+				this_accordion_item.accordion_item_content = accordion_item_content;
+				// Attach the accordion parent to the accordion item content element.
+				accordion_item_content.accordion_parent = this_accordion_element;
+				// Attach the accordion item parent to the accordion item content element.
+				accordion_item_content.accordion_item_parent = this_accordion_item;
+				// Get the next available accordion id.
+				const accordion_item_content_uuid = uuid();
 				// Set the accordion item content id.
-				accordion_item_content.id = this_accordion_item.id + '__content';
+				accordion_item_content.id = accordion_item_content_uuid;
 				// Set the accordion item content aria-hidden attribute.
-				accordion_item_content.setAttribute('aria-hidden', 'true');
+				accordion_item_content.setAttribute('aria-hidden', aria_hidden_value);
 
 				//
 				// Heading
 				//
 
 				// Get accordion item heading.
-				const accordion_item_heading = this_accordion_item.querySelector(':scope > ' + options.selectors.heading);
-				// Set the accordion item heading id.
-				accordion_item_heading.id = this_accordion_item.id + '__heading';
+				const accordion_item_heading = this_accordion_item.querySelector(options.selectors.heading);
+				// Attach the accordion item heading to the accordion item element.
+				this_accordion_item.accordion_item_heading = accordion_item_heading;
+				// Attach the accordion parent to the accordion item heading element.
+				accordion_item_heading.accordion_parent = this_accordion_element;
+				// Attach the accordion item parent to the accordion item heading element.
+				accordion_item_heading.accordion_item_parent = this_accordion_item;
 				// Set the accordion item heading role attribute.
 				accordion_item_heading.setAttribute('role', 'heading');
 				// Set the accordion item heading aria-controls attribute to the accordion item content id.
@@ -231,9 +265,9 @@ const Accordion = class {
 				// Set the accordion item heading aria-level attribute.
 				accordion_item_heading.setAttribute('aria-level', accordion_level);
 				// Set the accordion item heading aria-expanded attribute.
-				accordion_item_heading.setAttribute('aria-expanded', 'false');
+				accordion_item_heading.setAttribute('aria-expanded', aria_expanded_value);
 				//
-				accordion_item_heading.addEventListener('click', testfunc);
+				accordion_item_heading.addEventListener('click', this.openItem);
 
 			} // End loop: accordion_items.
 
@@ -241,3 +275,6 @@ const Accordion = class {
 
 	} // End function: initialize.
 };
+
+// Export the accordion class.
+// export default Accordion;
