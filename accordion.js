@@ -5,6 +5,10 @@
 
 // Import uuidv4 function.
 // import {uuid} from '../uuid/uuid,js';
+/*
+https://stackoverflow.com/a/2117523
+https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)
+*/
 const uuid = () => {
 	return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
 };
@@ -69,9 +73,6 @@ const Accordion = class {
 
 	constructor(options_user) {
 
-		// Set the accordion identifying attribute.
-		this.identifier_attribute = 'data-accordion';
-		this.identifier_attribute_selector = '[' + this.identifier_attribute + ']';
 		// Set the input user options object.
 		this.options_user = options_user;
 		// Set the default options object.
@@ -83,6 +84,7 @@ const Accordion = class {
 				"content": ".accordion__item__content"
 			},
 			"id_prefix": "accordion",
+			"aria_label": "Accordion item group.",
 			// "allow_multiple_open_items": true,
 			// "always_one_item_open": true,
 			"first_item_default_open": false,
@@ -131,26 +133,114 @@ const Accordion = class {
 	} // End function: constructor.
 
 	/**
-	 *
+	 * Static properties
 	 */
 
-	 openItem(event) {
-	 	console.log(event);
-	 	console.log(event.target);
-	 	console.dir(event.target);
-	 }
+	static get id_attribute() {
+		return 'data-accordion-id';
+	}
+
+	static get item_state_attrubute() {
+		return 'data-accordion-item-state';
+	}
 
 	/**
 	 *
 	 */
 
-	 closeItem() {}
+	static openItem(accordion_item) {
+		console.log('openItem');
+		console.log(accordion_item);
+		console.dir(accordion_item);
+		accordion_item.setAttribute(Accordion.item_state_attrubute, 'opened');
+		accordion_item.accordion_item_heading.setAttribute('aria-expanded', 'true');
+		accordion_item.accordion_item_content.setAttribute('aria-hidden', 'false');
+	}
 
 	/**
 	 *
 	 */
 
-	 toggleItem() {}
+	static closeItem(accordion_item) {
+		console.log('closeItem');
+		console.log(accordion_item);
+		console.dir(accordion_item);
+		accordion_item.setAttribute(Accordion.item_state_attrubute, 'closed');
+		accordion_item.accordion_item_heading.setAttribute('aria-expanded', 'false');
+		accordion_item.accordion_item_content.setAttribute('aria-hidden', 'true');
+	}
+
+	/**
+	 *
+	 */
+
+	static toggleItem(accordion_item) {
+		console.log('toggleItem:');
+		const accordion_item_state = accordion_item.getAttribute(Accordion.item_state_attrubute);
+		if(accordion_item_state === 'closed') {
+			Accordion.openItem(accordion_item);
+		}
+		else if(accordion_item_state === 'opened') {
+			Accordion.closeItem(accordion_item);
+		}
+	}
+
+	/**
+	 *
+	 */
+
+	static focusItem(accordion_item, option) {
+		let item_to_focus = accordion_item;
+		if(option) {
+			const accordion_items_list = accordion_item.accordion_parent.accordion_items;
+			for(let i = 0; i < accordion_items_list.length; i++) {
+				if(accordion_items_list[i] === accordion_item) {
+					if(option === 'previous' && i > 0) {
+						item_to_focus = accordion_items_list[i - 1];
+					}
+					else if(option === 'next' && i < (accordion_items_list.length - 1)) {
+						item_to_focus = accordion_items_list[i + 1];
+					}
+					else {
+						console.log('There is no ' + option + ' item in this accordion.');
+					}
+					break;
+				}
+			}
+		}
+		item_to_focus.accordion_item_heading.focus();
+	}
+
+	/**
+	 *
+	 */
+
+	headingClick(event) {
+		// Get the accordion parent item.
+		const accordion_item = event.target.accordion_item_parent;
+		// Toggle the accordion item.
+		Accordion.toggleItem(accordion_item);
+
+	}
+
+	/**
+	 *
+	 */
+
+	headingKeyDown(event) {
+		// Get the accordion parent item.
+		const accordion_item = event.target.accordion_item_parent;
+		//
+		switch(event.keyCode) {
+			case 38:
+				Accordion.focusItem(accordion_item, 'previous');
+				break;
+			case 40:
+				Accordion.focusItem(accordion_item, 'next');
+				break;
+		}
+
+	}
 
 	/**
 	 *
@@ -173,15 +263,15 @@ const Accordion = class {
 			// Generate UUID.
 			const this_accordion_uuid = uuid();
 			// Set this accordion selector by identifier attribute UUID.
-			const this_accordion_selector = '[' + this.identifier_attribute + '="' + this_accordion_uuid + '"]';
+			const this_accordion_selector = '[' + Accordion.id_attribute + '="' + this_accordion_uuid + '"]';
 			// Set the universal accordion identifier data attribute.
-			this_accordion_element.setAttribute(this.identifier_attribute, this_accordion_uuid);
+			this_accordion_element.setAttribute(Accordion.id_attribute, this_accordion_uuid);
 			// Set the accordion aria-label attribute.
-			this_accordion_element.setAttribute('aria-label', 'Accordion Control Button Group');
+			this_accordion_element.setAttribute('aria-label', options.aria_label);
 			// Initialize accordion aria-level attribute value.
 			let accordion_level = 1;
 			// Get the closest accordion (parent) that is not this accordion.
-			const parent_accordion = this_accordion_element.closest(this.identifier_attribute_selector + ':not(' + this_accordion_selector + ')');
+			const parent_accordion = this_accordion_element.closest('[' + Accordion.id_attribute + ']:not(' + this_accordion_selector + ')');
 			// If a parent accordion exists.
 			if(parent_accordion) {
 				// Get the parent accordion first heading element.
@@ -192,7 +282,7 @@ const Accordion = class {
 				accordion_level = parseInt(parent_heading_aria_level) + 1;
 			}
 			// Get all child accordion elements with aria-level.
-			const aria_level_elements = this_accordion_element.querySelectorAll(this.identifier_attribute_selector + '[aria-level]');
+			const aria_level_elements = this_accordion_element.querySelectorAll('[' + Accordion.id_attribute + '] [aria-level]');
 			// For each aria-level element.
 			for(let aria_level_element = 0; aria_level_element < aria_level_elements.length; aria_level_element++) {
 				// Get this current aria-level element.
@@ -217,15 +307,19 @@ const Accordion = class {
 				const this_accordion_item = accordion_items[accordion_item];
 				// Attach the accordion parent to the accordion item element.
 				this_accordion_item.accordion_parent = this_accordion_element;
-				// Initialize aria hidden and expanded values.
+				// Initialize item state values.
+				let item_state_attrubute_value = 'closed';
 				let aria_hidden_value = 'true';
 				let aria_expanded_value = 'false';
 				// If this is the first accordion item and the first item default open option is set to true.
 				if(accordion_item === 0 && options.first_item_default_open) {
-					// Set the aria hidden and expanded values as open for the accordion item.
+					// Set the state values as open for the accordion item.
+					item_state_attrubute_value = 'opened';
 					aria_hidden_value = 'false';
 					aria_expanded_value = 'true';
 				}
+				// Set the item state.
+				this_accordion_item.setAttribute(Accordion.item_state_attrubute, item_state_attrubute_value);
 
 				//
 				// Content
@@ -266,8 +360,10 @@ const Accordion = class {
 				accordion_item_heading.setAttribute('aria-level', accordion_level);
 				// Set the accordion item heading aria-expanded attribute.
 				accordion_item_heading.setAttribute('aria-expanded', aria_expanded_value);
+				// Add click event listener to toggle the accordion item opened/closed state.
+				accordion_item_heading.addEventListener('click', this.headingClick);
 				//
-				accordion_item_heading.addEventListener('click', this.openItem);
+				accordion_item_heading.addEventListener('keydown', this.headingKeyDown);
 
 			} // End loop: accordion_items.
 
