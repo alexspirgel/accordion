@@ -11,7 +11,7 @@
 		<li class="accordion__item">
 			<h1><button class="accordion__item__heading">Lorem Ipsum</button></h1>
 			<div class="accordion__item__content">
-				<p>Lorem ipsum dolor sit amet</p>
+				<p>Lorem <a href="#">ipsum</a> dolor sit amet</p>
 			</div>
 		</li>
 		<li class="accordion__item">
@@ -96,9 +96,7 @@
 	</ul>
 
 	<script type="text/javascript">
-		const accordion = new Accordion({
-			"first_item_default_open": true
-		});
+		const accordion = new Accordion({});
 		const accordion2 = new Accordion({
 			"selectors": {
 				"accordion": ".accordion-2"
