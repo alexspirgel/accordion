@@ -83,12 +83,10 @@ const Accordion = class {
 				"heading": ".accordion__item__heading",
 				"content": ".accordion__item__content"
 			},
-			"id_prefix": "accordion",
 			"aria_label": "Accordion item group.",
-			// "allow_multiple_open_items": true,
-			// "always_one_item_open": true,
+			"allow_multiple_open_items": true,
 			"first_item_default_open": false,
-			// "close_child_accordion_items": true,
+			"close_child_items": false,
 			// "scroll_to_top": {
 			// 	"enabled": true,
 			// 	"scroll_element": window,
@@ -149,9 +147,19 @@ const Accordion = class {
 	 */
 
 	static openItem(accordion_item) {
-		console.log('openItem');
-		console.log(accordion_item);
-		console.dir(accordion_item);
+		// console.log('openItem');
+		// console.log(accordion_item);
+		// console.dir(accordion_item);
+		const accordion_parent = accordion_item.accordion_parent;
+		const accordion_options = accordion_parent.accordion_options;
+
+		if(accordion_options.allow_multiple_open_items === false) {
+			const open_items = accordion_parent.querySelectorAll('[' + Accordion.item_state_attrubute + '="opened"]');
+			for(let open_item = 0; open_item < open_items.length; open_item++) {
+				Accordion.closeItem(open_items[open_item]);
+			}
+		}
+
 		accordion_item.setAttribute(Accordion.item_state_attrubute, 'opened');
 		accordion_item.accordion_item_heading.setAttribute('aria-expanded', 'true');
 		accordion_item.accordion_item_content.setAttribute('aria-hidden', 'false');
@@ -162,31 +170,50 @@ const Accordion = class {
 	 */
 
 	static closeItem(accordion_item) {
-		console.log('closeItem');
-		console.log(accordion_item);
-		console.dir(accordion_item);
+		// console.log('closeItem');
+		// console.log(accordion_item);
+		// console.dir(accordion_item);
+		const accordion_parent = accordion_item.accordion_parent;
+		const accordion_options = accordion_parent.accordion_options;
+
 		accordion_item.setAttribute(Accordion.item_state_attrubute, 'closed');
 		accordion_item.accordion_item_heading.setAttribute('aria-expanded', 'false');
 		accordion_item.accordion_item_content.setAttribute('aria-hidden', 'true');
+
+		if(accordion_options.close_child_items === true) {
+			console.log('close nested');
+			const nested_accordion = accordion_item.querySelector('[' + Accordion.id_attribute + ']');
+			console.dir(nested_accordion);
+			if(nested_accordion) {
+				for(let nested_item = 0; nested_item < nested_accordion.accordion_items.length; nested_item++) {
+					const this_nested_item = nested_accordion.accordion_items[nested_item];
+					Accordion.closeItem(this_nested_item);
+				}
+			}
+		}
 	}
 
 	/**
-	 *
+	 * Opens or closes an accordion item based on it's current state.
 	 */
 
 	static toggleItem(accordion_item) {
-		console.log('toggleItem:');
+		// Get the current accordion item state.
 		const accordion_item_state = accordion_item.getAttribute(Accordion.item_state_attrubute);
+		// If the accordion item is currently closed.
 		if(accordion_item_state === 'closed') {
+			// Open the accordion item.
 			Accordion.openItem(accordion_item);
 		}
+		// If the accordion is currently open.
 		else if(accordion_item_state === 'opened') {
+			// Close the accordion item.
 			Accordion.closeItem(accordion_item);
 		}
 	}
 
 	/**
-	 *
+	 * Sets the user focus on a specific accordion item or the previous or next item within the accordion.
 	 */
 
 	static focusItem(accordion_item, option) {
@@ -212,7 +239,7 @@ const Accordion = class {
 	}
 
 	/**
-	 *
+	 * Handles a click event on an accordion item heading.
 	 */
 
 	headingClick(event) {
@@ -220,30 +247,31 @@ const Accordion = class {
 		const accordion_item = event.target.accordion_item_parent;
 		// Toggle the accordion item.
 		Accordion.toggleItem(accordion_item);
-
-	}
+	} // End function: headingClick.
 
 	/**
-	 *
+	 * Handles a key down event on an accordion item heading.
 	 */
 
 	headingKeyDown(event) {
 		// Get the accordion parent item.
 		const accordion_item = event.target.accordion_item_parent;
-		//
 		switch(event.keyCode) {
+			// If key code is up arrow.
 			case 38:
 				Accordion.focusItem(accordion_item, 'previous');
 				break;
+			// If key code is down arrow.
 			case 40:
 				Accordion.focusItem(accordion_item, 'next');
 				break;
 		}
-
-	}
+	} // End function: headingKeyDown.
 
 	/**
+	 * Initializes an accordion.
 	 *
+	 * @param {object} options - The merged options used to configure the accordion.
 	 */
 
 	initialize(options) {
@@ -276,7 +304,7 @@ const Accordion = class {
 			if(parent_accordion) {
 				// Get the parent accordion first heading element.
 				const parent_heading = parent_accordion.querySelector(parent_accordion.accordion_options.selectors.heading);
-				// get the parent accordion heading aria-level.
+				// Get the parent accordion heading aria-level.
 				const parent_heading_aria_level = parent_heading.getAttribute('aria-level');
 				// Add one to the parent aria-level for the current level.
 				accordion_level = parseInt(parent_heading_aria_level) + 1;
@@ -362,7 +390,7 @@ const Accordion = class {
 				accordion_item_heading.setAttribute('aria-expanded', aria_expanded_value);
 				// Add click event listener to toggle the accordion item opened/closed state.
 				accordion_item_heading.addEventListener('click', this.headingClick);
-				//
+				// Add key down event listener for switching between accordion items and accessibility.
 				accordion_item_heading.addEventListener('keydown', this.headingKeyDown);
 
 			} // End loop: accordion_items.
