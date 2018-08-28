@@ -147,9 +147,6 @@ const Accordion = class {
 	 */
 
 	static openItem(accordion_item, skip_transition) {
-		// console.log('openItem');
-		// console.log(accordion_item);
-		// console.dir(accordion_item);
 
 		/**
 		 * Finish opening the accordion item.
@@ -166,12 +163,9 @@ const Accordion = class {
 			// If the accordion item is no longer opening (interrupted).
 			else {
 				// Nothing.
-				// console.log('opening interrupted');
 			}
 			// Remove the transition end event listener.
 			accordion_item.removeEventListener('transitionend', finishOpening);
-			// console.log('finishOpening');
-			// console.log(accordion_item);
 		}; // End function: finishOpening.
 
 
@@ -224,9 +218,6 @@ const Accordion = class {
 	 */
 
 	static closeItem(accordion_item, skip_transition) {
-		// console.log('closeItem');
-		// console.log(accordion_item);
-		// console.dir(accordion_item);
 
 		/**
 		 * Finish closing the accordion item.
@@ -268,12 +259,9 @@ const Accordion = class {
 			// If the accordion item is no longer closing (interrupted).
 			else {
 				// Nothing.
-				// console.log('closing interrupted');
 			}
 			// Remove the transition end event listener.
 			accordion_item.removeEventListener('transitionend', finishClosing);
-			// console.log('finishClosing');
-			// console.log(accordion_item);
 		}; // End function: finishClosing.
 
 		const accordion_parent = accordion_item.accordion_parent;
@@ -349,7 +337,7 @@ const Accordion = class {
 						item_to_focus = accordion_items_list[i + 1];
 					}
 					else {
-						console.log('There is no ' + option + ' item in this accordion.');
+						// console.log('There is no ' + option + ' item in this accordion.');
 					}
 					break;
 				}
