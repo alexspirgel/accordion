@@ -71,12 +71,8 @@ const extend = (target_object, merge_objects, deep) => {
 
 const Accordion = class {
 
-	constructor(options_user) {
-
-		// Set the input user options object.
-		this.options_user = options_user;
-		// Set the default options object.
-		this.options_default = {
+	static get options_default() {
+		const options_default = {
 			"selectors": {	
 				"accordion": ".accordion",
 				"item": ".accordion__item",
@@ -120,9 +116,16 @@ const Accordion = class {
 			// 	}
 			// }
 		}; // End variable: options_default.
+		// Return the default options.
+		return options_default;
+	}
 
+	constructor(options_user) {
+
+		// Set the input user options object.
+		this.options_user = options_user;
 		// Merge default options and user options into new object using the imported extend function.
-		this.options = extend({}, [this.options_default, this.options_user], true);
+		this.options = extend({}, [Accordion.options_default, this.options_user], true);
 		// Initialize the accordion with the merged options.
 		this.initialize(this.options);
 		// Return the reference to the accordion class instance.
