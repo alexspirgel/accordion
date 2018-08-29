@@ -148,27 +148,8 @@ const Accordion = class {
 
 	static openItem(accordion_item, skip_transition) {
 
-		/**
-		 * Finish opening the accordion item.
-		 */
-
-		const finishOpening = () => {
-			// If the accordion item is still opening (not interrupted).
-			if(accordion_item.getAttribute(Accordion.item_state_attrubute) === 'opening') {
-				// Remove the explicit height (should default back to auto).
-				accordion_item.style.removeProperty('height');
-				// Set the accordion item state attribute to show the item has finished opening.
-				accordion_item.setAttribute(Accordion.item_state_attrubute, 'opened');
-			}
-			// If the accordion item is no longer opening (interrupted).
-			else {
-				// Nothing.
-			}
-			// Remove the transition end event listener.
-			accordion_item.removeEventListener('transitionend', finishOpening);
-		}; // End function: finishOpening.
-
-
+		// Remove the finishClosing transition end event listener.
+		accordion_item.removeEventListener('transitionend', Accordion.finishClosingItem);
 		// Get the accordion element.
 		const accordion_parent = accordion_item.accordion_parent;
 		// Get the accordion options.
@@ -183,7 +164,7 @@ const Accordion = class {
 				// Close the accordion item.
 				Accordion.closeItem(open_items[open_item]);
 			}
-		}
+		} // End option: allow_multiple_open_items.
 
 		// Get the current item height.
 		const item_height_start = accordion_item.offsetHeight;
@@ -195,9 +176,12 @@ const Accordion = class {
 		accordion_item.accordion_item_heading.setAttribute('aria-expanded', 'true');
 		accordion_item.accordion_item_content.setAttribute('aria-hidden', 'false');
 
+		// Skip transition is true.
 		if(skip_transition) {
-			finishOpening();
+			// Finish opening the item immediately, disregarding transitions.
+			Accordion.finishOpeningItem({'target':accordion_item});
 		}
+		// If skip transition is false or not passed, continue with the transition as normal.
 		else {
 			// Get the height of the accordion heading.
 			const item_heading_height = accordion_item.accordion_item_heading.offsetHeight;
@@ -206,7 +190,7 @@ const Accordion = class {
 			// Calculate the end height for the accordion item.
 			const item_height_end = item_heading_height + item_content_height;
 			// Add a transition end event listener to the accordion item.
-			accordion_item.addEventListener('transitionend', finishOpening);
+			accordion_item.addEventListener('transitionend', Accordion.finishOpeningItem);
 			// Set the accordion item to it's end height.
 			accordion_item.style.height = item_height_end + 'px';
 		}
@@ -214,59 +198,36 @@ const Accordion = class {
 	} // End function: openItem.
 
 	/**
+	 * Finish opening the accordion item.
+	 */
+
+	static finishOpeningItem(event) {
+		// Get the accordion item.
+		const accordion_item = event.target;
+		// Get the accordion element.
+		const accordion_parent = accordion_item.accordion_parent;
+		// Get the accordion options.
+		const accordion_options = accordion_parent.accordion_options;
+		// Remove the explicit height (should default back to auto).
+		accordion_item.style.removeProperty('height');
+		// Set the accordion item state attribute to show the item has finished opening.
+		accordion_item.setAttribute(Accordion.item_state_attrubute, 'opened');
+		// Remove the transition end event listener.
+		accordion_item.removeEventListener('transitionend', Accordion.finishOpeningItem);
+	}
+
+	/**
 	 *
 	 */
 
 	static closeItem(accordion_item, skip_transition) {
 
-		/**
-		 * Finish closing the accordion item.
-		 */
-
-		const finishClosing = () => {
-			// If the accordion item is still closing (not interrupted).
-			if(accordion_item.getAttribute(Accordion.item_state_attrubute) === 'closing') {
-				// Remove the explicit height (should default back to auto).
-				accordion_item.style.removeProperty('height');
-				// Set the accordion item state attribute to show the item has finished closing.
-				accordion_item.setAttribute(Accordion.item_state_attrubute, 'closed');
-
-				// If the close item children is true.
-				if(accordion_options.close_child_items === true) {
-					// Get nested accordions.
-					const nested_accordions = accordion_item.querySelectorAll('[' + Accordion.id_attribute + ']');
-					// For each nested accordion.
-					for(let nested_accordion = 0; nested_accordion < nested_accordions.length; nested_accordion++) {
-						// Get this current nested accordion.
-						const this_nested_accordion = nested_accordions[nested_accordion];
-						// Get this nested accordion parent accordion.
-						const this_nested_accordion_parent_accordion = this_nested_accordion.parentNode.closest('[' + Accordion.id_attribute + ']');
-						// If the parent accordion matches the original item parent accordion. This ensures we only select accordions one level away.
-						if(this_nested_accordion_parent_accordion === accordion_parent) {
-							// For each item in the nested accordion.
-							for(let nested_item = 0; nested_item < this_nested_accordion.accordion_items.length; nested_item++) {
-								// Get the current nested item.
-								const this_nested_item = this_nested_accordion.accordion_items[nested_item];
-								// Close the nested item.
-								Accordion.closeItem(this_nested_item, true);
-							}
-						}
-						
-					}
-				}
-
-			}
-			// If the accordion item is no longer closing (interrupted).
-			else {
-				// Nothing.
-			}
-			// Remove the transition end event listener.
-			accordion_item.removeEventListener('transitionend', finishClosing);
-		}; // End function: finishClosing.
-
+		// Remove the finishOpeningItem transition end event listener.
+		accordion_item.removeEventListener('transitionend', Accordion.finishOpeningItem);
+		// Get the accordion element.
 		const accordion_parent = accordion_item.accordion_parent;
+		// Get the accordion options.
 		const accordion_options = accordion_parent.accordion_options;
-
 		// Get the current item height.
 		const item_height_start = accordion_item.offsetHeight;
 		// Set the item to its current height.
@@ -277,19 +238,65 @@ const Accordion = class {
 		accordion_item.accordion_item_heading.setAttribute('aria-expanded', 'false');
 		accordion_item.accordion_item_content.setAttribute('aria-hidden', 'true');
 
+		// Skip transition is true.
 		if(skip_transition) {
-			finishClosing();
+			// Finish closing the item immediately, disregarding transitions.
+			// The passed argument must mimic the event listener event.
+			Accordion.finishClosingItem({'target':accordion_item});
 		}
 		else {
 			// Get the height of the accordion heading.
 			const item_heading_height = accordion_item.accordion_item_heading.offsetHeight;
 			// Add a transition end event listener to the accordion item.
-			accordion_item.addEventListener('transitionend', finishClosing);
+			accordion_item.addEventListener('transitionend', Accordion.finishClosingItem);
 			// Set the accordion item to it's heading height.
 			accordion_item.style.height = item_heading_height + 'px';
 		}
 
 	} // End function: closeItem.
+
+	/**
+	 * Finish closing the accordion item.
+	 */
+
+	static finishClosingItem(event) {
+		// Get the accordion item.
+		const accordion_item = event.target;
+		// Get the accordion element.
+		const accordion_parent = accordion_item.accordion_parent;
+		// Get the accordion options.
+		const accordion_options = accordion_parent.accordion_options;
+		// Remove the explicit height (should default back to auto).
+		accordion_item.style.removeProperty('height');
+		// Set the accordion item state attribute to show the item has finished closing.
+		accordion_item.setAttribute(Accordion.item_state_attrubute, 'closed');
+
+		// If the close item children is true.
+		if(accordion_options.close_child_items === true) {
+			// Get nested accordions.
+			const nested_accordions = accordion_item.querySelectorAll('[' + Accordion.id_attribute + ']');
+			// For each nested accordion.
+			for(let nested_accordion = 0; nested_accordion < nested_accordions.length; nested_accordion++) {
+				// Get this current nested accordion.
+				const this_nested_accordion = nested_accordions[nested_accordion];
+				// Get this nested accordion parent accordion.
+				const this_nested_accordion_parent_accordion = this_nested_accordion.parentNode.closest('[' + Accordion.id_attribute + ']');
+				// If the parent accordion matches the original item parent accordion. This ensures we only select accordions one level away.
+				if(this_nested_accordion_parent_accordion === accordion_parent) {
+					// For each item in the nested accordion.
+					for(let nested_item = 0; nested_item < this_nested_accordion.accordion_items.length; nested_item++) {
+						// Get the current nested item.
+						const this_nested_item = this_nested_accordion.accordion_items[nested_item];
+						// Close the nested item.
+						Accordion.closeItem(this_nested_item, true);
+					}
+				}
+			} // End option: close_child_items.
+
+			// Remove the transition end event listener.
+			accordion_item.removeEventListener('transitionend', Accordion.finishClosingItem);
+		}
+	}
 
 	/**
 	 * Opens or closes an accordion item based on it's current state.
