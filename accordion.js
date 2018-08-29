@@ -306,22 +306,12 @@ const Accordion = class {
 		// Get the current accordion item state.
 		const accordion_item_state = accordion_item.getAttribute(Accordion.item_state_attrubute);
 		// If the accordion item is currently closed.
-		if(accordion_item_state === 'closed') {
-			// Open the accordion item.
-			Accordion.openItem(accordion_item);
-		}
-		// If the accordion item is currently closing.
-		else if(accordion_item_state === 'closing') {
+		if(accordion_item_state === 'closed' || accordion_item_state === 'closing') {
 			// Open the accordion item.
 			Accordion.openItem(accordion_item);
 		}
 		// If the accordion is currently opening.
-		else if(accordion_item_state === 'opening') {
-			// Close the accordion item.
-			Accordion.closeItem(accordion_item);
-		}
-		// If the accordion is currently open.
-		else if(accordion_item_state === 'opened') {
+		else if(accordion_item_state === 'opening' || accordion_item_state === 'opened') {
 			// Close the accordion item.
 			Accordion.closeItem(accordion_item);
 		}
