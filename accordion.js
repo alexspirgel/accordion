@@ -146,13 +146,63 @@ const Accordion = class {
 	}
 
 	/**
-	 *
+	 * Handles a click event on an accordion item heading.
 	 */
+
+	static headingClickEventHandler(event) {
+		// Get the accordion parent item.
+		const accordion_item = event.target.accordion_item_parent;
+		// Toggle the accordion item.
+		Accordion.toggleItem(accordion_item);
+	} // End function: headingClickEventHandler.
+
+	/**
+	 * Handles a key down event on an accordion item heading.
+	 */
+
+	static headingKeyDownEventHandler(event) {
+		// Get the accordion parent item.
+		const accordion_item = event.target.accordion_item_parent;
+		switch(event.keyCode) {
+			// If key code is up arrow.
+			case 38:
+				Accordion.focusItem(accordion_item, 'previous');
+				break;
+			// If key code is down arrow.
+			case 40:
+				Accordion.focusItem(accordion_item, 'next');
+				break;
+		}
+	} // End function: headingKeyDownEventHandler.
+
+	/**
+	 * Handles an open transition end event.
+	 */
+
+	static headingOpenTransitionEndEventHandler(event) {
+		const accordion_parent = event.target.accordion_parent;
+		const accordion_options = accordion_parent.accordion_options;
+		if(event.target.matches(accordion_options.selectors.item)){
+				Accordion.finishOpeningItem(event.target);
+		}
+	} // End function: headingOpenTransitionEndEventHandler.
+
+	/**
+	 * Handles a close transition end event.
+	 */
+
+	static headingCloseTransitionEndEventHandler(event) {
+		const accordion_parent = event.target.accordion_parent;
+		const accordion_options = accordion_parent.accordion_options;
+		if(event.target.matches(accordion_options.selectors.item)){
+				Accordion.finishClosingItem(event.target);
+		}
+	} // End function: headingCloseTransitionEndEventHandler.
 
 	static openItem(accordion_item, skip_transition) {
 
-		// Remove the finishClosing transition end event listener.
-		accordion_item.removeEventListener('transitionend', Accordion.finishClosingItem);
+		// Remove the close transitionend event listener.
+		accordion_item.removeEventListener('transitionend', Accordion.headingCloseTransitionEndEventHandler);
 		// Get the accordion element.
 		const accordion_parent = accordion_item.accordion_parent;
 		// Get the accordion options.
@@ -160,8 +210,8 @@ const Accordion = class {
 
 		// If multiple open items are not allowed.
 		if(accordion_options.allow_multiple_open_items === false) {
-			// Get all the open items within this accordion.
-			const open_items = accordion_parent.querySelectorAll('[' + Accordion.item_state_attrubute + '="opened"]');
+			// Get all the open/opening items within this accordion.
+			const open_items = accordion_parent.querySelectorAll('[' + Accordion.item_state_attrubute + '="opening"], [' + Accordion.item_state_attrubute + '="opened"]');
 			// For each open item.
 			for(let open_item = 0; open_item < open_items.length; open_item++) {
 				// Close the accordion item.
@@ -182,7 +232,7 @@ const Accordion = class {
 		// Skip transition is true.
 		if(skip_transition) {
 			// Finish opening the item immediately, disregarding transitions.
-			Accordion.finishOpeningItem({'target':accordion_item});
+			Accordion.finishOpeningItem(accordion_item);
 		}
 		// If skip transition is false or not passed, continue with the transition as normal.
 		else {
@@ -192,8 +242,8 @@ const Accordion = class {
 			const item_content_height = accordion_item.accordion_item_content.offsetHeight;
 			// Calculate the end height for the accordion item.
 			const item_height_end = item_heading_height + item_content_height;
-			// Add a transition end event listener to the accordion item.
-			accordion_item.addEventListener('transitionend', Accordion.finishOpeningItem);
+			// Add an open transitionend event listener to the accordion item.
+			accordion_item.addEventListener('transitionend', Accordion.headingOpenTransitionEndEventHandler);
 			// Set the accordion item to it's end height.
 			accordion_item.style.height = item_height_end + 'px';
 		}
@@ -204,19 +254,16 @@ const Accordion = class {
 	 * Finish opening the accordion item.
 	 */
 
-	static finishOpeningItem(event) {
-		// Get the accordion item.
-		const accordion_item = event.target;
+	static finishOpeningItem(accordion_item) {
+		console.log('finish open');
+		// Remove the open transitionend event listener.
+		accordion_item.removeEventListener('transitionend', Accordion.headingOpenTransitionEndEventHandler);
 		// Get the accordion element.
 		const accordion_parent = accordion_item.accordion_parent;
-		// Get the accordion options.
-		const accordion_options = accordion_parent.accordion_options;
 		// Remove the explicit height (should default back to auto).
 		accordion_item.style.removeProperty('height');
 		// Set the accordion item state attribute to show the item has finished opening.
 		accordion_item.setAttribute(Accordion.item_state_attrubute, 'opened');
-		// Remove the transition end event listener.
-		accordion_item.removeEventListener('transitionend', Accordion.finishOpeningItem);
 	}
 
 	/**
@@ -225,8 +272,8 @@ const Accordion = class {
 
 	static closeItem(accordion_item, skip_transition) {
 
-		// Remove the finishOpeningItem transition end event listener.
-		accordion_item.removeEventListener('transitionend', Accordion.finishOpeningItem);
+		// Remove the open transitionend event listener.
+		accordion_item.removeEventListener('transitionend', Accordion.headingOpenTransitionEndEventHandler);
 		// Get the accordion element.
 		const accordion_parent = accordion_item.accordion_parent;
 		// Get the accordion options.
@@ -250,8 +297,8 @@ const Accordion = class {
 		else {
 			// Get the height of the accordion heading.
 			const item_heading_height = accordion_item.accordion_item_heading.offsetHeight;
-			// Add a transition end event listener to the accordion item.
-			accordion_item.addEventListener('transitionend', Accordion.finishClosingItem);
+			// Add a close transitionend event listener to the accordion item.
+			accordion_item.addEventListener('transitionend', Accordion.headingCloseTransitionEndEventHandler);
 			// Set the accordion item to it's heading height.
 			accordion_item.style.height = item_heading_height + 'px';
 		}
@@ -262,9 +309,10 @@ const Accordion = class {
 	 * Finish closing the accordion item.
 	 */
 
-	static finishClosingItem(event) {
-		// Get the accordion item.
-		const accordion_item = event.target;
+	static finishClosingItem(accordion_item) {
+		console.log('finish close');
+		// Remove the close transitionend event listener.
+		accordion_item.removeEventListener('transitionend', Accordion.headingCloseTransitionEndEventHandler);
 		// Get the accordion element.
 		const accordion_parent = accordion_item.accordion_parent;
 		// Get the accordion options.
@@ -296,8 +344,6 @@ const Accordion = class {
 				}
 			} // End option: close_child_items.
 
-			// Remove the transition end event listener.
-			accordion_item.removeEventListener('transitionend', Accordion.finishClosingItem);
 		}
 	}
 
@@ -345,36 +391,6 @@ const Accordion = class {
 		}
 		item_to_focus.accordion_item_heading.focus();
 	}
-
-	/**
-	 * Handles a click event on an accordion item heading.
-	 */
-
-	headingClick(event) {
-		// Get the accordion parent item.
-		const accordion_item = event.target.accordion_item_parent;
-		// Toggle the accordion item.
-		Accordion.toggleItem(accordion_item);
-	} // End function: headingClick.
-
-	/**
-	 * Handles a key down event on an accordion item heading.
-	 */
-
-	headingKeyDown(event) {
-		// Get the accordion parent item.
-		const accordion_item = event.target.accordion_item_parent;
-		switch(event.keyCode) {
-			// If key code is up arrow.
-			case 38:
-				Accordion.focusItem(accordion_item, 'previous');
-				break;
-			// If key code is down arrow.
-			case 40:
-				Accordion.focusItem(accordion_item, 'next');
-				break;
-		}
-	} // End function: headingKeyDown.
 
 	/**
 	 * Initializes an accordion.
@@ -497,9 +513,9 @@ const Accordion = class {
 				// Set the accordion item heading aria-expanded attribute.
 				accordion_item_heading.setAttribute('aria-expanded', aria_expanded_value);
 				// Add click event listener to toggle the accordion item opened/closed state.
-				accordion_item_heading.addEventListener('click', this.headingClick);
+				accordion_item_heading.addEventListener('click', Accordion.headingClickEventHandler);
 				// Add key down event listener for switching between accordion items and accessibility.
-				accordion_item_heading.addEventListener('keydown', this.headingKeyDown);
+				accordion_item_heading.addEventListener('keydown', Accordion.headingKeyDownEventHandler);
 
 			} // End loop: accordion_items.
 
