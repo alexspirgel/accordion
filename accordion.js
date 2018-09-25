@@ -1,5 +1,5 @@
 /**
- * Accordion v1.0.1
+ * Accordion v1.0.0
  * https://github.com/alexspirgel/accordion
  */
 
