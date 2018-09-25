@@ -258,7 +258,6 @@ const Accordion = class {
 	 */
 
 	static finishOpeningItem(accordion_item) {
-		console.log('finish open');
 		// Remove the open transitionend event listener.
 		accordion_item.removeEventListener('transitionend', Accordion.headingOpenTransitionEndEventHandler);
 		// Get the accordion element.
@@ -295,7 +294,7 @@ const Accordion = class {
 		if(skip_transition) {
 			// Finish closing the item immediately, disregarding transitions.
 			// The passed argument must mimic the event listener event.
-			Accordion.finishClosingItem({'target':accordion_item});
+			Accordion.finishClosingItem(accordion_item);
 		}
 		else {
 			// Get the height of the accordion heading.
@@ -313,7 +312,6 @@ const Accordion = class {
 	 */
 
 	static finishClosingItem(accordion_item) {
-		console.log('finish close');
 		// Remove the close transitionend event listener.
 		accordion_item.removeEventListener('transitionend', Accordion.headingCloseTransitionEndEventHandler);
 		// Get the accordion element.
