@@ -210,12 +210,15 @@ const Accordion = class {
 
 		// If multiple open items are not allowed.
 		if(accordion_options.allow_multiple_open_items === false) {
-			// Get all the open/opening items within this accordion.
-			const open_items = accordion_parent.querySelectorAll('[' + Accordion.item_state_attrubute + '="opening"], [' + Accordion.item_state_attrubute + '="opened"]');
-			// For each open item.
-			for(let open_item = 0; open_item < open_items.length; open_item++) {
-				// Close the accordion item.
-				Accordion.closeItem(open_items[open_item]);
+			// Get all the accordion items within this accordion.
+			const accordion_items = accordion_parent.children;
+			// For each accordion item.
+			for(let accordion_item = 0; accordion_item < accordion_items.length; accordion_item++) {
+				// If the accordion item is open or opening.
+				if(accordion_items[accordion_item].matches('[' + Accordion.item_state_attrubute + '="opening"], [' + Accordion.item_state_attrubute + '="opened"]')) {
+					// Close the accordion item.
+					Accordion.closeItem(accordion_items[accordion_item]);
+				}
 			}
 		} // End option: allow_multiple_open_items.
 
