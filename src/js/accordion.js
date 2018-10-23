@@ -13,57 +13,8 @@ const uuid = () => {
 	return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
 };
 
-// Import extend function.
-// import {extend} from '../extend/extend.js';
-const extend = (target_object, merge_objects, deep) => {
-
-	const extendObject = (target_object, merge_object, deep) => {
-		// For each property in the merge_object.
-		for(let property in merge_object) {
-			// If the merge_object value is an object, is not null, and the deep flag is true.
-			if(typeof merge_object[property] === 'object' && merge_object[property] !== null && deep) {
-				// If the merge_object value is a special case.
-				if(merge_object[property].toString() === '[object Window]' || merge_object[property].toString() === '[object HTMLDocument]') {
-					// Set the target_object property value equal to the merge_object property value.
-					target_object[property] = merge_object[property];
-					// Continue past the normal deep object handling.
-					continue;
-				}
-				// If the merge_object value is an array.
-				if(Array.isArray(merge_object[property])) {
-					// Set the target_object value equal to an empty array (arrays are replaced, not merged).
-					target_object[property] = [];
-				}
-				// If the target_object value is not an object or if it is null.
-				else if(typeof target_object[property] !== 'object' || target_object[property] === null) {
-					// Set the target_object value equal to an empty object.
-					target_object[property] = {};
-				}
-				// Call the extendObject function recursively.
-				extendObject(target_object[property], merge_object[property], deep);
-				// Continue to the next property, skipping the normal value assignment.
-				continue;
-			}
-			// Set the target_object property value equal to the merge_object property value (primitive values or shallow calls).
-			target_object[property] = merge_object[property];
-		}
-		// Return the target_object.
-		return target_object;
-	};
-
-	// If merge_objects is not an array, make it an array.
-	if(!Array.isArray(merge_objects)) {
-		merge_objects = [merge_objects];
-	}
-	// For each object in merge_objects.
-	for(let object = 0; object < merge_objects.length; object++) {
-		// Extend the target_object with the merge_object.
-		extendObject(target_object, merge_objects[object], deep);
-	}
-
-	// Return the extended target_object.
-	return target_object;
-};
+// Require extend function.
+const extend = require('@alexspirgel/extend');
 
 /**
  * Defines an accordion.
@@ -125,7 +76,7 @@ const Accordion = class {
 		// Set the input user options object.
 		this.options_user = options_user;
 		// Merge default options and user options into new object using the imported extend function.
-		this.options = extend({}, [Accordion.options_default, this.options_user], true);
+		this.options = extend([{}, Accordion.options_default, this.options_user], true);
 		// Initialize the accordion with the merged options.
 		this.initialize(this.options);
 		// Return the reference to the accordion class instance.
@@ -525,5 +476,8 @@ const Accordion = class {
 	} // End function: initialize.
 };
 
-// Export the accordion class.
-// export default Accordion;
+// If script is being required as a node module.
+if (typeof module !== 'undefined' && module.exports) {
+	// Export the accordion class.
+	module.exports = Accordion;
+}

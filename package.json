@@ -18,6 +18,13 @@
   "homepage": "https://github.com/alexspirgel/accordion#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
-    "gulp-sass": "^4.0.1"
+    "gulp-sass": "^4.0.2",
+    "node-sass": "^4.9.4",
+    "sass-loader": "^7.1.0",
+    "webpack": "^4.21.0",
+    "webpack-stream": "^5.1.1"
+  },
+  "dependencies": {
+    "@alexspirgel/extend": "^2.0.1"
   }
 }
