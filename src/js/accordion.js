@@ -110,16 +110,40 @@ const Accordion = class {
 	 * Initialize an accordion.
 	 */
 
-	 initializeAccordion(accordion_element) {
-	 	// Initialize the accordion data object on the element.
-	 	accordion_element[Accordion.static_constants.data_property] = {};
-	 }
+	initializeAccordion(accordion_element) {
+		// Initialize the accordion data object on the element.
+		accordion_element[Accordion.static_constants.data_property] = {};
+	}
 
+	/**
+	 * Initialize.
+	 */
+
+	initialize() {
+		//
+		if (accordion_elements.length > 1) {
+			// Initialize this current accordion holder variable.
+			let this_accordion_element;
+			// For each accordion.
+			for(let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
+				// Get the accordion element for the current loop.
+				this_accordion_element = accordion_elements[accordion_element];
+				// Initialize the accordion.
+				this.initializeAccordion(this_accordion_element);
+			}
+		}
+		//
+		else {
+			// Increment the instance count.
+			Accordion.incrementInstanceCount();
+		}
+	}
+
+	/**
+	 * Initialize.
+	 */
 
 	constructor(options_user) {
-
-		// Increment the instance count.
-		Accordion.incrementInstanceCount();
 
 		// Set the input user options object.
 		this.options_user = options_user;
@@ -128,13 +152,13 @@ const Accordion = class {
 
 		// Get the accordion element(s).
 		const accordion_elements = document.querySelectorAll(this.options.selectors.accordion);
-		// For each accordion.
-		for(let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
-			// Get the accordion element for the current loop.
-			this_accordion_element = accordion_elements[accordion_element];
-			// Initialize the accordion.
-			initializeAccordion(this_accordion_element);
+		//
+		if (accordion_elements.length > 0) {
+			//
+			initialize();
 		}
+		//
+		else {}
 
 		// Initialize the accordion with the merged options.
 		// this.initialize(this.options);
