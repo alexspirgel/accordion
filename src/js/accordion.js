@@ -3,16 +3,6 @@
  * https://github.com/alexspirgel/accordion
  */
 
-// Import uuidv4 function.
-// import {uuid} from '../uuid/uuid,js';
-/*
-https://stackoverflow.com/a/2117523
-https://en.wikipedia.org/wiki/Universally_unique_identifier#Version_4_(random)
-*/
-const uuid = () => {
-	return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));
-};
-
 // Require extend function.
 const extend = require('@alexspirgel/extend');
 
@@ -22,18 +12,22 @@ const extend = require('@alexspirgel/extend');
 
 const Accordion = class {
 
+	/**
+	 * Defines the default set of options.
+	 */
+
 	static get options_default() {
-		const options_default = {
+		return {
 			"selectors": {	
 				"accordion": ".accordion",
 				"item": ".accordion__item",
 				"heading": ".accordion__item__heading",
 				"content": ".accordion__item__content"
 			},
-			"aria_label": "Accordion item group.",
-			"allow_multiple_open_items": true,
-			"first_item_default_open": false,
-			"close_child_items": false,
+			"aria_label": "Accordion item group", // maybe set in html? or at least check if it is already set
+			"multiple_open_items": true,
+			"default_open_items": false, // false || 1 || [1, 3, 7]
+			"close_nested_items": false, // only closes one nested level deep, but it can set off a chain reaction to close them all
 			// "scroll_to_top": {
 			// 	"enabled": true,
 			// 	"scroll_element": window,
@@ -66,35 +60,93 @@ const Accordion = class {
 			// 		}
 			// 	}
 			// }
-		}; // End variable: options_default.
-		// Return the default options.
-		return options_default;
-	}
+		};
+	} // End: options_default
+
+	/**
+	 * Defines a set of constant class variables.
+	 */
+
+	static get static_constants() {
+		return {
+			data_property: 'accordion_data',
+			id_attribute: 'data-accordion-id',
+			item_state_attrubute: 'data-accordion-item-state'
+		};
+	} // End: static_constants
+
+	/**
+	 * Increments the class instance counter.
+	 */
+
+	static incrementInstanceCount() {
+		if (typeof Accordion.instance_count == 'undefined') {
+			Accordion.instance_count = 1;
+		}
+		else {
+			Accordion.instance_count++;
+		}
+	} // End: incrementInstanceCount
+
+	/**
+	 * Initialize content.
+	 */
+
+	initializeContent(content_element) {}
+
+	/**
+	 * Initialize a heading.
+	 */
+
+	initializeHeading(heading_element) {}
+
+	/**
+	 * Initialize an item.
+	 */
+
+	initializeItem(item_element) {}
+
+	/**
+	 * Initialize an accordion.
+	 */
+
+	 initializeAccordion(accordion_element) {
+	 	// Initialize the accordion data object on the element.
+	 	accordion_element[Accordion.static_constants.data_property] = {};
+	 }
+
 
 	constructor(options_user) {
+
+		// Increment the instance count.
+		Accordion.incrementInstanceCount();
 
 		// Set the input user options object.
 		this.options_user = options_user;
 		// Merge default options and user options into new object using the imported extend function.
 		this.options = extend([{}, Accordion.options_default, this.options_user], true);
+
+		// Get the accordion element(s).
+		const accordion_elements = document.querySelectorAll(this.options.selectors.accordion);
+		// For each accordion.
+		for(let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
+			// Get the accordion element for the current loop.
+			this_accordion_element = accordion_elements[accordion_element];
+			// Initialize the accordion.
+			initializeAccordion(this_accordion_element);
+		}
+
 		// Initialize the accordion with the merged options.
-		this.initialize(this.options);
+		// this.initialize(this.options);
+
 		// Return the reference to the accordion class instance.
 		return this;
 
-	} // End function: constructor.
+	} // End: constructor
 
-	/**
-	 * Static properties
-	 */
+	
 
-	static get id_attribute() {
-		return 'data-accordion-id';
-	}
-
-	static get item_state_attrubute() {
-		return 'data-accordion-item-state';
-	}
+	
 
 	/**
 	 * Handles a click event on an accordion item heading.
@@ -160,7 +212,7 @@ const Accordion = class {
 		const accordion_options = accordion_parent.accordion_options;
 
 		// If multiple open items are not allowed.
-		if(accordion_options.allow_multiple_open_items === false) {
+		if(accordion_options.multiple_open_items === false) {
 			// Get all the accordion items within this accordion.
 			const accordion_items = accordion_parent.children;
 			// For each accordion item.
@@ -171,7 +223,7 @@ const Accordion = class {
 					Accordion.closeItem(accordion_items[accordion_item]);
 				}
 			}
-		} // End option: allow_multiple_open_items.
+		} // End option: multiple_open_items.
 
 		// Get the current item height.
 		const item_height_start = accordion_item.offsetHeight;
@@ -275,7 +327,7 @@ const Accordion = class {
 		accordion_item.setAttribute(Accordion.item_state_attrubute, 'closed');
 
 		// If the close item children is true.
-		if(accordion_options.close_child_items === true) {
+		if(accordion_options.close_nested_items === true) {
 			// Get nested accordions.
 			const nested_accordions = accordion_item.querySelectorAll('[' + Accordion.id_attribute + ']');
 			// For each nested accordion.
@@ -294,7 +346,7 @@ const Accordion = class {
 						Accordion.closeItem(this_nested_item, true);
 					}
 				}
-			} // End option: close_child_items.
+			} // End option: close_nested_items.
 
 		}
 	}
@@ -345,64 +397,85 @@ const Accordion = class {
 	}
 
 	/**
+	 * Gets or sets the passed accordion and child accordion's aria level value.
+	 */
+
+	static nestedLevel(accordion_element, nested_level) {
+		const accordion_data = accordion_element[Accordion.static_constants.data_property];
+		if (nested_level) {
+			accordion_data.nested_level = nested_level;
+			// Get all accordion children elements.
+			const immediate_child_accordions = accordion_element.querySelectorAll('[' + Accordion.static_constants.id_attribute + ']');
+			// For each child accordion.
+			for(let accordion_child = 0; accordion_child < accordion_children.length; accordion_child++) {
+				// Get this current child accordion element.
+				this_accordion_child_element = accordion_children[accordion_child];
+				// Get the current aria-level.
+				const current_aria_level = parseInt(this_aria_level_element.getAttribute('aria-level'));
+				// Set a new aria-level one greater than before.
+				this_aria_level_element.setAttribute('aria-level', (current_aria_level + 1));
+			}
+		}
+		else {
+			return accordion_element[Accordion.static_constants.data_property].nested_level;
+		}
+	}
+
+	/**
 	 * Initializes an accordion.
 	 *
 	 * @param {object} options - The merged options used to configure the accordion.
 	 */
 
 	initialize(options) {
-		
-		//
-		// Accordion
-		//
+
+		let this_accordion_element,
+		this_accordion_data,
+		accordions_existing,
+		accordion_next_id,
+		accordion_nested_level,
+		accordion_parent,
+		accordion_children,
+		this_accordion_child_element;
 
 		// Get the accordion element(s).
 		const accordion_elements = document.querySelectorAll(options.selectors.accordion);
+
 		// For each accordion.
 		for(let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
+
 			// Get this current accordion element for the loop.
-			const this_accordion_element = accordion_elements[accordion_element];
-			// Attach the accordion options to the accordion element.
-			this_accordion_element.accordion_options = options;
-			// Generate UUID.
-			const this_accordion_uuid = uuid();
-			// Set this accordion selector by identifier attribute UUID.
-			const this_accordion_selector = '[' + Accordion.id_attribute + '="' + this_accordion_uuid + '"]';
-			// Set the universal accordion identifier data attribute.
-			this_accordion_element.setAttribute(Accordion.id_attribute, this_accordion_uuid);
-			// Set the accordion aria-label attribute.
-			this_accordion_element.setAttribute('aria-label', options.aria_label);
-			// Initialize accordion aria-level attribute value.
-			let accordion_level = 1;
-			// Get the closest accordion (parent) that is not this accordion.
-			const parent_accordion = this_accordion_element.closest('[' + Accordion.id_attribute + ']:not(' + this_accordion_selector + ')');
-			// If a parent accordion exists.
-			if(parent_accordion) {
-				// Get the parent accordion first heading element.
-				const parent_heading = parent_accordion.querySelector(parent_accordion.accordion_options.selectors.heading);
-				// Get the parent accordion heading aria-level.
-				const parent_heading_aria_level = parent_heading.getAttribute('aria-level');
-				// Add one to the parent aria-level for the current level.
-				accordion_level = parseInt(parent_heading_aria_level) + 1;
+			this_accordion_element = accordion_elements[accordion_element];
+			// Initialize the accordion data object on the element.
+			this_accordion_element[Accordion.static_constants.data_property] = {};
+			// Define a shortcut to this accordion's data, for code clarity.
+			this_accordion_data = this_accordion_element[Accordion.static_constants.data_property];
+			
+			// Attach the accordion element to the accordion data.
+			this_accordion_data.element = this_accordion_element;
+
+			// Attach the accordion options to the accordion data.
+			this_accordion_data.options = options;
+
+			// Get the existing accordions.
+			accordions_existing = document.querySelectorAll('[' + Accordion.static_constants.id_attribute + ']');
+			// Generate the next accordion id.
+			accordion_next_id = accordions_existing.length + 1;
+			while (document.querySelector('[' + Accordion.static_constants.id_attribute + ']="' + thing + '"')) {
+				thing++;
 			}
-			// Get all child accordion elements with aria-level.
-			const aria_level_elements = this_accordion_element.querySelectorAll('[' + Accordion.id_attribute + '] [aria-level]');
-			// For each aria-level element.
-			for(let aria_level_element = 0; aria_level_element < aria_level_elements.length; aria_level_element++) {
-				// Get this current aria-level element.
-				const this_aria_level_element = aria_level_elements[aria_level_element];
-				// Get the current aria-level.
-				const current_aria_level = parseInt(this_aria_level_element.getAttribute('aria-level'));
-				// Set a new aria-level one greater than before.
-				this_aria_level_element.setAttribute('aria-level', (current_aria_level + 1));
-			}
+
+			// Set the accordion id data attribute.
+			this_accordion_element.setAttribute(Accordion.static_constants.id_attribute, accordion_next_id);
+			// Set this accordion selector by accordion id attribute.
+			this_accordion_data.unique_selector = '[' + Accordion.static_constants.id_attribute + '="' + accordion_next_id + '"]';
 
 			//
 			// Item
 			//
 
 			// Get accordion items.
-			const accordion_items = this_accordion_element.querySelectorAll(this_accordion_selector + ' > ' + options.selectors.item);
+			const accordion_items = this_accordion_element.querySelectorAll(this_accordion_data.selector + ' > ' + options.selectors.item);
 			// Attach the accordion items to the accordion element.
 			this_accordion_element.accordion_items = accordion_items;
 			// For each accordion item.
@@ -470,6 +543,37 @@ const Accordion = class {
 				accordion_item_heading.addEventListener('keydown', Accordion.headingKeyDownEventHandler);
 
 			} // End loop: accordion_items.
+
+			// Set the accordion aria-label attribute.
+			this_accordion_element.setAttribute('aria-label', this_accordion_data.options.aria_label);
+
+			// Get the closest parent accordion.
+			// Closest must be called on the parent node to prevent it from returning the node it's being called form.
+			accordion_parent = this_accordion_element.parentNode.closest('[' + Accordion.static_constants.id_attribute + ']');
+			// If a parent accordion exists.
+			if(accordion_parent) {
+				// Add one to the parent aria-level for the current accordion aria-level.
+				accordion_nested_level = Accordion.nestedLevel(accordion_parent) + 1;
+			}
+			// If there is no parent accordion (the accordion is not nested in another accordion).
+			else {
+				// Set the accordion aria-level attribute value.
+				accordion_nested_level = 1;
+			}
+			// Set this accordion and nested accordion's nested level.
+			Accordion.nestedLevel(this_accordion_element, accordion_nested_level);
+
+			// Get all accordion children elements.
+			accordion_children = this_accordion_element.querySelectorAll('[' + Accordion.static_constants.id_attribute + ']');
+			// For each child accordion.
+			for(let accordion_child = 0; accordion_child < accordion_children.length; accordion_child++) {
+				// Get this current child accordion element.
+				this_accordion_child_element = accordion_children[accordion_child];
+				// Get the current aria-level.
+				const current_aria_level = parseInt(this_aria_level_element.getAttribute('aria-level'));
+				// Set a new aria-level one greater than before.
+				this_aria_level_element.setAttribute('aria-level', (current_aria_level + 1));
+			}
 
 		} // End loop accordion_elements.
 
