@@ -18,150 +18,172 @@ const Accordion = class {
 
 	static get options_default() {
 		return {
-			"selectors": {	
-				"accordion": ".accordion",
-				"item": ".accordion__item",
-				"heading": ".accordion__item__heading",
-				"content": ".accordion__item__content"
-			},
-			"aria_label": "Accordion item group", // maybe set in html? or at least check if it is already set
-			"multiple_open_items": true,
-			"default_open_items": false, // false || 1 || [1, 3, 7]
-			"close_nested_items": false, // only closes one nested level deep, but it can set off a chain reaction to close them all
-			// "scroll_to_top": {
-			// 	"enabled": true,
-			// 	"scroll_element": window,
-			// 	"transition": {
-			// 		"enabled": true,
-			// 		"duration": 500, // Transition duration in milliseconds.
-			// 		"cancel_on_scroll": true,
-			// 		"easing_function": (t) => {return t<0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1;} // Ease In Out Cubic.
+			selectors: {	
+				accordion: '.accordion',
+				item: '.accordion__item',
+				heading: '.accordion__item__heading',
+				content: '.accordion__item__content'
+			}, // End: selectors
+			accessibility_warnings: true, // log any accessibility issues
+			close_nested_items: false, // only closes one nested level deep, but it can set off a chain reaction to close them all
+			default_open_items: false, // false || 1 || [1, 3, 7]
+			multiple_open_items: true,
+			open_anchored_item: false, // if true, if item is anchored to in url, open it
+			// scroll_to_top: {
+			// 	enabled: true,
+			// 	scroll_element: window,
+			// 	transition: {
+			// 		enabled: true,
+			// 		duration: 500, // Transition duration in milliseconds.
+			// 		cancel_on_scroll: true,
+			// 		easing_function: (t) => {return t<0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1;} // Ease In Out Cubic.
 			// 	}
 			// },
-			// "callbacks": {
-			// 	"accordion": {
-			// 		"initialize": {
-			// 			"before": (accordion_element, accordion_object) => {},
-			// 			"after": (accordion_element, accordion_object) => {}
-			// 		}
-			// 	},
-			// 	"item": {
-			// 		"initialize": {
-			// 			"before": (item_element, accordion_object) => {},
-			// 			"after": (item_element, accordion_object) => {}
-			// 		},
-			// 		"open": {
-			// 			"before": (item_element, accordion_object) => {},
-			// 			"after": (item_element, accordion_object) => {}
-			// 		},
-			// 		"close": {
-			// 			"before": (item_element, accordion_object) => {},
-			// 			"after": (item_element, accordion_object) => {}
-			// 		}
-			// 	}
-			// }
-		};
+			callbacks: {
+				accordion: {
+					after: {
+						initialize: () => {}
+					},
+					before: {
+						initialize: () => {}
+					}
+				}, // End: accordion
+				item: {
+					before: {
+						initialize: () => {},
+						open: () => {},
+						close: () => {}
+					},
+					after: {
+						initialize: () => {},
+						open: () => {},
+						close: () => {}
+					}
+				} // End: item
+			}, // End: callbacks
+			debug: false
+		}; // End: return
 	} // End: options_default
 
 	/**
 	 * Defines a set of constant class variables.
 	 */
 
-	static get static_constants() {
+	static get constants() {
 		return {
-			data_property: 'accordion_data',
 			id_attribute: 'data-accordion-id',
 			item_state_attrubute: 'data-accordion-item-state'
 		};
-	} // End: static_constants
+	} // End: constants
 
 	/**
-	 * Increments the class instance counter.
+	 * Adds an accordion instance to the accordion class.
 	 */
 
-	static incrementInstanceCount() {
-		if (typeof Accordion.instance_count == 'undefined') {
-			Accordion.instance_count = 1;
+	static addInstance(instance) {
+
+		// If the class instance count has not been initialized.
+		if (typeof Accordion.instance_count !== 'number') {
+			// Set the class instant count to 0.
+			Accordion.instance_count = 0;
 		}
-		else {
-			Accordion.instance_count++;
+		// Increment the class instance count.
+		Accordion.instance_count++;
+
+		// If the class instances object has not been initialized.
+		if (!Accordion.instances) {
+			// Initialize the class instances object.
+			Accordion.instances = {};
 		}
-	} // End: incrementInstanceCount
+		// Add the class instance to the class instances object.
+		Accordion.instances[Accordion.instance_count] = instance;
+
+		// Return this class instance's unique id.
+		return Accordion.instance_count;
+
+	} // End: addInstance
 
 	/**
 	 * Initialize content.
 	 */
 
-	initializeContent(content_element) {}
+	initializeContent(content_element) {} // End: initializeContent
 
 	/**
 	 * Initialize a heading.
 	 */
 
-	initializeHeading(heading_element) {}
+	initializeHeading(heading_element) {} // End: initializeHeading
 
 	/**
 	 * Initialize an item.
 	 */
 
-	initializeItem(item_element) {}
+	initializeItem(item_element) {} // End: initializeItem
 
 	/**
 	 * Initialize an accordion.
 	 */
 
 	initializeAccordion(accordion_element) {
-		// Initialize the accordion data object on the element.
-		accordion_element[Accordion.static_constants.data_property] = {};
-	}
+
+		// Set the accordion id data attribute.
+		//accordion_element.setAttribute(Accordion.constants.id_attribute, accordion_id);
+		// Set this accordion selector by accordion id attribute.
+		//this_accordion_data.unique_selector = '[' + Accordion.constants.id_attribute + '="' + accordion_next_id + '"]';
+
+	} // End: initializeAccordion
 
 	/**
 	 * Initialize.
 	 */
 
 	initialize() {
-		//
-		if (accordion_elements.length > 1) {
-			// Initialize this current accordion holder variable.
-			let this_accordion_element;
-			// For each accordion.
-			for(let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
-				// Get the accordion element for the current loop.
-				this_accordion_element = accordion_elements[accordion_element];
+
+		// Get the accordion element(s).
+		const accordion_elements = document.querySelectorAll(this.options.selectors.accordion);
+		// If there at least one element matching the accordion selector.
+		if (accordion_elements.length > 0) {
+			// Initialize variable to hold the accordion element for the current loop.
+			let loop_accordion_element;
+			// For each matching accordion element.
+			for (let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
+				// Set the current loop accordion element.
+				loop_accordion_element = accordion_elements[accordion_element];
 				// Initialize the accordion.
-				this.initializeAccordion(this_accordion_element);
+				this.initializeAccordion(loop_accordion_element);
 			}
 		}
-		//
+		// If there are no elements matching the accordion selector.
 		else {
-			// Increment the instance count.
-			Accordion.incrementInstanceCount();
+			// No accordions found using input selector.
+			console.warn("No accordions found using selector: '" + this.options.selectors.accordion + "'");
 		}
-	}
+
+	} // End: initialize
 
 	/**
-	 * Initialize.
+	 * Constructor.
 	 */
 
 	constructor(options_user) {
 
-		// Set the input user options object.
-		this.options_user = options_user;
+		// Add this class instance to the global class instances object.
+		this.instance_id = Accordion.addInstance(this);
+
 		// Merge default options and user options into new object using the imported extend function.
-		this.options = extend([{}, Accordion.options_default, this.options_user], true);
+		this.options = extend([{}, Accordion.options_default, options_user], true);
 
-		// Get the accordion element(s).
-		const accordion_elements = document.querySelectorAll(this.options.selectors.accordion);
-		//
-		if (accordion_elements.length > 0) {
-			//
-			initialize();
+		// Initialize the accordion(s).
+		this.initialize();
+
+		// If debug is true.
+		if (this.options.debug) {
+			// Log the class.
+			console.dir(Accordion);
+			// Log the instance.
+			console.log(this);
 		}
-		//
-		else {}
-
-		// Initialize the accordion with the merged options.
-		// this.initialize(this.options);
 
 		// Return the reference to the accordion class instance.
 		return this;
@@ -425,11 +447,11 @@ const Accordion = class {
 	 */
 
 	static nestedLevel(accordion_element, nested_level) {
-		const accordion_data = accordion_element[Accordion.static_constants.data_property];
+		const accordion_data = accordion_element[Accordion.constants.data_property];
 		if (nested_level) {
 			accordion_data.nested_level = nested_level;
 			// Get all accordion children elements.
-			const immediate_child_accordions = accordion_element.querySelectorAll('[' + Accordion.static_constants.id_attribute + ']');
+			const immediate_child_accordions = accordion_element.querySelectorAll('[' + Accordion.constants.id_attribute + ']');
 			// For each child accordion.
 			for(let accordion_child = 0; accordion_child < accordion_children.length; accordion_child++) {
 				// Get this current child accordion element.
@@ -441,7 +463,7 @@ const Accordion = class {
 			}
 		}
 		else {
-			return accordion_element[Accordion.static_constants.data_property].nested_level;
+			return accordion_element[Accordion.constants.data_property].nested_level;
 		}
 	}
 
@@ -451,7 +473,7 @@ const Accordion = class {
 	 * @param {object} options - The merged options used to configure the accordion.
 	 */
 
-	initialize(options) {
+	initialize_old(options) {
 
 		let this_accordion_element,
 		this_accordion_data,
@@ -471,9 +493,9 @@ const Accordion = class {
 			// Get this current accordion element for the loop.
 			this_accordion_element = accordion_elements[accordion_element];
 			// Initialize the accordion data object on the element.
-			this_accordion_element[Accordion.static_constants.data_property] = {};
+			this_accordion_element[Accordion.constants.data_property] = {};
 			// Define a shortcut to this accordion's data, for code clarity.
-			this_accordion_data = this_accordion_element[Accordion.static_constants.data_property];
+			this_accordion_data = this_accordion_element[Accordion.constants.data_property];
 			
 			// Attach the accordion element to the accordion data.
 			this_accordion_data.element = this_accordion_element;
@@ -482,17 +504,17 @@ const Accordion = class {
 			this_accordion_data.options = options;
 
 			// Get the existing accordions.
-			accordions_existing = document.querySelectorAll('[' + Accordion.static_constants.id_attribute + ']');
+			accordions_existing = document.querySelectorAll('[' + Accordion.constants.id_attribute + ']');
 			// Generate the next accordion id.
 			accordion_next_id = accordions_existing.length + 1;
-			while (document.querySelector('[' + Accordion.static_constants.id_attribute + ']="' + thing + '"')) {
+			while (document.querySelector('[' + Accordion.constants.id_attribute + ']="' + thing + '"')) {
 				thing++;
 			}
 
 			// Set the accordion id data attribute.
-			this_accordion_element.setAttribute(Accordion.static_constants.id_attribute, accordion_next_id);
+			this_accordion_element.setAttribute(Accordion.constants.id_attribute, accordion_next_id);
 			// Set this accordion selector by accordion id attribute.
-			this_accordion_data.unique_selector = '[' + Accordion.static_constants.id_attribute + '="' + accordion_next_id + '"]';
+			this_accordion_data.unique_selector = '[' + Accordion.constants.id_attribute + '="' + accordion_next_id + '"]';
 
 			//
 			// Item
@@ -573,7 +595,7 @@ const Accordion = class {
 
 			// Get the closest parent accordion.
 			// Closest must be called on the parent node to prevent it from returning the node it's being called form.
-			accordion_parent = this_accordion_element.parentNode.closest('[' + Accordion.static_constants.id_attribute + ']');
+			accordion_parent = this_accordion_element.parentNode.closest('[' + Accordion.constants.id_attribute + ']');
 			// If a parent accordion exists.
 			if(accordion_parent) {
 				// Add one to the parent aria-level for the current accordion aria-level.
@@ -588,7 +610,7 @@ const Accordion = class {
 			Accordion.nestedLevel(this_accordion_element, accordion_nested_level);
 
 			// Get all accordion children elements.
-			accordion_children = this_accordion_element.querySelectorAll('[' + Accordion.static_constants.id_attribute + ']');
+			accordion_children = this_accordion_element.querySelectorAll('[' + Accordion.constants.id_attribute + ']');
 			// For each child accordion.
 			for(let accordion_child = 0; accordion_child < accordion_children.length; accordion_child++) {
 				// Get this current child accordion element.
