@@ -71,7 +71,8 @@ const Accordion = class {
 
 	static get constants() {
 		return {
-			id_attribute: 'data-accordion-id',
+			instance_id_attribute: 'data-accordion-instance-id',
+			accordion_id_attribute: 'data-accordion-id',
 			item_state_attrubute: 'data-accordion-item-state'
 		};
 	} // End: constants
@@ -80,7 +81,7 @@ const Accordion = class {
 	 * Adds an accordion instance to the accordion class.
 	 */
 
-	static addInstance(instance) {
+	static addClassInstance(instance) {
 
 		// If the class instance count has not been initialized.
 		if (typeof Accordion.instance_count !== 'number') {
@@ -95,13 +96,16 @@ const Accordion = class {
 			// Initialize the class instances object.
 			Accordion.instances = {};
 		}
+
+		// Generate the instance id.
+		const instance_id = Accordion.instance_count - 1;
 		// Add the class instance to the class instances object.
-		Accordion.instances[Accordion.instance_count] = instance;
+		Accordion.instances[instance_id] = instance;
 
-		// Return this class instance's unique id.
-		return Accordion.instance_count;
+		// Return this class instance unique id.
+		return instance_id;
 
-	} // End: addInstance
+	} // End: addClassInstance
 
 	/**
 	 * Initialize content.
@@ -119,7 +123,22 @@ const Accordion = class {
 	 * Initialize an item.
 	 */
 
-	initializeItem(item_element) {} // End: initializeItem
+	initializeItem(accordion_id, item_element) {
+
+		// Get the accordion object. Assign it to a variable for easier access.
+		const this_accordion = this.accordions[accordion_id];
+
+		// Initialize object to hold item data.
+		const item_object = {};
+		// Add the item element reference.
+		item_object.element = item_element;
+		// Add the item state.
+		item_object.state = 'closed';
+
+		//
+		this_accordion.items.push(item_object);
+
+	} // End: initializeItem
 
 	/**
 	 * Initialize an accordion.
@@ -127,10 +146,54 @@ const Accordion = class {
 
 	initializeAccordion(accordion_element) {
 
+		// Increment the accordion count.
+		this.accordion_count++;
+
+		// Generate the accordion id.
+		const accordion_id = this.accordion_count - 1;
+		// Initialize the accordion object. Assign it to a variable for easier access.
+		const this_accordion = this.accordions[accordion_id] = {};
+
+		// Add the accordion relative unique id (relative to this class instance).
+		this_accordion.id = accordion_id;
+		// Add the accordion element reference.
+		this_accordion.element = accordion_element;
+		// Initialize a list of accordion items.
+		this_accordion.items = [];
+
+		// Set the class instance id data attribute.
+		this_accordion.element.setAttribute(Accordion.constants.instance_id_attribute, this.instance_id);
 		// Set the accordion id data attribute.
-		//accordion_element.setAttribute(Accordion.constants.id_attribute, accordion_id);
-		// Set this accordion selector by accordion id attribute.
-		//this_accordion_data.unique_selector = '[' + Accordion.constants.id_attribute + '="' + accordion_next_id + '"]';
+		this_accordion.element.setAttribute(Accordion.constants.accordion_id_attribute, this_accordion.id);
+
+		// Create a selector for the unique local accordion id.
+		const this_accordion_id_selector = '[' + Accordion.constants.accordion_id_attribute + '="' + this_accordion.id + '"]';
+		// Set the global unique selector for this accordion.
+		this_accordion.selector = this.instance_id_selector + this_accordion_id_selector;
+
+		// Get the items in this accordion.
+		const accordion_items = this_accordion.element.querySelectorAll(this_accordion.selector + ' > ' + this.options.selectors.item);
+		// If there is at least one item.
+		if (accordion_items.length > 0) {
+			// Initialize variable to hold the item element for the current loop.
+			let loop_item_element;
+			// For each item.
+			for(let accordion_item = 0; accordion_item < accordion_items.length; accordion_item++) {
+				// Set the current loop item element.
+				loop_item_element = accordion_items[accordion_item];
+				// Initialize the item.
+				this.initializeItem(this_accordion.id, loop_item_element);
+			}
+		}
+		// If there are no items in this accordion
+		else {
+			// If debug is true.
+			if (this.options.debug) {
+				// Send a warning to the console.
+				console.warn(this.constructor.name + ": No items found using selector: '" + this.options.selectors.item + "'");
+			}
+		}
+
 
 	} // End: initializeAccordion
 
@@ -139,6 +202,18 @@ const Accordion = class {
 	 */
 
 	initialize() {
+
+		// If the accordion count has not been initialized.
+		if (typeof this.accordion_count !== 'number') {
+			// Set the accordion count to 0.
+			this.accordion_count = 0;
+		}
+
+		// If the accordions object has not been initialized.
+		if (!this.accordions) {
+			// Initialize the accordions object.
+			this.accordions = {};
+		}
 
 		// Get the accordion element(s).
 		const accordion_elements = document.querySelectorAll(this.options.selectors.accordion);
@@ -156,8 +231,11 @@ const Accordion = class {
 		}
 		// If there are no elements matching the accordion selector.
 		else {
-			// No accordions found using input selector.
-			console.warn("No accordions found using selector: '" + this.options.selectors.accordion + "'");
+			// If debug is true.
+			if (this.options.debug) {
+				// Send a warning to the console.
+				console.warn(this.constructor.name + ": No accordions found using selector: '" + this.options.selectors.accordion + "'");
+			}
 		}
 
 	} // End: initialize
@@ -168,8 +246,10 @@ const Accordion = class {
 
 	constructor(options_user) {
 
-		// Add this class instance to the global class instances object.
-		this.instance_id = Accordion.addInstance(this);
+		// Add this class instance to the global class instances object and set the instance id on the instance.
+		this.instance_id = Accordion.addClassInstance(this);
+		// Create a selector for this unique instance id.
+		this.instance_id_selector = '[' + Accordion.constants.instance_id_attribute + '="' + this.instance_id + '"]';
 
 		// Merge default options and user options into new object using the imported extend function.
 		this.options = extend([{}, Accordion.options_default, options_user], true);
@@ -191,7 +271,9 @@ const Accordion = class {
 	} // End: constructor
 
 	
-
+	/******************************************************
+	* OLD CODE WAITING TO BE REFACTORED BEYOND THIS POINT *
+	*******************************************************/
 	
 
 	/**
