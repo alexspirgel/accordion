@@ -25,6 +25,6 @@
     "webpack-stream": "^5.1.1"
   },
   "dependencies": {
-    "@alexspirgel/extend": "^2.0.1"
+    "@alexspirgel/extend": "^2.0.3"
   }
 }
