@@ -26,40 +26,30 @@ const Accordion = class {
 			}, // End: selectors
 			accessibility_warnings: true, // log any accessibility issues
 			close_nested_items: false, // only closes one nested level deep, but it can set off a chain reaction to close them all
-			default_open_items: false, // false || 1 || [1, 3, 7]
+			default_open_items: false, // false || elem_ref || [elem_ref, elem_ref, elem_ref]
 			multiple_open_items: true,
 			open_anchored_item: false, // if true, if item is anchored to in url, open it
-			// scroll_to_top: {
-			// 	enabled: true,
-			// 	scroll_element: window,
-			// 	transition: {
-			// 		enabled: true,
-			// 		duration: 500, // Transition duration in milliseconds.
-			// 		cancel_on_scroll: true,
-			// 		easing_function: (t) => {return t<0.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1;} // Ease In Out Cubic.
-			// 	}
-			// },
 			callbacks: {
 				accordion: {
-					after: {
-						initialize: () => {}
-					},
-					before: {
-						initialize: () => {}
+					initialize: {
+						before: () => {},
+						after: () => {}
 					}
-				}, // End: accordion
+				}, // End: callbacks.accordion
 				item: {
-					before: {
-						initialize: () => {},
-						open: () => {},
-						close: () => {}
+					initialize: {
+						before: () => {},
+						after: () => {}
 					},
-					after: {
-						initialize: () => {},
-						open: () => {},
-						close: () => {}
+					open: {
+						before: () => {},
+						after: () => {}
+					},
+					close: {
+						before: () => {},
+						after: () => {}
 					}
-				} // End: item
+				} // End: callbacks.item
 			}, // End: callbacks
 			debug: false
 		}; // End: return
@@ -108,40 +98,105 @@ const Accordion = class {
 	} // End: addClassInstance
 
 	/**
-	 * Initialize content.
+	 * Check if one element matches one or more other elements.
 	 */
 
-	initializeContent(content_element) {} // End: initializeContent
+	static elementMatchesInput(element, input) {
+
+		// If input is array or a node list.
+		if (Array.isArray(input)) {
+			// For each item in input array.
+			for (let array_item = 0; array_item < input.length; array_item++) {
+				// Recursive call to check if the input array item matches the element.
+				if (Accordion.elementMatchesInput(element, input[array_item])) {
+					// If it matches, return true.
+					return true;
+				}
+			}
+		}
+		// If the input is an element.
+		else if (input instanceof Element) {
+			// If the input matches the element.
+			if (element === input) {
+				return true;
+			}
+			// If the input does not match the element.
+			else {
+				return false;
+			}
+		}
+
+	} // End: elementMatchesInput
 
 	/**
-	 * Initialize a heading.
+	 * Initialize item.
 	 */
 
-	initializeHeading(heading_element) {} // End: initializeHeading
+	initializeItem(item_element, accordion_id) {
 
-	/**
-	 * Initialize an item.
-	 */
+		/**
+		 * Initialize content.
+		 */
 
-	initializeItem(accordion_id, item_element) {
+		const initializeContent = (content_element) => {}; // End: initializeContent
+
+		/**
+		 * Initialize heading.
+		 */
+
+		const initializeHeading = (heading_element) => {
+			// Set the heading role attribute to heading.
+			heading_element.setAttribute('role', 'heading');
+			// Set the heading aria-controls attribute to the item content id.
+			heading_element.setAttribute('aria-controls', accordion_item_content.id);
+			// Set the accordion item heading aria-level attribute.
+			accordion_item_heading.setAttribute('aria-level', accordion_level);
+			// Set the accordion item heading aria-expanded attribute.
+			accordion_item_heading.setAttribute('aria-expanded', aria_expanded_value);
+			// Add click event listener to toggle the accordion item opened/closed state.
+			accordion_item_heading.addEventListener('click', Accordion.headingClickEventHandler);
+			// Add key down event listener for switching between accordion items and accessibility.
+			accordion_item_heading.addEventListener('keydown', Accordion.headingKeyDownEventHandler);
+		}; // End: initializeHeading
 
 		// Get the accordion object. Assign it to a variable for easier access.
 		const this_accordion = this.accordions[accordion_id];
 
 		// Initialize object to hold item data.
-		const item_object = {};
-		// Add the item element reference.
-		item_object.element = item_element;
-		// Add the item state.
-		item_object.state = 'closed';
+		const this_item = {};
+		// Add the item element reference to the item object.
+		this_item.element = item_element;
 
-		//
-		this_accordion.items.push(item_object);
+		// Initialize the item state value.
+		let item_state_attrubute_value = 'closed';
+
+		// Get the default_open_items options value.
+		const default_open_items = this.options.default_open_items;
+		// If the option value is not false.
+		if (default_open_items !== false) {
+			// If the element matches the default_open_items value.
+			if (Accordion.elementMatchesInput(this_item.element, default_open_items)) {
+				// Set the item state value to opened.
+				item_state_attrubute_value = 'opened';
+			}
+		}
+
+		// Add the item state to the item object.
+		this_item.state = item_state_attrubute_value;
+		// Set the item state attribute.
+		this_item.element.setAttribute(Accordion.constants.item_state_attrubute, item_state_attrubute_value);
+
+		// Get this item's heading element.
+		// const heading_element = this_item.element.querySelector(this_accordion.selector + ' > ' + this.options.selectors.item);
+		// Get this item's content element.
+
+		// Add the item object to the accordion items list.
+		this_accordion.items.push(this_item);
 
 	} // End: initializeItem
 
 	/**
-	 * Initialize an accordion.
+	 * Initialize accordion.
 	 */
 
 	initializeAccordion(accordion_element) {
@@ -182,7 +237,7 @@ const Accordion = class {
 				// Set the current loop item element.
 				loop_item_element = accordion_items[accordion_item];
 				// Initialize the item.
-				this.initializeItem(this_accordion.id, loop_item_element);
+				this.initializeItem(loop_item_element, this_accordion.id);
 			}
 		}
 		// If there are no items in this accordion
