@@ -18,7 +18,7 @@ const Accordion = class {
 
 	static get options_default() {
 		return {
-			selectors: {	
+			selectors: {
 				accordion: '.accordion',
 				item: '.accordion__item',
 				heading: '.accordion__item__heading',
@@ -27,8 +27,9 @@ const Accordion = class {
 			accessibility_warnings: true, // log any accessibility issues
 			close_nested_items: false, // only closes one nested level deep, but it can set off a chain reaction to close them all
 			default_open_items: false, // false || elem_ref || [elem_ref, elem_ref, elem_ref]
-			multiple_open_items: true,
-			open_anchored_item: false, // if true, if item is anchored to in url, open it
+			heading_trigger_selector: false, // selector to trigger open and close on instead of the heading selector
+			multiple_open_items: true, // allow multiple items to be open at the same time
+			open_anchored_items: false, // if true, if item is anchored to in url, open it
 			callbacks: {
 				accordion: {
 					initialize: {
@@ -98,17 +99,17 @@ const Accordion = class {
 	} // End: addClassInstance
 
 	/**
-	 * Check if one element matches one or more other elements.
+	 * Check if one element matches the input(s).
 	 */
 
-	static elementMatchesInput(element, input) {
+	static elementMatchesInput(element, input) { //need to implement handling for selector(s)
 
 		// If input is array or a node list.
 		if (Array.isArray(input)) {
 			// For each item in input array.
-			for (let array_item = 0; array_item < input.length; array_item++) {
+			for (let input_item = 0; input_item < input.length; input_item++) {
 				// Recursive call to check if the input array item matches the element.
-				if (Accordion.elementMatchesInput(element, input[array_item])) {
+				if (Accordion.elementMatchesInput(element, input[input_item])) {
 					// If it matches, return true.
 					return true;
 				}
