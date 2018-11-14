@@ -25,7 +25,7 @@ const Accordion = class {
 				content: '.accordion__item__content'
 			}, // End: selectors
 			accessibility_warnings: true, // log any accessibility issues
-			close_nested_items: false, // only closes one nested level deep, but it can set off a chain reaction to close them all
+			close_nested_items: false, // only closes one nested level deep, but it can set off a chain reaction to close further nested levels
 			default_open_items: false, // false || elem_ref || [elem_ref, elem_ref, elem_ref]
 			heading_trigger_selector: false, // selector to trigger open and close on instead of the heading selector
 			multiple_open_items: true, // allow multiple items to be open at the same time
