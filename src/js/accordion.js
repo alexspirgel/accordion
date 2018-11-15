@@ -26,7 +26,7 @@ const Accordion = class {
 			}, // End: selectors
 			accessibility_warnings: true, // log any accessibility issues
 			close_nested_items: false, // only closes one nested level deep, but it can set off a chain reaction to close further nested levels
-			default_open_items: false, // false || elem_ref || [elem_ref, elem_ref, elem_ref]
+			default_open_items: false, // false || index (number) || elem_ref || '.selector' || coming soon: [1, '.selector', elem_ref]
 			heading_trigger_selector: false, // selector to trigger open and close on instead of the heading selector
 			multiple_open_items: true, // allow multiple items to be open at the same time
 			open_anchored_items: false, // if true, if item is anchored to in url, open it
@@ -99,35 +99,60 @@ const Accordion = class {
 	} // End: addClassInstance
 
 	/**
-	 * Check if one element matches the input(s).
+	 * Check if an item matches the input(s).
 	 */
 
-	static elementMatchesInput(element, input) { //need to implement handling for selector(s)
+	static itemMatchesValue(item_element, match_criteria) {
 
-		// If input is array or a node list.
-		if (Array.isArray(input)) {
-			// For each item in input array.
-			for (let input_item = 0; input_item < input.length; input_item++) {
-				// Recursive call to check if the input array item matches the element.
-				if (Accordion.elementMatchesInput(element, input[input_item])) {
+		// If the match criteria is a node list.
+		if (match_criteria instanceof NodeList) {
+			// Convert the match criteria into an array.
+			match_criteria = Array.from(match_criteria);
+		}
+
+		// If the match criteria is an array.
+		if (Array.isArray(match_criteria)) {
+			// For each value in the match criteria array.
+			for (let value = 0; value < match_criteria.length; value++) {
+				// Recursive call to check if the array value matches the item element.
+				if (Accordion.itemMatchesValue(item_element, match_criteria[value])) {
 					// If it matches, return true.
 					return true;
 				}
 			}
 		}
-		// If the input is an element.
-		else if (input instanceof Element) {
-			// If the input matches the element.
-			if (element === input) {
-				return true;
-			}
-			// If the input does not match the element.
-			else {
-				return false;
+
+		// If the match criteria is a number (index).
+		else if (typeof match_criteria === 'number') {
+			// If the match criteria is an integer.
+			if (Number.isInteger(match_criteria)) {
+				// If the match criteria is zero or greater.
+				if (match_criteria >= 0) {
+					/*determine item's depth*/
+				}
 			}
 		}
 
-	} // End: elementMatchesInput
+		// If the match criteria is a string (selector).
+		else if (typeof match_criteria === 'string') {
+			// If the item element matches the match criteria selector.
+			if (item_element.matches(match_criteria)) {
+				return true;
+			}
+		}
+
+		// If the match criteria is an element.
+		else if (match_criteria instanceof Element) {
+			// If the item element matches the match criteria.
+			if (item_element === match_criteria) {
+				return true;
+			}
+		}
+
+		// If the item element does not match the match criteria.
+		return false;
+
+	} // End: itemMatchesValue
 
 	/**
 	 * Initialize item.
