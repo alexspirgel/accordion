@@ -1,79 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>accordion</title>
-	<link rel="stylesheet" type="text/css" href="dist/css/accordion.css">
-	<script type="text/javascript" src="dist/js/accordion.js"></script>
+	<title>Ace Accordion</title>
+	<link rel="stylesheet" type="text/css" href="dist/css/ace-accordion.css">
+	<script type="text/javascript" src="dist/js/ace-accordion.js"></script>
 </head>
 <body>
 
-	<ul class="accordion" aria-label="Accordion item group">
+	<h1>Ace Accordion</h1>
+
+	<h2>Accordion 1</h2>
+	<pre id="accordion-1-options"></pre>
+	<br>
+	<ul class="accordion accordion-1">
 		<li class="accordion__item">
 			<button class="accordion__item__heading">Lorem Ipsum</button>
 			<div class="accordion__item__content">
 				<p>Lorem ipsum dolor sit amet</p>
-			</div>
-		</li>
-		<li class="accordion__item">
-			<button class="accordion__item__heading">Lorem Ipsum</button>
-			<div class="accordion__item__content">
-				<p>Lorem ipsum dolor sit amet</p>
-				<ul class="accordion">
-					<li class="accordion__item">
-						<button class="accordion__item__heading">Lorem Ipsum</button>
-						<div class="accordion__item__content">
-							<p>Lorem ipsum dolor sit amet</p>
-							<ul class="accordion">
-								<li class="accordion__item">
-									<button class="accordion__item__heading">Lorem Ipsum</button>
-									<div class="accordion__item__content">
-										<p>Lorem ipsum dolor sit amet</p>
-									</div>
-								</li>
-								<li class="accordion__item">
-									<button class="accordion__item__heading">Lorem Ipsum</button>
-									<div class="accordion__item__content">
-										<p>Lorem ipsum dolor sit amet</p>
-									</div>
-								</li>
-							</ul>
-						</div>
-					</li>
-					<li class="accordion__item">
-						<button class="accordion__item__heading">Lorem Ipsum</button>
-						<div class="accordion__item__content">
-							<p>Lorem ipsum dolor sit amet</p>
-						</div>
-					</li>
-				</ul>
-				<ul class="accordion">
-					<li class="accordion__item">
-						<button class="accordion__item__heading">Lorem Ipsum</button>
-						<div class="accordion__item__content">
-							<p>Lorem ipsum dolor sit amet</p>
-							<ul class="accordion">
-								<li class="accordion__item">
-									<button class="accordion__item__heading">Lorem Ipsum</button>
-									<div class="accordion__item__content">
-										<p>Lorem ipsum dolor sit amet</p>
-									</div>
-								</li>
-								<li class="accordion__item">
-									<button class="accordion__item__heading">Lorem Ipsum</button>
-									<div class="accordion__item__content">
-										<p>Lorem ipsum dolor sit amet</p>
-									</div>
-								</li>
-							</ul>
-						</div>
-					</li>
-					<li class="accordion__item">
-						<button class="accordion__item__heading">Lorem Ipsum</button>
-						<div class="accordion__item__content">
-							<p>Lorem ipsum dolor sit amet</p>
-						</div>
-					</li>
-				</ul>
 			</div>
 		</li>
 		<li class="accordion__item">
@@ -91,10 +34,20 @@
 	</ul>
 
 	<script type="text/javascript">
-		const accordion = new Accordion({
-			default_open_items: [1, '.accordion__item:nth-child(3)', document.querySelector('.accordion__item:nth-child(2)')],
+
+		// 1
+		console.log('Accordion 1:');
+		const accordion_1_user_options = {
+			selectors: {
+				accordion: '.accordion-1'
+			},
+			default_open_items: '.accordion__item',
 			debug: true
-		});
+		};
+		const accordion_1 = new AceAccordion(accordion_1_user_options);
+		document.getElementById('accordion-1-options').innerText = JSON.stringify(accordion_1_user_options, null, 2);
+		console.log('Accordion 1 End ==============================');
+
 	</script>
 
 </body>
