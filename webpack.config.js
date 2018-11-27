@@ -1,7 +1,7 @@
 module.exports = {
 	mode: "development",
 	output: {
-		filename: "accordion.js",
-		library: "Accordion"
+		filename: "ace-accordion.js",
+		library: "AceAccordion"
 	}
 };

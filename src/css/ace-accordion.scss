@@ -26,12 +26,12 @@ $accordion-item-content-selector: '.accordion__item__content';
 	padding: 10px 20px;
 }
 #{$accordion-item-selector} {
-	&[data-accordion-item-state="closing"] {
+	&[data-item-state="closing"] {
 		> #{$accordion-item-heading-selector} {
 			background-color: lightblue;
 		}
 	}
-	&[data-accordion-item-state="closed"] {
+	&[data-item-state="closed"] {
 		> #{$accordion-item-heading-selector} {
 			background-color: lightblue;
 		}
@@ -39,12 +39,12 @@ $accordion-item-content-selector: '.accordion__item__content';
 			display: none;
 		}
 	}
-	&[data-accordion-item-state="opening"] {
+	&[data-item-state="opening"] {
 		> #{$accordion-item-heading-selector} {
 			background-color: lightgreen;
 		}
 	}
-	&[data-accordion-item-state="opened"] {
+	&[data-item-state="opened"] {
 		> #{$accordion-item-heading-selector} {
 			background-color: lightgreen;
 		}

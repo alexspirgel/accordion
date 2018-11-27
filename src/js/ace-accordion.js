@@ -1,3 +1,5 @@
+// Class > instance > accordion > item > heading/content
+
 /**
  * Accordion v1.0.0
  * https://github.com/alexspirgel/accordion
@@ -10,7 +12,7 @@ const extend = require('@alexspirgel/extend');
  * Defines an accordion.
  */
 
-const Accordion = class {
+const AceAccordion = class {
 
 	/**
 	 * Defines the default set of options.
@@ -19,10 +21,10 @@ const Accordion = class {
 	static get options_default() {
 		return {
 			selectors: {
-				accordion: '.accordion',
-				item: '.accordion__item',
-				heading: '.accordion__item__heading',
-				content: '.accordion__item__content'
+				accordion: '.accordion', // Custom accordion element selector.
+				item: '.accordion__item', // Custom item element selector.
+				heading: '.accordion__item__heading', // Custom heading element selector.
+				content: '.accordion__item__content' // Custom content element selector.
 			}, // End: selectors
 			accessibility_warnings: true, // log any accessibility issues
 			close_nested_items: false, // only closes one nested level deep, but it can set off a chain reaction to close further nested levels
@@ -36,7 +38,7 @@ const Accordion = class {
 						before: () => {},
 						after: () => {}
 					}
-				}, // End: callbacks.accordion
+				},
 				item: {
 					initialize: {
 						before: () => {},
@@ -50,7 +52,7 @@ const Accordion = class {
 						before: () => {},
 						after: () => {}
 					}
-				} // End: callbacks.item
+				}
 			}, // End: callbacks
 			debug: false
 		}; // End: return
@@ -62,47 +64,90 @@ const Accordion = class {
 
 	static get constants() {
 		return {
-			instance_id_attribute: 'data-accordion-instance-id',
+			instance_id_attribute: 'data-instance-id',
 			accordion_id_attribute: 'data-accordion-id',
-			item_state_attrubute: 'data-accordion-item-state'
+			item_id_attrubute: 'data-item-id',
+			item_state_attrubute: 'data-item-state'
 		};
 	} // End: constants
 
 	/**
-	 * Adds an accordion instance to the accordion class.
+	 * Sets an instance to a class.
+	 * @returns {number} instance_id - The id of the instance (zero indexed).
 	 */
 
-	static addClassInstance(instance) {
+	_setClassInstance(instance, Class, list_property, count_property) {
 
-		// If the class instance count has not been initialized.
-		if (typeof Accordion.instance_count !== 'number') {
-			// Set the class instant count to 0.
-			Accordion.instance_count = 0;
-		}
-		// Increment the class instance count.
-		Accordion.instance_count++;
+		// Initialize the instance id variable.
+		let instance_id;
 
-		// If the class instances object has not been initialized.
-		if (!Accordion.instances) {
-			// Initialize the class instances object.
-			Accordion.instances = {};
+		// If the class instance list has not been initialized.
+		if (!Class[list_property]) {
+			// Initialize the class instances list.
+			Class[list_property] = {};
 		}
 
-		// Generate the instance id.
-		const instance_id = Accordion.instance_count - 1;
-		// Add the class instance to the class instances object.
-		Accordion.instances[instance_id] = instance;
+		// If the class instance list is not an array.
+		if (!Array.isArray(Class[list_property])) {
+			// If the class instance count has not been initialized.
+			if (typeof Class[count_property] !== 'number') {
+				// Set the class instance count to 0.
+				Class[count_property] = 0;
+			}
+			// Increment the class instance count.
+			Class[count_property]++;
+			// Generate the instance id from the instance count.
+			// Subtract one to have the id be zero indexed.
+			instance_id = Class[count_property] - 1;
+			// Add the instance to the class instances object.
+			Class[list_property][instance_id] = instance;
+		}
+		// If the class instance list is an array.
+		else {
+			// Set the instance id equal to the array length (also the next available index).
+			instance_id = Class[list_property].length;
+			// Add the instance to the instance list.
+			Class[list_property].push(instance);
+		}
 
-		// Return this class instance unique id.
+		// Return this instance's unique id.
 		return instance_id;
 
-	} // End: addClassInstance
+	} // End: _setClassInstance
+
+	/**
+	 * Index accordion items.
+	 */
+
+	indexItems(accordion_id) {
+		// If no accordion id is passed.
+		if (typeof accordion_id === 'undefined') {
+			// For each accordion in this Accordion class instance.
+			for (let accordion in this.accordions) {
+				// Recursive call with accordion id.
+				this.indexItems(accordion);
+			}
+		}
+		// If an accordion id is passed.
+		else {
+			// Generate the items selector for this accordion
+			const items_selector = this.accordions[accordion_id].selector + ' > ' + this.options.selectors.item;
+			// Get the items of this accordion.
+			const items_elements = document.querySelectorAll(items_selector);
+			// For each item in the accordion.
+			for (let item = 0; item < items_elements.length; item++) {
+				//
+				items_elements[item].setAttribute(Accordion.constants.item_index_attrubute, item);
+			}
+		}
+	} // End: indexItems
 
 	/**
 	 * Check if an item matches the input(s).
 	 */
 
-	static itemMatchesValue(item_element, match_criteria) {
+	_itemMatchesValue(item, match_criteria) {
+		console.log(item);
 
 		// If the match criteria is a node list.
 		if (match_criteria instanceof NodeList) {
@@ -114,8 +159,8 @@ const Accordion = class {
 		if (Array.isArray(match_criteria)) {
 			// For each value in the match criteria array.
 			for (let value = 0; value < match_criteria.length; value++) {
-				// Recursive call to check if the array value matches the item element.
-				if (Accordion.itemMatchesValue(item_element, match_criteria[value])) {
+				// Recursive call to check if the array value matches the item.
+				if (this._itemMatchesValue(item, match_criteria[value])) {
 					// If it matches, return true.
 					return true;
 				}
@@ -128,7 +173,10 @@ const Accordion = class {
 			if (Number.isInteger(match_criteria)) {
 				// If the match criteria is zero or greater.
 				if (match_criteria >= 0) {
-					/*determine item's depth*/
+					// If the item index matches the match criteria index.
+					if (item.index === match_criteria) {
+						return true;
+					}
 				}
 			}
 		}
@@ -136,7 +184,7 @@ const Accordion = class {
 		// If the match criteria is a string (selector).
 		else if (typeof match_criteria === 'string') {
 			// If the item element matches the match criteria selector.
-			if (item_element.matches(match_criteria)) {
+			if (item.element.matches(match_criteria)) {
 				return true;
 			}
 		}
@@ -144,7 +192,7 @@ const Accordion = class {
 		// If the match criteria is an element.
 		else if (match_criteria instanceof Element) {
 			// If the item element matches the match criteria.
-			if (item_element === match_criteria) {
+			if (item.element === match_criteria) {
 				return true;
 			}
 		}
@@ -152,7 +200,7 @@ const Accordion = class {
 		// If the item element does not match the match criteria.
 		return false;
 
-	} // End: itemMatchesValue
+	} // End: _itemMatchesValue
 
 	/**
 	 * Initialize item.
@@ -161,20 +209,15 @@ const Accordion = class {
 	initializeItem(item_element, accordion_id) {
 
 		/**
-		 * Initialize content.
-		 */
-
-		const initializeContent = (content_element) => {}; // End: initializeContent
-
-		/**
 		 * Initialize heading.
 		 */
 
-		const initializeHeading = (heading_element) => {
+		const initializeHeading = (heading_element, item) => {
+			console.log(heading_element);
 			// Set the heading role attribute to heading.
 			heading_element.setAttribute('role', 'heading');
 			// Set the heading aria-controls attribute to the item content id.
-			heading_element.setAttribute('aria-controls', accordion_item_content.id);
+			heading_element.setAttribute('aria-controls', item.content.id);
 			// Set the accordion item heading aria-level attribute.
 			accordion_item_heading.setAttribute('aria-level', accordion_level);
 			// Set the accordion item heading aria-expanded attribute.
@@ -185,39 +228,53 @@ const Accordion = class {
 			accordion_item_heading.addEventListener('keydown', Accordion.headingKeyDownEventHandler);
 		}; // End: initializeHeading
 
+		/**
+		 * Initialize content.
+		 */
+
+		const initializeContent = (content_element) => {}; // End: initializeContent
+
 		// Get the accordion object. Assign it to a variable for easier access.
 		const this_accordion = this.accordions[accordion_id];
+		// Initialize this accordion to the instance object.
+		const item_index = this._setClassInstance({}, this_accordion, 'items');
 
 		// Initialize object to hold item data.
-		const this_item = {};
+		const this_item = this_accordion.items[item_index];
+		// Add the item index to the item object.
+		this_item.index = item_index;
 		// Add the item element reference to the item object.
 		this_item.element = item_element;
 
 		// Initialize the item state value.
-		let item_state_attrubute_value = 'closed';
+		let item_state = 'closed';
 
 		// Get the default_open_items options value.
 		const default_open_items = this.options.default_open_items;
-		// If the option value is not false.
-		if (default_open_items !== false) {
+		// If the option value is not false, null, or undefined.
+		if (default_open_items !== false || default_open_items !== null || typeof default_open_items !== 'undefined') {
 			// If the element matches the default_open_items value.
-			if (Accordion.elementMatchesInput(this_item.element, default_open_items)) {
+			if (this._itemMatchesValue(this_item, default_open_items)) {
 				// Set the item state value to opened.
-				item_state_attrubute_value = 'opened';
+				item_state = 'opened';
 			}
 		}
 
 		// Add the item state to the item object.
-		this_item.state = item_state_attrubute_value;
+		this_item.state = item_state;
 		// Set the item state attribute.
-		this_item.element.setAttribute(Accordion.constants.item_state_attrubute, item_state_attrubute_value);
+		this_item.element.setAttribute(this.constructor.constants.item_state_attrubute, item_state);
+
+		// Get this item's content element.
+		const content_element = this_item.element.querySelector(this_accordion.selector + ' > ' + this.options.selectors.item + ' > ' + this.options.selectors.content);
+		//
+		this_item.content = initializeContent(content_element, this_item);
 
 		// Get this item's heading element.
-		// const heading_element = this_item.element.querySelector(this_accordion.selector + ' > ' + this.options.selectors.item);
-		// Get this item's content element.
+		const heading_element = this_item.element.querySelector(this_accordion.selector + ' > ' + this.options.selectors.item + ' > ' + this.options.selectors.heading);
+		//
+		this_item.heading = initializeHeading(heading_element, this_item);
 
-		// Add the item object to the accordion items list.
-		this_accordion.items.push(this_item);
 
 	} // End: initializeItem
 
@@ -227,13 +284,10 @@ const Accordion = class {
 
 	initializeAccordion(accordion_element) {
 
-		// Increment the accordion count.
-		this.accordion_count++;
-
-		// Generate the accordion id.
-		const accordion_id = this.accordion_count - 1;
-		// Initialize the accordion object. Assign it to a variable for easier access.
-		const this_accordion = this.accordions[accordion_id] = {};
+		// Initialize this accordion to the instance object.
+		const accordion_id = this._setClassInstance({}, this, 'accordions', 'accordion_count');
+		// Assign this accordion object to a variable for easier access.
+		const this_accordion = this.accordions[accordion_id];
 
 		// Add the accordion relative unique id (relative to this class instance).
 		this_accordion.id = accordion_id;
@@ -243,14 +297,14 @@ const Accordion = class {
 		this_accordion.items = [];
 
 		// Set the class instance id data attribute.
-		this_accordion.element.setAttribute(Accordion.constants.instance_id_attribute, this.instance_id);
+		this_accordion.element.setAttribute(AceAccordion.constants.instance_id_attribute, this.id);
 		// Set the accordion id data attribute.
-		this_accordion.element.setAttribute(Accordion.constants.accordion_id_attribute, this_accordion.id);
+		this_accordion.element.setAttribute(AceAccordion.constants.accordion_id_attribute, this_accordion.id);
 
 		// Create a selector for the unique local accordion id.
-		const this_accordion_id_selector = '[' + Accordion.constants.accordion_id_attribute + '="' + this_accordion.id + '"]';
+		const this_accordion_id_selector = '[' + AceAccordion.constants.accordion_id_attribute + '="' + this_accordion.id + '"]';
 		// Set the global unique selector for this accordion.
-		this_accordion.selector = this.instance_id_selector + this_accordion_id_selector;
+		this_accordion.selector = this.selector + this_accordion_id_selector;
 
 		// Get the items in this accordion.
 		const accordion_items = this_accordion.element.querySelectorAll(this_accordion.selector + ' > ' + this.options.selectors.item);
@@ -278,75 +332,49 @@ const Accordion = class {
 
 	} // End: initializeAccordion
 
+
 	/**
-	 * Initialize.
+	 * AceAccordion class constructor.
+	 * @param {object} options_user - A set of override options supplied by the user.
+	 * @returns {object} this - The reference to this instance.
 	 */
 
-	initialize() {
+	constructor(options_user) {
 
-		// If the accordion count has not been initialized.
-		if (typeof this.accordion_count !== 'number') {
-			// Set the accordion count to 0.
-			this.accordion_count = 0;
-		}
+		// Add this instance to the static class object and set the instance id on this instance.
+		this.id = this._setClassInstance(this, this.constructor, 'instances', 'instance_count');
+		// Create a selector for the unique local instance id.
+		this.selector = '[' + this.constructor.constants.instance_id_attribute + '="' + this.id + '"]';
 
-		// If the accordions object has not been initialized.
-		if (!this.accordions) {
-			// Initialize the accordions object.
-			this.accordions = {};
-		}
+		// For now, assume passed parameter is a correctly formed options object.
+		// TO-DO: implement schema checking script.
+
+		// Merge default options and user options into new object using the imported extend function.
+		this.options = extend([{}, this.constructor.options_default, options_user], true);
 
 		// Get the accordion element(s).
 		const accordion_elements = document.querySelectorAll(this.options.selectors.accordion);
 		// If there at least one element matching the accordion selector.
 		if (accordion_elements.length > 0) {
-			// Initialize variable to hold the accordion element for the current loop.
-			let loop_accordion_element;
 			// For each matching accordion element.
 			for (let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
-				// Set the current loop accordion element.
-				loop_accordion_element = accordion_elements[accordion_element];
 				// Initialize the accordion.
-				this.initializeAccordion(loop_accordion_element);
+				this.initializeAccordion(accordion_elements[accordion_element]);
 			}
 		}
 		// If there are no elements matching the accordion selector.
 		else {
-			// If debug is true.
-			if (this.options.debug) {
-				// Send a warning to the console.
-				console.warn(this.constructor.name + ": No accordions found using selector: '" + this.options.selectors.accordion + "'");
-			}
+			// Send a warning to the console.
+			console.warn(this.constructor.name + ": No accordions found using selector: '" + this.options.selectors.accordion + "'");
 		}
-
-	} // End: initialize
-
-	/**
-	 * Constructor.
-	 */
-
-	constructor(options_user) {
-
-		// Add this class instance to the global class instances object and set the instance id on the instance.
-		this.instance_id = Accordion.addClassInstance(this);
-		// Create a selector for this unique instance id.
-		this.instance_id_selector = '[' + Accordion.constants.instance_id_attribute + '="' + this.instance_id + '"]';
-
-		// Merge default options and user options into new object using the imported extend function.
-		this.options = extend([{}, Accordion.options_default, options_user], true);
-
-		// Initialize the accordion(s).
-		this.initialize();
 
 		// If debug is true.
-		if (this.options.debug) {
-			// Log the class.
-			console.dir(Accordion);
-			// Log the instance.
-			console.log(this);
+		if (true) {
+			// Log the classes.
+			console.dir(this.constructor);
 		}
 
-		// Return the reference to the accordion class instance.
+		// Return the this instance.
 		return this;
 
 	} // End: constructor
@@ -791,6 +819,6 @@ const Accordion = class {
 
 // If script is being required as a node module.
 if (typeof module !== 'undefined' && module.exports) {
-	// Export the accordion class.
-	module.exports = Accordion;
+	// Export the AceAccordion class.
+	module.exports = AceAccordion;
 }

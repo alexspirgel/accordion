@@ -11,7 +11,7 @@ gulp.task('css', () => {
 });
 
 gulp.task('js', () => {
-	gulp.src('./src/js/accordion.js')
+	gulp.src('./src/js/ace-accordion.js')
 		.pipe(webpackStream(webpack_config), webpack)
 		.pipe(gulp.dest('./dist/js'));
 });
