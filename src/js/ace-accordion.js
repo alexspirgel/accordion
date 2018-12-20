@@ -1,12 +1,21 @@
-// Class > instance > accordion > item > heading/content
+// Notes:
+// - Class > instance > accordion > item > heading/content
+// - only re-index items when we need to check them, do not use attribute, track only internally
+// - separate out classes in different files
+
+
 
 /**
- * Accordion v1.0.0
+ * AceAccordion v1.0.0
  * https://github.com/alexspirgel/accordion
  */
 
 // Require extend function.
 const extend = require('@alexspirgel/extend');
+
+// Require accordion classes.
+const Accordion = require('./accordion.js');
+const AccordionItem = require('./accordion-item.js');
 
 /**
  * Defines an accordion.
@@ -21,17 +30,17 @@ const AceAccordion = class {
 	static get options_default() {
 		return {
 			selectors: {
-				accordion: '.accordion', // Custom accordion element selector.
-				item: '.accordion__item', // Custom item element selector.
-				heading: '.accordion__item__heading', // Custom heading element selector.
-				content: '.accordion__item__content' // Custom content element selector.
+				accordion: '.accordion', // {string} Custom accordion element selector.
+				item: '.accordion__item', // {string} Custom item element selector.
+				heading: '.accordion__item__heading', // {string} Custom heading element selector.
+				content: '.accordion__item__content' // {string} Custom content element selector.
 			}, // End: selectors
-			accessibility_warnings: true, // log any accessibility issues
-			close_nested_items: false, // only closes one nested level deep, but it can set off a chain reaction to close further nested levels
-			default_open_items: false, // false || index (number) || elem_ref || '.selector' || coming soon: [1, '.selector', elem_ref]
-			heading_trigger_selector: false, // selector to trigger open and close on instead of the heading selector
-			multiple_open_items: true, // allow multiple items to be open at the same time
-			open_anchored_items: false, // if true, if item is anchored to in url, open it
+			accessibility_warnings: true, // {boolean} Log detected accessibility issues as warnings.
+			close_nested_items: false, // {boolean} Close immediate nested items. Can chain reaction to close further nested levels depending on nested options.
+			custom_trigger_selector: '', // {string} Alternate selector to trigger open and close instead of the heading selector.
+			default_open_items: [], // {number|string|object|array} Initializes item(s) already open.
+			multiple_open_items: true, // {boolean} Allow multiple items to be open at the same time.
+			open_anchored_items: false, // {boolean} When anchored to an accordion item, open it.
 			callbacks: {
 				accordion: {
 					initialize: {
@@ -54,7 +63,7 @@ const AceAccordion = class {
 					}
 				}
 			}, // End: callbacks
-			debug: false
+			debug: false // Log helpful messages to the console for development.
 		}; // End: return
 	} // End: options_default
 
@@ -64,10 +73,7 @@ const AceAccordion = class {
 
 	static get constants() {
 		return {
-			instance_id_attribute: 'data-instance-id',
-			accordion_id_attribute: 'data-accordion-id',
-			item_id_attrubute: 'data-item-id',
-			item_state_attrubute: 'data-item-state'
+			instance_id_attribute: 'data-instance-id'
 		};
 	} // End: constants
 
@@ -206,7 +212,7 @@ const AceAccordion = class {
 	 * Initialize item.
 	 */
 
-	initializeItem(item_element, accordion_id) {
+	_initializeItem(item_element, accordion_id) {
 
 		/**
 		 * Initialize heading.
@@ -266,17 +272,17 @@ const AceAccordion = class {
 		this_item.element.setAttribute(this.constructor.constants.item_state_attrubute, item_state);
 
 		// Get this item's content element.
-		const content_element = this_item.element.querySelector(this_accordion.selector + ' > ' + this.options.selectors.item + ' > ' + this.options.selectors.content);
+		// const content_element = this_item.element.querySelector(this_accordion.selector + ' > ' + this.options.selectors.item + ' > ' + this.options.selectors.content);
 		//
-		this_item.content = initializeContent(content_element, this_item);
+		// this_item.content = initializeContent(content_element, this_item);
 
 		// Get this item's heading element.
-		const heading_element = this_item.element.querySelector(this_accordion.selector + ' > ' + this.options.selectors.item + ' > ' + this.options.selectors.heading);
+		// const heading_element = this_item.element.querySelector(this_accordion.selector + ' > ' + this.options.selectors.item + ' > ' + this.options.selectors.heading);
 		//
-		this_item.heading = initializeHeading(heading_element, this_item);
+		// this_item.heading = initializeHeading(heading_element, this_item);
 
 
-	} // End: initializeItem
+	} // End: _initializeItem
 
 	/**
 	 * Initialize accordion.
@@ -317,7 +323,7 @@ const AceAccordion = class {
 				// Set the current loop item element.
 				loop_item_element = accordion_items[accordion_item];
 				// Initialize the item.
-				this.initializeItem(loop_item_element, this_accordion.id);
+				this._initializeItem(loop_item_element, this_accordion.id);
 			}
 		}
 		// If there are no items in this accordion
