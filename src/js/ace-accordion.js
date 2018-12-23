@@ -12,13 +12,11 @@
 
 // Require extend function.
 const extend = require('@alexspirgel/extend');
-
-// Require accordion classes.
+// Require Accordion class.
 const Accordion = require('./accordion.js');
-const AccordionItem = require('./accordion-item.js');
 
 /**
- * Defines an accordion.
+ * Defines an Ace Accordion.
  */
 
 const AceAccordion = class {
@@ -73,7 +71,7 @@ const AceAccordion = class {
 
 	static get constants() {
 		return {
-			instance_id_attribute: 'data-instance-id'
+			id_attribute: 'data-ace-accordion-id'
 		};
 	} // End: constants
 
@@ -82,7 +80,7 @@ const AceAccordion = class {
 	 * @returns {number} instance_id - The id of the instance (zero indexed).
 	 */
 
-	_setClassInstance(instance, Class, list_property, count_property) {
+	static _setClassInstance(instance, Class, list_property, count_property) {
 
 		// Initialize the instance id variable.
 		let instance_id;
@@ -121,92 +119,6 @@ const AceAccordion = class {
 
 	} // End: _setClassInstance
 
-	/**
-	 * Index accordion items.
-	 */
-
-	indexItems(accordion_id) {
-		// If no accordion id is passed.
-		if (typeof accordion_id === 'undefined') {
-			// For each accordion in this Accordion class instance.
-			for (let accordion in this.accordions) {
-				// Recursive call with accordion id.
-				this.indexItems(accordion);
-			}
-		}
-		// If an accordion id is passed.
-		else {
-			// Generate the items selector for this accordion
-			const items_selector = this.accordions[accordion_id].selector + ' > ' + this.options.selectors.item;
-			// Get the items of this accordion.
-			const items_elements = document.querySelectorAll(items_selector);
-			// For each item in the accordion.
-			for (let item = 0; item < items_elements.length; item++) {
-				//
-				items_elements[item].setAttribute(Accordion.constants.item_index_attrubute, item);
-			}
-		}
-	} // End: indexItems
-
-	/**
-	 * Check if an item matches the input(s).
-	 */
-
-	_itemMatchesValue(item, match_criteria) {
-		console.log(item);
-
-		// If the match criteria is a node list.
-		if (match_criteria instanceof NodeList) {
-			// Convert the match criteria into an array.
-			match_criteria = Array.from(match_criteria);
-		}
-
-		// If the match criteria is an array.
-		if (Array.isArray(match_criteria)) {
-			// For each value in the match criteria array.
-			for (let value = 0; value < match_criteria.length; value++) {
-				// Recursive call to check if the array value matches the item.
-				if (this._itemMatchesValue(item, match_criteria[value])) {
-					// If it matches, return true.
-					return true;
-				}
-			}
-		}
-
-		// If the match criteria is a number (index).
-		else if (typeof match_criteria === 'number') {
-			// If the match criteria is an integer.
-			if (Number.isInteger(match_criteria)) {
-				// If the match criteria is zero or greater.
-				if (match_criteria >= 0) {
-					// If the item index matches the match criteria index.
-					if (item.index === match_criteria) {
-						return true;
-					}
-				}
-			}
-		}
-
-		// If the match criteria is a string (selector).
-		else if (typeof match_criteria === 'string') {
-			// If the item element matches the match criteria selector.
-			if (item.element.matches(match_criteria)) {
-				return true;
-			}
-		}
-
-		// If the match criteria is an element.
-		else if (match_criteria instanceof Element) {
-			// If the item element matches the match criteria.
-			if (item.element === match_criteria) {
-				return true;
-			}
-		}
-
-		// If the item element does not match the match criteria.
-		return false;
-
-	} // End: _itemMatchesValue
 
 	/**
 	 * Initialize item.
@@ -284,60 +196,6 @@ const AceAccordion = class {
 
 	} // End: _initializeItem
 
-	/**
-	 * Initialize accordion.
-	 */
-
-	initializeAccordion(accordion_element) {
-
-		// Initialize this accordion to the instance object.
-		const accordion_id = this._setClassInstance({}, this, 'accordions', 'accordion_count');
-		// Assign this accordion object to a variable for easier access.
-		const this_accordion = this.accordions[accordion_id];
-
-		// Add the accordion relative unique id (relative to this class instance).
-		this_accordion.id = accordion_id;
-		// Add the accordion element reference.
-		this_accordion.element = accordion_element;
-		// Initialize a list of accordion items.
-		this_accordion.items = [];
-
-		// Set the class instance id data attribute.
-		this_accordion.element.setAttribute(AceAccordion.constants.instance_id_attribute, this.id);
-		// Set the accordion id data attribute.
-		this_accordion.element.setAttribute(AceAccordion.constants.accordion_id_attribute, this_accordion.id);
-
-		// Create a selector for the unique local accordion id.
-		const this_accordion_id_selector = '[' + AceAccordion.constants.accordion_id_attribute + '="' + this_accordion.id + '"]';
-		// Set the global unique selector for this accordion.
-		this_accordion.selector = this.selector + this_accordion_id_selector;
-
-		// Get the items in this accordion.
-		const accordion_items = this_accordion.element.querySelectorAll(this_accordion.selector + ' > ' + this.options.selectors.item);
-		// If there is at least one item.
-		if (accordion_items.length > 0) {
-			// Initialize variable to hold the item element for the current loop.
-			let loop_item_element;
-			// For each item.
-			for(let accordion_item = 0; accordion_item < accordion_items.length; accordion_item++) {
-				// Set the current loop item element.
-				loop_item_element = accordion_items[accordion_item];
-				// Initialize the item.
-				this._initializeItem(loop_item_element, this_accordion.id);
-			}
-		}
-		// If there are no items in this accordion
-		else {
-			// If debug is true.
-			if (this.options.debug) {
-				// Send a warning to the console.
-				console.warn(this.constructor.name + ": No items found using selector: '" + this.options.selectors.item + "'");
-			}
-		}
-
-
-	} // End: initializeAccordion
-
 
 	/**
 	 * AceAccordion class constructor.
@@ -347,16 +205,16 @@ const AceAccordion = class {
 
 	constructor(options_user) {
 
-		// Add this instance to the static class object and set the instance id on this instance.
-		this.id = this._setClassInstance(this, this.constructor, 'instances', 'instance_count');
-		// Create a selector for the unique local instance id.
-		this.selector = '[' + this.constructor.constants.instance_id_attribute + '="' + this.id + '"]';
-
 		// For now, assume passed parameter is a correctly formed options object.
 		// TO-DO: implement schema checking script.
 
 		// Merge default options and user options into new object using the imported extend function.
 		this.options = extend([{}, this.constructor.options_default, options_user], true);
+
+		// Add this instance to the static class object and set the instance id on this instance.
+		this.id = this.constructor._setClassInstance(this, this.constructor, 'instances', 'instance_count');
+		// Create a selector for the unique local instance id.
+		this.selector = '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
 		// Get the accordion element(s).
 		const accordion_elements = document.querySelectorAll(this.options.selectors.accordion);
@@ -364,8 +222,8 @@ const AceAccordion = class {
 		if (accordion_elements.length > 0) {
 			// For each matching accordion element.
 			for (let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
-				// Initialize the accordion.
-				this.initializeAccordion(accordion_elements[accordion_element]);
+				// Initialize an accordion.
+				const accordion = new Accordion(this, accordion_elements[accordion_element]);
 			}
 		}
 		// If there are no elements matching the accordion selector.
@@ -375,12 +233,16 @@ const AceAccordion = class {
 		}
 
 		// If debug is true.
-		if (true) {
+		if (this.options.debug) {
 			// Log the classes.
+			console.log('Debug: AceAccordion Class:');
 			console.dir(this.constructor);
+			// Log the instance.
+			console.log('Debug: AceAccordion - ' + this.id + ':');
+			console.dir(this);
 		}
 
-		// Return the this instance.
+		// Return this instance.
 		return this;
 
 	} // End: constructor
