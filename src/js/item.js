@@ -147,7 +147,7 @@ const Item = class {
 		this.state = initial_state;
 
 		// If debug is true.
-		if (this.accordion.ace_accordion.options.debug) {
+		if (this.options.debug) {
 			// Log the classes.
 			console.log('Debug: Item Class:');
 			console.dir(this.constructor);
