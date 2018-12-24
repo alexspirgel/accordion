@@ -5,22 +5,28 @@
 const Item = class {
 
 	/**
-	 * Defines a set of constant class variables.
+	 * Defines constant class variables.
 	 */
 
 	static get constants() {
 		return {
-			state_attrubute: 'data-item-state'
+			state_attrubute: 'data-item-state',
+			states: [
+				'opened',
+				'opening',
+				'closing',
+				'closed'
+			]
 		};
-	} // End: constants
+	} // End method: static get constants
 
 	/**
 	 *
 	 */
 
 	get options() {
-		// Return options from the parent Accordion.
-		return this.accordion.options;
+		// Return options from the parent instance.
+		return this.parent_instance.options;
 	} // End: get options
 
 	/**
@@ -28,12 +34,16 @@ const Item = class {
 	 */
 
 	set state(state) {
-		if (state === 'opened' || state === 'opening' || state === 'closing' || state === 'closed') {
+		// If the passed value is a valid state.
+		if (this.constructor.constants.states.indexOf(state) >= 0) {
+			// Set the item state attribute equal to the passed state.
 			this.element.setAttribute(this.constructor.constants.state_attrubute, state);
-			return true;
+			// Return the state value.
+			return state;
 		}
+		// If the passed value is not a valid state.
 		else {
-			console.warn('invalid state');
+			console.warn('invalid state, options are: ' + this.constructor.constants.states);
 			return false;
 		}
 	} // End: set state
@@ -45,19 +55,19 @@ const Item = class {
 	get state() {
 		// Returns null if attribute is not set.
 		return this.element.getAttribute(this.constructor.constants.state_attrubute);
-	} // End get state
+	} // End method: get state
 
 	/**
 	 *
 	 */
 
 	get index() {
-		// Get the item elements in the accordion and convert the result into an array.
-		let item_elements = Array.from(this.accordion.element.querySelectorAll(this.accordion.selector + ' > ' + this.options.selectors.item));
+		// Get the item elements and convert the result into an array.
+		let item_elements = Array.from(this.parent_instance.element.querySelectorAll(this.parent_instance.selector + ' > ' + this.options.selectors.item));
 		// Return the index of the item.
 		// Will return negative one if the item cannot be found.
 		return item_elements.indexOf(this.element);
-	} // End: get index
+	} // End method: get index
 
 	/**
 	 * Check if this item matches the criteria.
@@ -115,16 +125,16 @@ const Item = class {
 		// If the item does not match the criteria.
 		return false;
 
-	} // End: matches
+	} // End method: matches
 
 	/**
 	 *
 	 */
 
-	constructor(accordion, item_element) {
+	constructor(parent_instance, item_element) {
 
-		// Set a reference to the Accordion.
-		this.accordion = accordion;
+		// Set a reference to the parent instance.
+		this.parent_instance = parent_instance;
 
 		// Add the item element reference.
 		this.element = item_element;
@@ -146,23 +156,12 @@ const Item = class {
 		//
 		this.state = initial_state;
 
-		// If debug is true.
-		if (this.options.debug) {
-			// Log the classes.
-			console.log('Debug: Item Class:');
-			console.dir(this.constructor);
-			// Log the instance.
-			console.log('Debug: AceAccordion - ' + this.accordion.ace_accordion.id + ':');
-			console.log('Debug: Accordion - ' + this.accordion.id + ':');
-			console.dir(this);
-		}
-
 		// Return this instance.
 		return this;
 
-	} // End: constructor
+	} // End method: constructor
 
-};
+}; // End class: Item
 
 // Export the Item class.
 module.exports = Item;

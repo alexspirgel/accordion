@@ -1,8 +1,6 @@
 // Notes:
-// - Class > instance > accordion > item > heading/content
 // - only re-index items when we need to check them, do not use attribute, track only internally
-// - separate out classes in different files
-
+// - implement better error handling and logging
 
 
 /**
@@ -16,7 +14,7 @@ const extend = require('@alexspirgel/extend');
 const Accordion = require('./accordion.js');
 
 /**
- * Defines an Ace Accordion.
+ * Defines an Ace Accordion (a handling wrapper for the Accordion Class).
  */
 
 const AceAccordion = class {
@@ -32,7 +30,7 @@ const AceAccordion = class {
 				item: '.accordion__item', // {string} Custom item element selector.
 				heading: '.accordion__item__heading', // {string} Custom heading element selector.
 				content: '.accordion__item__content' // {string} Custom content element selector.
-			}, // End: selectors
+			},
 			accessibility_warnings: true, // {boolean} Log detected accessibility issues as warnings.
 			close_nested_items: false, // {boolean} Close immediate nested items. Can chain reaction to close further nested levels depending on nested options.
 			custom_trigger_selector: '', // {string} Alternate selector to trigger open and close instead of the heading selector.
@@ -42,8 +40,8 @@ const AceAccordion = class {
 			callbacks: {
 				accordion: {
 					initialize: {
-						before: () => {},
-						after: () => {}
+						before: (instance_id, accordion_id) => {},
+						after: (instance_id, accordion_id) => {}
 					}
 				},
 				item: {
@@ -60,64 +58,69 @@ const AceAccordion = class {
 						after: () => {}
 					}
 				}
-			}, // End: callbacks
+			},
 			debug: false // Log helpful messages to the console for development.
-		}; // End: return
-	} // End: options_default
+		};
+	} // End method: static get options_default
 
 	/**
-	 * Defines a set of constant class variables.
+	 * Defines constant class variables.
 	 */
 
 	static get constants() {
 		return {
+			count_property: 'count',
+			instances_property: 'instances',
 			id_attribute: 'data-ace-accordion-id'
 		};
-	} // End: constants
+	} // End method: static get constants
 
 	/**
-	 * Sets an instance to a class.
+	 * Adds an instance to a class.
 	 * @returns {number} instance_id - The id of the instance (zero indexed).
 	 */
 
-	static _setClassInstance(instance, Class, list_property, count_property) {
+	static addInstance(parameters) {
 
-		// Initialize the instance id variable.
-		let instance_id;
+		// If the class instance count has not been initialized.
+		if (typeof parameters.class_reference[parameters.count_property] !== 'number') {
+			// Set the class instance count to 0.
+			parameters.class_reference[parameters.count_property] = 0;
+		}
 
 		// If the class instance list has not been initialized.
-		if (!Class[list_property]) {
+		if (typeof parameters.class_reference[parameters.list_property] !== 'object') {
 			// Initialize the class instances list.
-			Class[list_property] = {};
+			parameters.class_reference[parameters.list_property] = {};
 		}
 
-		// If the class instance list is not an array.
-		if (!Array.isArray(Class[list_property])) {
-			// If the class instance count has not been initialized.
-			if (typeof Class[count_property] !== 'number') {
-				// Set the class instance count to 0.
-				Class[count_property] = 0;
-			}
-			// Increment the class instance count.
-			Class[count_property]++;
-			// Generate the instance id from the instance count.
-			// Subtract one to have the id be zero indexed.
-			instance_id = Class[count_property] - 1;
-			// Add the instance to the class instances object.
-			Class[list_property][instance_id] = instance;
-		}
-		// If the class instance list is an array.
-		else {
-			// Set the instance id equal to the array length (also the next available index).
-			instance_id = Class[list_property].length;
-			// Add the instance to the instance list.
-			Class[list_property].push(instance);
-		}
+		// Increment the class instance count.
+		parameters.class_reference[parameters.count_property]++;
+		// Generate the instance id from the instance count. Subtract one to have the id be zero indexed.
+		const instance_id = parameters.class_reference[parameters.count_property] - 1;
+		// Add the instance to the class instances object.
+		parameters.class_reference[parameters.list_property][instance_id] = parameters.instance;
 
 		// Return this instance's unique id.
 		return instance_id;
 
-	} // End: _setClassInstance
+	} // End method: static addInstance
+
+	/**
+	 *
+	 */
+
+	addInstance() {
+		// Call the static function to add the instance and return the instance id.
+		const instance_id = this.constructor.addInstance({
+			instance: this, // The instance to add.
+			class_reference: this.constructor, // The class to add the instance to.
+			count_property: this.constructor.constants.count_property, // The count property on the class.
+			list_property: this.constructor.constants.instances_property // The instance list property on the class.
+		});
+		// Return the instance id.
+		return instance_id;
+	} // End method: addInstance
 
 
 	/**
@@ -155,7 +158,7 @@ const AceAccordion = class {
 		// Get the accordion object. Assign it to a variable for easier access.
 		const this_accordion = this.accordions[accordion_id];
 		// Initialize this accordion to the instance object.
-		const item_index = this._setClassInstance({}, this_accordion, 'items');
+		const item_index = this.setClassInstance({}, this_accordion, 'items');
 
 		// Initialize object to hold item data.
 		const this_item = this_accordion.items[item_index];
@@ -210,9 +213,8 @@ const AceAccordion = class {
 
 		// Merge default options and user options into new object using the imported extend function.
 		this.options = extend([{}, this.constructor.options_default, options_user], true);
-
 		// Add this instance to the static class object and set the instance id on this instance.
-		this.id = this.constructor._setClassInstance(this, this.constructor, 'instances', 'instance_count');
+		this.id = this.addInstance();
 		// Create a selector for the unique local instance id.
 		this.selector = '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
@@ -235,17 +237,17 @@ const AceAccordion = class {
 		// If debug is true.
 		if (this.options.debug) {
 			// Log the classes.
-			console.log('Debug: AceAccordion Class:');
+			console.log('AceAccordion Debug: AceAccordion Class:');
 			console.dir(this.constructor);
 			// Log the instance.
-			console.log('Debug: AceAccordion - ' + this.id + ':');
+			console.log('AceAccordion Debug: AceAccordion - ' + this.id + ':');
 			console.dir(this);
 		}
 
 		// Return this instance.
 		return this;
 
-	} // End: constructor
+	} // End method: constructor
 
 	
 	/******************************************************
@@ -683,7 +685,7 @@ const AceAccordion = class {
 		} // End loop accordion_elements.
 
 	} // End function: initialize.
-};
+}; // End class: AceAccordion
 
 // If script is being required as a node module.
 if (typeof module !== 'undefined' && module.exports) {

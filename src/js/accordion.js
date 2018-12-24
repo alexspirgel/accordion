@@ -1,4 +1,4 @@
-// Require accordion class.
+// Require Item class.
 const Item = require('./item.js');
 
 /**
@@ -8,14 +8,16 @@ const Item = require('./item.js');
 const Accordion = class {
 
 	/**
-	 * Defines a set of constant class variables.
+	 * Defines constant class variables.
 	 */
 
 	static get constants() {
 		return {
+			count_property: 'accordion_count',
+			instances_property: 'accordions',
 			id_attribute: 'data-accordion-id'
 		};
-	} // End: constants
+	} // End method: static get constants
 
 	/**
 	 *
@@ -23,31 +25,47 @@ const Accordion = class {
 
 	get options() {
 		// Return options from the parent AceAccordion.
-		return this.ace_accordion.options;
-	} // End: get options
+		return this.parent_instance.options;
+	} // End method: get options
 
 	/**
 	 *
 	 */
 
-	constructor(ace_accordion, accordion_element) {
+	addInstance() {
+		// Call the static function to add the instance and return the instance id.
+		const instance_id = this.parent_instance.constructor.addInstance({
+			instance: this, // The instance to add.
+			class_reference: this.parent_instance, // The class to add the instance to.
+			count_property: this.constructor.constants.count_property, // The count property on the class.
+			list_property: this.constructor.constants.instances_property // The instance list property on the class.
+		});
+		// Return the instance id.
+		return instance_id;
+	} // End method: addInstance
+
+	/**
+	 *
+	 */
+
+	constructor(parent_instance, accordion_element) {
 
 		// Set a reference to the AceAccordion.
-		this.ace_accordion = ace_accordion;
+		this.parent_instance = parent_instance;
 
-		// Add this Accordion class instance to the AceAccordion.
-		this.id = this.ace_accordion.constructor._setClassInstance(this, this.ace_accordion, 'accordions', 'accordion_count');
+		// Add this instance to the parent instance and set the instance id on this instance.
+		this.id = this.addInstance();
 		// Add the accordion element reference.
 		this.element = accordion_element;
 
 		// Set the AceAccordion class instance id data attribute.
-		this.element.setAttribute(this.ace_accordion.constructor.constants.id_attribute, this.ace_accordion.id);
+		this.element.setAttribute(this.parent_instance.constructor.constants.id_attribute, this.parent_instance.id);
 		// Set the Accordion class instance id data attribute.
 		this.element.setAttribute(this.constructor.constants.id_attribute, this.id);
 
 		// Create a unique selector for this Accordion class instance.
 		// Unique selector is a combination of AceAccordion and Accordion class instance ids.
-		this.selector = this.ace_accordion.selector + '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
+		this.selector = this.parent_instance.selector + '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
 		// Get the items in this accordion.
 		const item_elements = this.element.querySelectorAll(this.selector + ' > ' + this.options.selectors.item);
@@ -68,23 +86,12 @@ const Accordion = class {
 			}
 		}
 
-		// If debug is true.
-		if (this.options.debug) {
-			// Log the classes.
-			console.log('Debug: Accordion Class:');
-			console.dir(this.constructor);
-			// Log the instance.
-			console.log('Debug: AceAccordion - ' + this.ace_accordion.id + ':');
-			console.log('Debug: Accordion - ' + this.id + ':');
-			console.dir(this);
-		}
-
 		// Return this instance.
 		return this;
 
-	} // End: constructor
+	} // End method: constructor
 
-};
+}; // End class: Accordion
 
 // Export the Accordion class.
 module.exports = Accordion;
