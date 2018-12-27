@@ -15,7 +15,8 @@ const Accordion = class {
 		return {
 			count_property: 'accordion_count',
 			instances_property: 'accordions',
-			id_attribute: 'data-accordion-id'
+			id_attribute: 'data-accordion-id',
+			item_instances_property: 'items'
 		};
 	} // End method: static get constants
 
@@ -32,9 +33,9 @@ const Accordion = class {
 	 *
 	 */
 
-	addInstance() {
+	addAccordion() {
 		// Call the static function to add the instance and return the instance id.
-		const instance_id = this.parent_instance.constructor.addInstance({
+		const instance_id = this.parent_instance.constructor.addAccordion({
 			instance: this, // The instance to add.
 			class_reference: this.parent_instance, // The class to add the instance to.
 			count_property: this.constructor.constants.count_property, // The count property on the class.
@@ -42,7 +43,25 @@ const Accordion = class {
 		});
 		// Return the instance id.
 		return instance_id;
-	} // End method: addInstance
+	} // End method: addAccordion
+
+	/**
+	 *
+	 */
+
+	get item_elements() {
+		// Get the item elements and convert the result into an array.
+		return Array.from(this.element.querySelectorAll(this.selector + ' > ' + this.options.selectors.item));
+	} // End method: get item_elements
+
+	/**
+	 *
+	 */
+
+	addItem(item_element) {
+		//
+		// new Item(item_element);
+	}
 
 	/**
 	 *
@@ -54,7 +73,7 @@ const Accordion = class {
 		this.parent_instance = parent_instance;
 
 		// Add this instance to the parent instance and set the instance id on this instance.
-		this.id = this.addInstance();
+		this.id = this.addAccordion();
 		// Add the accordion element reference.
 		this.element = accordion_element;
 
@@ -67,14 +86,13 @@ const Accordion = class {
 		// Unique selector is a combination of AceAccordion and Accordion class instance ids.
 		this.selector = this.parent_instance.selector + '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
-		// Get the items in this accordion.
-		const item_elements = this.element.querySelectorAll(this.selector + ' > ' + this.options.selectors.item);
 		// If there is at least one item.
-		if (item_elements.length > 0) {
-			// For each item.
-			for(let item_element = 0; item_element < item_elements.length; item_element++) {
+		if (this.item_elements.length > 0) {
+			// For each item element.
+			for(let index = 0; index < this.item_elements.length; index++) {
 				// Initialize an item.
-				const item = new Item(this, item_elements[item_element]);
+				// const item = new Item(this, this.item_elements[index], index);
+				this.addItem(this.item_elements[index]);
 			}
 		}
 		// If there are no items in this accordion.

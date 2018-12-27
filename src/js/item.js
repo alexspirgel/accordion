@@ -10,6 +10,8 @@ const Item = class {
 
 	static get constants() {
 		return {
+			instances_property: 'items',
+			index_attribute: 'data-item-index',
 			state_attrubute: 'data-item-state',
 			states: [
 				'opened',
@@ -33,6 +35,34 @@ const Item = class {
 	 *
 	 */
 
+	set index(index) {
+		// If the passed value is an integer.
+		if (Number.isInteger(index)) {
+			// Set the item index attribute equal to the passed index.
+			this.element.setAttribute(this.constructor.constants.index_attribute, index);
+			// Return the index value.
+			return index;
+		}
+		// If the passed value is not a valid index.
+		else {
+			console.warn('invalid index, must be an integer');
+			return false;
+		}
+	} // End method: set index
+
+	/**
+	 *
+	 */
+
+	get index() {
+		// Returns null if attribute is not set.
+		return this.element.getAttribute(this.constructor.constants.index_attribute);
+	} // End method: get index
+
+	/**
+	 *
+	 */
+
 	set state(state) {
 		// If the passed value is a valid state.
 		if (this.constructor.constants.states.indexOf(state) >= 0) {
@@ -46,7 +76,7 @@ const Item = class {
 			console.warn('invalid state, options are: ' + this.constructor.constants.states);
 			return false;
 		}
-	} // End: set state
+	} // End method: set state
 
 	/**
 	 *
@@ -56,18 +86,6 @@ const Item = class {
 		// Returns null if attribute is not set.
 		return this.element.getAttribute(this.constructor.constants.state_attrubute);
 	} // End method: get state
-
-	/**
-	 *
-	 */
-
-	get index() {
-		// Get the item elements and convert the result into an array.
-		let item_elements = Array.from(this.parent_instance.element.querySelectorAll(this.parent_instance.selector + ' > ' + this.options.selectors.item));
-		// Return the index of the item.
-		// Will return negative one if the item cannot be found.
-		return item_elements.indexOf(this.element);
-	} // End method: get index
 
 	/**
 	 * Check if this item matches the criteria.
@@ -131,13 +149,16 @@ const Item = class {
 	 *
 	 */
 
-	constructor(parent_instance, item_element) {
+	constructor(parent_instance, item_element, item_index) {
 
 		// Set a reference to the parent instance.
 		this.parent_instance = parent_instance;
 
 		// Add the item element reference.
 		this.element = item_element;
+
+		//
+		this.index = item_index;
 
 		// Initialize the item state.
 		let initial_state = 'closed';
@@ -153,8 +174,15 @@ const Item = class {
 			}
 		}
 
-		//
+		// Set the item state.
 		this.state = initial_state;
+
+		// Get the content element.
+		const content_element = this.element.querySelector( // Scope the selector results to within this element.
+			parent_instance.selector + // Get the parent accordion.
+			' > ' + this.options.selectors.item + // Items directly nested within the parent accordion.
+			' > ' + this.options.selectors.content); // Content directly nested within the parent item.
+		console.log(content_element);
 
 		// Return this instance.
 		return this;

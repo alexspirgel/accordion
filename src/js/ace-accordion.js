@@ -1,6 +1,7 @@
 // Notes:
 // - only re-index items when we need to check them, do not use attribute, track only internally
 // - implement better error handling and logging
+// - I think I gotta go back to storing item index as data attribute
 
 
 /**
