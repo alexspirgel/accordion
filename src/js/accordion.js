@@ -33,22 +33,6 @@ const Accordion = class {
 	 *
 	 */
 
-	addAccordion() {
-		// Call the static function to add the instance and return the instance id.
-		const instance_id = this.parent_instance.constructor.addAccordion({
-			instance: this, // The instance to add.
-			class_reference: this.parent_instance, // The class to add the instance to.
-			count_property: this.constructor.constants.count_property, // The count property on the class.
-			list_property: this.constructor.constants.instances_property // The instance list property on the class.
-		});
-		// Return the instance id.
-		return instance_id;
-	} // End method: addAccordion
-
-	/**
-	 *
-	 */
-
 	get item_elements() {
 		// Get the item elements and convert the result into an array.
 		return Array.from(this.element.querySelectorAll(this.selector + ' > ' + this.options.selectors.item));
@@ -58,9 +42,25 @@ const Accordion = class {
 	 *
 	 */
 
+	addInstance() {
+		// Call the static function to add the instance and return the instance id.
+		const instance_id = this.parent_instance.constructor.addInstance({
+			instance: this, // The instance to add.
+			class_reference: this.parent_instance, // The class to add the instance to.
+			count_property: this.constructor.constants.count_property, // The count property on the class.
+			list_property: this.constructor.constants.instances_property // The instance list property on the class.
+		});
+		// Return the instance id.
+		return instance_id;
+	} // End method: addInstance
+
+	/**
+	 *
+	 */
+
 	addItem(item_element) {
-		//
-		// new Item(item_element);
+		// Create a new item.
+		const item = new Item(this, item_element);
 	}
 
 	/**
@@ -72,8 +72,9 @@ const Accordion = class {
 		// Set a reference to the AceAccordion.
 		this.parent_instance = parent_instance;
 
-		// Add this instance to the parent instance and set the instance id on this instance.
-		this.id = this.addAccordion();
+		// Add this instance to the parent instance and set the instance id.
+		this.id = this.addInstance();
+
 		// Add the accordion element reference.
 		this.element = accordion_element;
 
@@ -82,8 +83,7 @@ const Accordion = class {
 		// Set the Accordion class instance id data attribute.
 		this.element.setAttribute(this.constructor.constants.id_attribute, this.id);
 
-		// Create a unique selector for this Accordion class instance.
-		// Unique selector is a combination of AceAccordion and Accordion class instance ids.
+		// Create a unique selector for this Accordion.
 		this.selector = this.parent_instance.selector + '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
 		// If there is at least one item.
@@ -91,7 +91,6 @@ const Accordion = class {
 			// For each item element.
 			for(let index = 0; index < this.item_elements.length; index++) {
 				// Initialize an item.
-				// const item = new Item(this, this.item_elements[index], index);
 				this.addItem(this.item_elements[index]);
 			}
 		}

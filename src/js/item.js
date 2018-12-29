@@ -10,12 +10,13 @@ const Item = class {
 
 	static get constants() {
 		return {
+			count_property: 'item_count',
 			instances_property: 'items',
-			index_attribute: 'data-item-index',
+			id_attribute: 'data-item-id',
 			state_attrubute: 'data-item-state',
 			states: [
-				'opened',
 				'opening',
+				'opened',
 				'closing',
 				'closed'
 			]
@@ -35,29 +36,21 @@ const Item = class {
 	 *
 	 */
 
-	set index(index) {
-		// If the passed value is an integer.
-		if (Number.isInteger(index)) {
-			// Set the item index attribute equal to the passed index.
-			this.element.setAttribute(this.constructor.constants.index_attribute, index);
-			// Return the index value.
-			return index;
-		}
-		// If the passed value is not a valid index.
-		else {
-			console.warn('invalid index, must be an integer');
-			return false;
-		}
-	} // End method: set index
+	get index() {
+		// Get the items elements from the parent instance.
+		const items = this.parent_instance.item_elements;
+		// Return the index of this item in the list of items.
+		return items.indexOf(this.element);
+	} // End method: get index
 
 	/**
 	 *
 	 */
 
-	get index() {
+	get state() {
 		// Returns null if attribute is not set.
-		return this.element.getAttribute(this.constructor.constants.index_attribute);
-	} // End method: get index
+		return this.element.getAttribute(this.constructor.constants.state_attrubute);
+	} // End method: get state
 
 	/**
 	 *
@@ -82,10 +75,17 @@ const Item = class {
 	 *
 	 */
 
-	get state() {
-		// Returns null if attribute is not set.
-		return this.element.getAttribute(this.constructor.constants.state_attrubute);
-	} // End method: get state
+	addInstance() {
+		// Call the static function to add the instance and return the instance id.
+		const instance_id = this.parent_instance.parent_instance.constructor.addInstance({
+			instance: this, // The instance to add.
+			class_reference: this.parent_instance, // The class to add the instance to.
+			count_property: this.constructor.constants.count_property, // The count property on the class.
+			list_property: this.constructor.constants.instances_property // The instance list property on the class.
+		});
+		// Return the instance id.
+		return instance_id;
+	} // End method: addInstance
 
 	/**
 	 * Check if this item matches the criteria.
@@ -149,20 +149,25 @@ const Item = class {
 	 *
 	 */
 
-	constructor(parent_instance, item_element, item_index) {
+	constructor(parent_instance, item_element) {
 
 		// Set a reference to the parent instance.
 		this.parent_instance = parent_instance;
 
+		// Add this instance to the parent instance and set the instance id.
+		this.id = this.addInstance();
+
 		// Add the item element reference.
 		this.element = item_element;
 
-		//
-		this.index = item_index;
+		// Set the Accordion class instance id data attribute.
+		this.element.setAttribute(this.constructor.constants.id_attribute, this.id);
+
+		// Create a unique selector for this item.
+		this.selector = this.parent_instance.selector + ' > [' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
 		// Initialize the item state.
 		let initial_state = 'closed';
-
 		// Get the default_open_items options value.
 		const default_open_items = this.options.default_open_items;
 		// If the option value is not false, null, or undefined.
@@ -173,16 +178,14 @@ const Item = class {
 				initial_state = 'opened';
 			}
 		}
-
 		// Set the item state.
 		this.state = initial_state;
 
+		// Get the heading element.
+		const heading_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.heading);
+
 		// Get the content element.
-		const content_element = this.element.querySelector( // Scope the selector results to within this element.
-			parent_instance.selector + // Get the parent accordion.
-			' > ' + this.options.selectors.item + // Items directly nested within the parent accordion.
-			' > ' + this.options.selectors.content); // Content directly nested within the parent item.
-		console.log(content_element);
+		const content_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.content);
 
 		// Return this instance.
 		return this;

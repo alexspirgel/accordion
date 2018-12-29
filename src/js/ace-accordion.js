@@ -33,9 +33,9 @@ const AceAccordion = class {
 				content: '.accordion__item__content' // {string} Custom content element selector.
 			},
 			accessibility_warnings: true, // {boolean} Log detected accessibility issues as warnings.
-			close_nested_items: false, // {boolean} Close immediate nested items. Can chain reaction to close further nested levels depending on nested options.
+			close_nested_items: false, // {boolean} Close immediate nested items. Can chain to close nested items depending on nested options.
 			custom_trigger_selector: '', // {string} Alternate selector to trigger open and close instead of the heading selector.
-			default_open_items: [], // {number|string|object|array} Initializes item(s) already open.
+			default_open_items: [], // {number|string|object|array} Initializes item(s) to default open by default.
 			multiple_open_items: true, // {boolean} Allow multiple items to be open at the same time.
 			open_anchored_items: false, // {boolean} When anchored to an accordion item, open it.
 			callbacks: {
@@ -70,8 +70,8 @@ const AceAccordion = class {
 
 	static get constants() {
 		return {
-			count_property: 'count',
-			instances_property: 'instances',
+			count_property: 'ace_accordion_count',
+			instances_property: 'ace_accordions',
 			id_attribute: 'data-ace-accordion-id'
 		};
 	} // End method: static get constants
@@ -123,9 +123,18 @@ const AceAccordion = class {
 		return instance_id;
 	} // End method: addInstance
 
+	/**
+	 *
+	 */
+
+	addAccordion(accordion_element) {
+		// Create a new accordion.
+		const accordion = new Accordion(this, accordion_element);
+	}
+
 
 	/**
-	 * Initialize item.
+	 * Old Initialize item, working on refactoring this out.
 	 */
 
 	_initializeItem(item_element, accordion_id) {
@@ -226,7 +235,7 @@ const AceAccordion = class {
 			// For each matching accordion element.
 			for (let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
 				// Initialize an accordion.
-				const accordion = new Accordion(this, accordion_elements[accordion_element]);
+				this.addAccordion(accordion_elements[accordion_element]);
 			}
 		}
 		// If there are no elements matching the accordion selector.
@@ -237,12 +246,9 @@ const AceAccordion = class {
 
 		// If debug is true.
 		if (this.options.debug) {
-			// Log the classes.
+			// Log the class.
 			console.log('AceAccordion Debug: AceAccordion Class:');
 			console.dir(this.constructor);
-			// Log the instance.
-			console.log('AceAccordion Debug: AceAccordion - ' + this.id + ':');
-			console.dir(this);
 		}
 
 		// Return this instance.
