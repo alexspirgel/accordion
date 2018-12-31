@@ -32,30 +32,30 @@ const AceAccordion = class {
 				heading: '.accordion__item__heading', // {string} Custom heading element selector.
 				content: '.accordion__item__content' // {string} Custom content element selector.
 			},
-			accessibility_warnings: true, // {boolean} Log detected accessibility issues as warnings.
-			close_nested_items: false, // {boolean} Close immediate nested items. Can chain to close nested items depending on nested options.
-			default_open_items: [], // {number|string|object|array} Initializes item(s) to default open by default.
-			multiple_open_items: true, // {boolean} Allow multiple items to be open at the same time.
-			open_anchored_items: false, // {boolean} When anchored to an accordion item, open it.
+			// accessibility_warnings: true, // {boolean} Log detected accessibility issues as warnings.
+			// close_nested_items: false, // {boolean} Close immediate nested items. Can chain to close nested items depending on nested options.
+			default_open_items: null, // {number|string|object|array} Initializes item(s) to default open by default.
+			// multiple_open_items: true, // {boolean} Allow multiple items to be open at the same time.
+			// open_anchored_items: false, // {boolean} When anchored to an accordion item, open it.
 			callbacks: {
 				accordion: {
 					initialize: {
-						before: () => {},
-						after: (accordion) => {}
+						before: null,
+						after: null
 					}
 				},
 				item: {
 					initialize: {
-						before: () => {},
-						after: (item) => {}
+						before: null,
+						after: null
 					},
 					open: {
-						before: (item) => {},
-						after: (item) => {}
+						// before: null,
+						// after: null
 					},
 					close: {
-						before: (item) => {},
-						after: (item) => {}
+						// before: null,
+						// after: null
 					}
 				}
 			},
@@ -74,6 +74,15 @@ const AceAccordion = class {
 			id_attribute: 'data-ace-accordion-id'
 		};
 	} // End method: static get constants
+
+	/**
+	 *
+	 */
+
+	get accordion_elements() {
+		// Get accordion elements and convert the result into an array.
+		return Array.from(document.querySelectorAll(this.options.selectors.accordion));
+	} // End method: get accordion_elements
 
 	/**
 	 * Adds an instance to a class.
@@ -127,9 +136,23 @@ const AceAccordion = class {
 	 */
 
 	addAccordion(accordion_element) {
+
+		// If the callback option value is a function.
+		if (typeof this.options.callbacks.accordion.initialize.before === 'function') {
+			// Call the callback function, passing null as this and the accordion element as an argument.
+			this.options.callbacks.accordion.initialize.before.call(null, accordion_element);
+		}
+
 		// Create a new accordion.
 		const accordion = new Accordion(this, accordion_element);
-	}
+
+		// If the callback option value is a function.
+		if (typeof this.options.callbacks.accordion.initialize.after === 'function') {
+			// Call the callback function, passing the accordion object as this and the accordion element as an argument.
+			this.options.callbacks.accordion.initialize.after.call(accordion, accordion_element);
+		}
+
+	} // End method: addAccordion
 
 
 	/**
@@ -227,14 +250,12 @@ const AceAccordion = class {
 		// Create a selector for the unique local instance id.
 		this.selector = '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
-		// Get the accordion element(s).
-		const accordion_elements = document.querySelectorAll(this.options.selectors.accordion);
 		// If there at least one element matching the accordion selector.
-		if (accordion_elements.length > 0) {
+		if (this.accordion_elements.length > 0) {
 			// For each matching accordion element.
-			for (let accordion_element = 0; accordion_element < accordion_elements.length; accordion_element++) {
+			for (let accordion_element = 0; accordion_element < this.accordion_elements.length; accordion_element++) {
 				// Initialize an accordion.
-				this.addAccordion(accordion_elements[accordion_element]);
+				this.addAccordion(this.accordion_elements[accordion_element]);
 			}
 		}
 		// If there are no elements matching the accordion selector.

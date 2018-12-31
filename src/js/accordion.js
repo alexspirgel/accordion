@@ -34,7 +34,7 @@ const Accordion = class {
 	 */
 
 	get item_elements() {
-		// Get the item elements and convert the result into an array.
+		// Get item elements and convert the result into an array.
 		return Array.from(this.element.querySelectorAll(this.selector + ' > ' + this.options.selectors.item));
 	} // End method: get item_elements
 
@@ -59,9 +59,23 @@ const Accordion = class {
 	 */
 
 	addItem(item_element) {
+
+		// If the callback option value is a function.
+		if (typeof this.options.callbacks.item.initialize.before === 'function') {
+			// Call the callback function, passing null as this and the item element as an argument.
+			this.options.callbacks.item.initialize.before.call(null, item_element);
+		}
+
 		// Create a new item.
 		const item = new Item(this, item_element);
-	}
+
+		// If the callback option value is a function.
+		if (typeof this.options.callbacks.item.initialize.after === 'function') {
+			// Call the callback function, passing the item object as this and the item element as an argument.
+			this.options.callbacks.item.initialize.after.call(item, item_element);
+		}
+
+	} // End: method: addItem
 
 	/**
 	 *
@@ -72,11 +86,11 @@ const Accordion = class {
 		// Set a reference to the AceAccordion.
 		this.parent_instance = parent_instance;
 
-		// Add this instance to the parent instance and set the instance id.
-		this.id = this.addInstance();
-
 		// Add the accordion element reference.
 		this.element = accordion_element;
+
+		// Add this instance to the parent instance and set the instance id.
+		this.id = this.addInstance();
 
 		// Set the AceAccordion class instance id data attribute.
 		this.element.setAttribute(this.parent_instance.constructor.constants.id_attribute, this.parent_instance.id);
