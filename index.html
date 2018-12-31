@@ -40,6 +40,28 @@
 				accordion: '.accordion-1'
 			},
 			default_open_items: 0,
+			callbacks: {
+				accordion: {
+					initialize: {
+						before: function(element) {
+							console.log('before accordion');
+						},
+						after: function(element) {
+							console.log('after accordion ' + this.id);
+						}
+					}
+				},
+				item: {
+					initialize: {
+						before: function(element) {
+							console.log('before item');
+						},
+						after: function(element) {
+							console.log('after item ' + this.id);
+						}
+					}
+				}
+			},
 			debug: true
 		};
 		const accordion_1 = new AceAccordion(accordion_1_user_options);
