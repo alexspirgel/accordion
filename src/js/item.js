@@ -1,3 +1,9 @@
+// Require Heading class.
+const Heading = require('./heading.js');
+// Require Content class.
+const Content = require('./content.js');
+
+
 /**
  * Defines an Item.
  */
@@ -30,7 +36,7 @@ const Item = class {
 	get options() {
 		// Return options from the parent instance.
 		return this.parent_instance.options;
-	} // End: get options
+	} // End method: get options
 
 	/**
 	 *
@@ -149,16 +155,24 @@ const Item = class {
 	 *
 	 */
 
+	initializeHeading(heading_element) {
+		//
+	} // End method: initializeHeading
+
+	/**
+	 *
+	 */
+
 	constructor(parent_instance, item_element) {
 
 		// Set a reference to the parent instance.
 		this.parent_instance = parent_instance;
 
-		// Add this instance to the parent instance and set the instance id.
-		this.id = this.addInstance();
-
 		// Add the item element reference.
 		this.element = item_element;
+
+		// Add this instance to the parent instance and set the instance id.
+		this.id = this.addInstance();
 
 		// Set the Accordion class instance id data attribute.
 		this.element.setAttribute(this.constructor.constants.id_attribute, this.id);
@@ -168,12 +182,12 @@ const Item = class {
 
 		// Initialize the item state.
 		let initial_state = 'closed';
-		// Get the default_open_items options value.
-		const default_open_items = this.options.default_open_items;
-		// If the option value is not false, null, or undefined.
-		if (default_open_items !== false || default_open_items !== null || typeof default_open_items !== 'undefined') {
+		// If the default_open_items option value is not false, null, or undefined.
+		if (this.options.default_open_items !== false ||
+			this.options.default_open_items !== null ||
+			typeof this.options.default_open_items !== 'undefined') {
 			// If the element matches the default_open_items value.
-			if (this.matches(default_open_items)) {
+			if (this.matches(this.options.default_open_items)) {
 				// Set the item state value to opened.
 				initial_state = 'opened';
 			}
@@ -181,11 +195,11 @@ const Item = class {
 		// Set the item state.
 		this.state = initial_state;
 
-		// Get the heading element.
-		const heading_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.heading);
-
 		// Get the content element.
 		const content_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.content);
+
+		// Get the heading element.
+		const heading_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.heading);
 
 		// Return this instance.
 		return this;
