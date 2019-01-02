@@ -197,10 +197,11 @@ const Item = class {
 
 		// Get the content element.
 		const content_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.content);
-		const content = new Content(this, content_element);
+		this.content = new Content(this, content_element);
 
 		// Get the heading element.
 		const heading_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.heading);
+		this.heading = new Heading(this, heading_element);
 
 		// Return this instance.
 		return this;
