@@ -9,8 +9,8 @@ const Content = class {
 	 */
 
 	get options() {
-		// Return options from the parent instance.
-		return this.parent_instance.options;
+		// Return options from the wrapper AceAccordion object.
+		return this.wrapper_item.wrapper_accordion.wrapper_ace_accordion.options;
 	} // End method: get options
 
 	/**
@@ -18,25 +18,24 @@ const Content = class {
 	 */
 
 	generateId() {
-		// Get parent instance objects.
-		const parent_item = this.parent_instance;
-		const parent_accordion = parent_item.parent_instance;
-		const parent_ace_accordion = parent_accordion.parent_instance;
-		// Generate a unique id based off parent instance ids.
-		return 'accordion-content-' + parent_ace_accordion.id + '-' + parent_accordion.id + '-' + parent_item.id;
+		// Generate a unique id based off wrapper instance ids.
+		return 'accordion-content-' + this.wrapper_item.wrapper_accordion.wrapper_ace_accordion.id + '-' + this.wrapper_item.wrapper_accordion.id + '-' + this.wrapper_item.id;
 	} // End method: generateId
 
 	/**
 	 *
 	 */
 
-	constructor(parent_instance, content_element) {
+	constructor(item, content_element) {
 
-		// Set a reference to the parent instance.
-		this.parent_instance = parent_instance;
+		// Set references to the wrapper instances.
+		this.wrapper_item = item;
 
 		// Add the content element reference.
 		this.element = content_element;
+
+		// Add the this instance object reference to the element.
+		this.element.ace_object = this;
 
 		// If the element does not have an id.
 		if (this.element.id === '') {

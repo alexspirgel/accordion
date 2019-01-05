@@ -34,8 +34,8 @@ const Item = class {
 	 */
 
 	get options() {
-		// Return options from the parent instance.
-		return this.parent_instance.options;
+		// Return options from the wrapper AceAccordion object.
+		return this.wrapper_accordion.wrapper_ace_accordion.options;
 	} // End method: get options
 
 	/**
@@ -43,8 +43,8 @@ const Item = class {
 	 */
 
 	get index() {
-		// Get the items elements from the parent instance.
-		const items = this.parent_instance.item_elements;
+		// Get the items elements from the wrapper accordion.
+		const items = this.wrapper_accordion.item_elements;
 		// Return the index of this item in the list of items.
 		return items.indexOf(this.element);
 	} // End method: get index
@@ -83,9 +83,9 @@ const Item = class {
 
 	addInstance() {
 		// Call the static function to add the instance and return the instance id.
-		const instance_id = this.parent_instance.parent_instance.constructor.addInstance({
+		const instance_id = this.wrapper_accordion.wrapper_ace_accordion.constructor.addInstance({
 			instance: this, // The instance to add.
-			class_reference: this.parent_instance, // The class to add the instance to.
+			class_reference: this.wrapper_accordion, // The class to add the instance to.
 			count_property: this.constructor.constants.count_property, // The count property on the class.
 			list_property: this.constructor.constants.instances_property // The instance list property on the class.
 		});
@@ -163,22 +163,25 @@ const Item = class {
 	 *
 	 */
 
-	constructor(parent_instance, item_element) {
+	constructor(accordion, item_element) {
 
-		// Set a reference to the parent instance.
-		this.parent_instance = parent_instance;
+		// Set a reference to the wrapper instance.
+		this.wrapper_accordion = accordion;
 
 		// Add the item element reference.
 		this.element = item_element;
 
-		// Add this instance to the parent instance and set the instance id.
+		// Add the this instance object reference to the element.
+		this.element.ace_object = this;
+
+		// Add this instance to the wrapper instance and set the instance id.
 		this.id = this.addInstance();
 
 		// Set the Accordion class instance id data attribute.
 		this.element.setAttribute(this.constructor.constants.id_attribute, this.id);
 
 		// Create a unique selector for this item.
-		this.selector = this.parent_instance.selector + ' > [' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
+		this.selector = this.wrapper_accordion.selector + ' > [' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
 		// Initialize the item state.
 		let initial_state = 'closed';

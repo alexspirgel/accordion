@@ -25,9 +25,65 @@ const Accordion = class {
 	 */
 
 	get options() {
-		// Return options from the parent AceAccordion.
-		return this.parent_instance.options;
+		// Return options from the wrapper AceAccordion object.
+		return this.wrapper_ace_accordion.options;
 	} // End method: get options
+
+	/**
+	 *
+	 */
+
+	get parent_accordion() {
+		// Get the parent node.
+		// We do this because Element.closest can match with itself.
+		const parent_node = this.element.parentNode;
+		// Get the closest parent accordion.
+		let parent_accordion = parent_node.closest('[' + this.constructor.constants.id_attribute + ']');
+		// If a parent accordion exists.
+		if (parent_accordion) {
+			// Set parent_accordion equal to the ace object.
+			parent_accordion = parent_accordion.ace_object;
+		}
+		// Return the parent accordion object, or null.
+		return parent_accordion;
+	} // End method: get parent_accordion
+
+	/**
+	 *
+	 */
+
+	get nested_level() {
+		// Return the private nested level.
+		return this._nested_level;
+	} // End method: get nested_level
+
+	/**
+	 *
+	 */
+
+	set nested_level(level) {
+		// Set the private nested level value.
+		this._nested_level = level;
+		// If this accordion has one or more items.
+		if (this.items.length > 0) {
+			// For each item in this accordion.
+			for (let item in this.items) {
+				// If this item has a heading.
+				if (this.items[item].heading) {
+					// Set the nested level value on the heading.
+					this.items[item].heading.element.setAttribute('aria-level', this._nested_level);
+				}
+			}
+		}
+	} // End method: set nested_level
+
+	/**
+	 *
+	 */
+
+	calculateNestedLevel() {
+		//
+	} // End method: calculateNestedLevel
 
 	/**
 	 *
@@ -44,9 +100,9 @@ const Accordion = class {
 
 	addInstance() {
 		// Call the static function to add the instance and return the instance id.
-		const instance_id = this.parent_instance.constructor.addInstance({
+		const instance_id = this.wrapper_ace_accordion.constructor.addInstance({
 			instance: this, // The instance to add.
-			class_reference: this.parent_instance, // The class to add the instance to.
+			class_reference: this.wrapper_ace_accordion, // The class to add the instance to.
 			count_property: this.constructor.constants.count_property, // The count property on the class.
 			list_property: this.constructor.constants.instances_property // The instance list property on the class.
 		});
@@ -81,24 +137,27 @@ const Accordion = class {
 	 *
 	 */
 
-	constructor(parent_instance, accordion_element) {
+	constructor(ace_accordion, accordion_element) {
 
-		// Set a reference to the AceAccordion.
-		this.parent_instance = parent_instance;
+		// Set a reference to the wrapper instance.
+		this.wrapper_ace_accordion = ace_accordion;
 
 		// Add the accordion element reference.
 		this.element = accordion_element;
 
-		// Add this instance to the parent instance and set the instance id.
+		// Add the this instance object reference to the element.
+		this.element.ace_object = this;
+
+		// Add this instance to the wrapper instance and set the instance id.
 		this.id = this.addInstance();
 
 		// Set the AceAccordion class instance id data attribute.
-		this.element.setAttribute(this.parent_instance.constructor.constants.id_attribute, this.parent_instance.id);
+		this.element.setAttribute(this.wrapper_ace_accordion.constructor.constants.id_attribute, this.wrapper_ace_accordion.id);
 		// Set the Accordion class instance id data attribute.
 		this.element.setAttribute(this.constructor.constants.id_attribute, this.id);
 
 		// Create a unique selector for this Accordion.
-		this.selector = this.parent_instance.selector + '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
+		this.selector = this.wrapper_ace_accordion.selector + '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
 		// If there is at least one item.
 		if (this.item_elements.length > 0) {
