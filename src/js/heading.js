@@ -32,10 +32,17 @@ const Heading = class {
 		heading_element.setAttribute('role', 'heading');
 		// Set the heading aria-controls attribute to the item content id.
 		heading_element.setAttribute('aria-controls', this.wrapper_item.content.element.id);
-		// Set the accordion item heading aria-level attribute.
-		// accordion_item_heading.setAttribute('aria-level', accordion_level);
-		// Set the accordion item heading aria-expanded attribute.
-		// accordion_item_heading.setAttribute('aria-expanded', aria_expanded_value);
+		// Set the heading aria-level attribute.
+		heading_element.setAttribute('aria-level', this.wrapper_item.wrapper_accordion.nested_level);
+		// Set the aria expanded value to false.
+		let aria_expanded_value = false;
+		// If the wrapper item is opened.
+		if (this.wrapper_item.state === 'opened') {
+			// Set the aria expanded value equal to true.
+			aria_expanded_value = true;
+		}
+		// Set the heading aria-expanded attribute.
+		heading_element.setAttribute('aria-expanded', aria_expanded_value);
 
 		// Return this instance.
 		return this;
