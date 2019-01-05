@@ -43,6 +43,16 @@ const Content = class {
 			this.element.id = this.generateId();
 		}
 
+		// Set the aria expanded value to false.
+		let aria_hidden_value = true;
+		// If the wrapper item is opened.
+		if (this.wrapper_item.state === 'opened') {
+			// Set the aria expanded value equal to true.
+			aria_hidden_value = false;
+		}
+		// Set the heading aria-expanded attribute.
+		this.element.setAttribute('aria-hidden', aria_hidden_value);
+
 		// Return this instance.
 		return this;
 

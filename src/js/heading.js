@@ -29,11 +29,11 @@ const Heading = class {
 		this.element.ace_object = this;
 
 		// Set the heading role attribute to heading.
-		heading_element.setAttribute('role', 'heading');
+		this.element.setAttribute('role', 'heading');
 		// Set the heading aria-controls attribute to the item content id.
-		heading_element.setAttribute('aria-controls', this.wrapper_item.content.element.id);
+		this.element.setAttribute('aria-controls', this.wrapper_item.content.element.id);
 		// Set the heading aria-level attribute.
-		heading_element.setAttribute('aria-level', this.wrapper_item.wrapper_accordion.nested_level);
+		this.element.setAttribute('aria-level', this.wrapper_item.wrapper_accordion.nested_level);
 		// Set the aria expanded value to false.
 		let aria_expanded_value = false;
 		// If the wrapper item is opened.
@@ -42,7 +42,7 @@ const Heading = class {
 			aria_expanded_value = true;
 		}
 		// Set the heading aria-expanded attribute.
-		heading_element.setAttribute('aria-expanded', aria_expanded_value);
+		this.element.setAttribute('aria-expanded', aria_expanded_value);
 
 		// Return this instance.
 		return this;
