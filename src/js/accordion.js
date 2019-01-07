@@ -175,6 +175,13 @@ const Accordion = class {
 		// Create a unique selector for this Accordion.
 		this.selector = this.wrapper_ace_accordion.selector + '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
 
+		//
+		this.element.addEventListener('click', function (event) {
+			const options = this.ace_object.options;
+			console.log(event);
+			console.log(event.target.closest(options.selectors.heading));
+		});
+
 		// If there is at least one item.
 		if (this.item_elements.length > 0) {
 			// For each item element.
