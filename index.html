@@ -14,7 +14,7 @@
 	<br>
 	<ul class="accordion accordion-1">
 		<li class="accordion__item">
-			<button class="accordion__item__heading">Lorem Ipsum</button>
+			<button class="accordion__item__heading">Lorem Ipsum<span>test</span></button>
 			<div class="accordion__item__content">
 				<p>Lorem ipsum dolor sit amet</p>
 			</div>
@@ -29,6 +29,26 @@
 			<button class="accordion__item__heading">Lorem Ipsum</button>
 			<div class="accordion__item__content">
 				<p>Lorem ipsum dolor sit amet</p>
+				<ul class="accordion accordion-1">
+					<li class="accordion__item">
+						<button class="accordion__item__heading">Lorem Ipsum</button>
+						<div class="accordion__item__content">
+							<p>Lorem ipsum dolor sit amet</p>
+						</div>
+					</li>
+					<li class="accordion__item">
+						<button class="accordion__item__heading">Lorem Ipsum</button>
+						<div class="accordion__item__content">
+							<p>Lorem ipsum dolor sit amet</p>
+						</div>
+					</li>
+					<li class="accordion__item">
+						<button class="accordion__item__heading">Lorem Ipsum</button>
+						<div class="accordion__item__content">
+							<p>Lorem ipsum dolor sit amet</p>
+						</div>
+					</li>
+				</ul>
 			</div>
 		</li>
 	</ul>
@@ -39,7 +59,7 @@
 			selectors: {
 				accordion: '.accordion-1'
 			},
-			default_open_items: 0,
+			default_open_items: 2,
 			callbacks: {
 				accordion: {
 					initialize: {
