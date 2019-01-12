@@ -37,8 +37,15 @@ const Content = class {
 		// Add the this instance object reference to the element.
 		this.element.ace_object = this;
 
+		// Set the initial_id property.
+		this.initial_id = this.element.id;
+		// If the element has an id.
+		if (this.initial_id !== '') {
+			// Assume the initial id is unique.
+			// Leave as is.
+		}
 		// If the element does not have an id.
-		if (this.element.id === '') {
+		else {
 			// Generate and set a unique id.
 			this.element.id = this.generateId();
 		}
@@ -63,7 +70,23 @@ const Content = class {
 	 */
 
 	destroy() {
-		//
+
+		// If the element id matches the initial id.
+		if (this.element.id === this.initial_id) {
+			// Leave as is.
+		}
+		// If the element id does not match the initial id.
+		else {
+			// Reset the id attribute.
+			this.element.setAttribute('id', this.initial_id);
+		}
+
+		// Remove the aria-hidden attribute. 
+		this.element.removeAttribute('aria-hidden');
+
+		// Remove the reference to this object from the parent.
+		this.wrapper_item.content = undefined;
+
 	} // End method: destroy
 
 }; // End class: Content
