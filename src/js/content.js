@@ -58,6 +58,14 @@ const Content = class {
 
 	} // End method: constructor
 
+	/**
+	 *
+	 */
+
+	destroy() {
+		//
+	} // End method: destroy
+
 }; // End class: Content
 
 // Export the Content class.

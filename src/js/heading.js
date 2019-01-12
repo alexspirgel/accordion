@@ -49,6 +49,14 @@ const Heading = class {
 
 	} // End method: constructor
 
+	/**
+	 *
+	 */
+
+	destroy() {
+		//
+	} // End method: destroy
+
 }; // End class: Heading
 
 // Export the Heading class.

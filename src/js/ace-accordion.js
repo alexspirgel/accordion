@@ -192,6 +192,14 @@ const AceAccordion = class {
 
 	} // End method: constructor
 
+	/**
+	 *
+	 */
+
+	destroy() {
+		//
+	} // End method: destroy
+
 	
 	/******************************************************
 	* OLD CODE WAITING TO BE REFACTORED BEYOND THIS POINT *

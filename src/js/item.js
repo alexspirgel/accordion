@@ -211,6 +211,14 @@ const Item = class {
 
 	} // End method: constructor
 
+	/**
+	 *
+	 */
+
+	destroy() {
+		//
+	} // End method: destroy
+
 }; // End class: Item
 
 // Export the Item class.

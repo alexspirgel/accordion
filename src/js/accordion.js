@@ -197,6 +197,14 @@ const Accordion = class {
 
 	} // End method: constructor
 
+	/**
+	 *
+	 */
+
+	destroy() {
+		//
+	} // End method: destroy
+
 }; // End class: Accordion
 
 // Export the Accordion class.
