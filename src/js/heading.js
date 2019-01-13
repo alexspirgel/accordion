@@ -17,6 +17,26 @@ const Heading = class {
 	 *
 	 */
 
+	determineTriggerElement(selector) {
+		// If the selector is a string.
+		if (typeof selector === 'string') {
+			// Get trigger element using the selector.
+			const custom_trigger_element = this.element.querySelector(selector);
+			// If the selector matches an element within the heading.
+			if (custom_trigger_element) {
+				// Return the element.
+				return custom_trigger_element;
+			}
+		}
+		// If the selector is not valid or has no matching element.
+		// Return the heading element.
+		return this.element;
+	} // End method: determineTriggerElement
+
+	/**
+	 *
+	 */
+
 	constructor(item, heading_element) {
 
 		// Set references to the wrapper instances.
@@ -25,15 +45,16 @@ const Heading = class {
 		// Add the heading element reference.
 		this.element = heading_element;
 
+		// Set the trigger element.
+		this.trigger_element = this.determineTriggerElement(this.options.heading_trigger_selector);
+
 		// Add the this instance object reference to the element.
 		this.element.ace_object = this;
+		// Add the this instance object reference to the trigger element.
+		this.trigger_element.ace_object = this;
 
-		// Set the heading role attribute to heading.
-		this.element.setAttribute('role', 'heading');
 		// Set the heading aria-controls attribute to the item content id.
-		this.element.setAttribute('aria-controls', this.wrapper_item.content.element.id);
-		// Set the heading aria-level attribute.
-		this.element.setAttribute('aria-level', this.wrapper_item.wrapper_accordion.nested_level);
+		this.trigger_element.setAttribute('aria-controls', this.wrapper_item.content.element.id);
 		// Set the aria expanded value to false.
 		let aria_expanded_value = false;
 		// If the wrapper item is opened.
@@ -42,7 +63,7 @@ const Heading = class {
 			aria_expanded_value = true;
 		}
 		// Set the heading aria-expanded attribute.
-		this.element.setAttribute('aria-expanded', aria_expanded_value);
+		this.trigger_element.setAttribute('aria-expanded', aria_expanded_value);
 
 		// Return this instance.
 		return this;
@@ -54,7 +75,19 @@ const Heading = class {
 	 */
 
 	destroy() {
-		//
+		
+		// Remove the reference to this object from the element.
+		this.element.ace_object = undefined;
+		// Remove the reference to this object from the trigger element.
+		this.trigger_element.ace_object = undefined;
+		// Remove the aria-controls attribute. 
+		this.trigger_element.removeAttribute('aria-controls');
+		// Remove the aria-expanded attribute. 
+		this.trigger_element.removeAttribute('aria-expanded');
+
+		// Remove the reference to this object from the parent.
+		this.wrapper_item.heading = undefined;
+
 	} // End method: destroy
 
 }; // End class: Heading

@@ -71,6 +71,9 @@ const Content = class {
 
 	destroy() {
 
+		// Remove the reference to this object from the element.
+		this.element.ace_object = undefined;
+
 		// If the element id matches the initial id.
 		if (this.element.id === this.initial_id) {
 			// Leave as is.

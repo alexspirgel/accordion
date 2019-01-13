@@ -155,9 +155,44 @@ const Item = class {
 	 *
 	 */
 
-	initializeHeading(heading_element) {
+	initializeContent(element) {
 		//
+		return new Content(this, element);
+	} // End method: initializeContent
+
+	/**
+	 *
+	 */
+
+	initializeHeading(element) {
+		//
+		if (this.content) {
+			//
+			return new Heading(this, element);
+		}
 	} // End method: initializeHeading
+
+	/**
+	 *
+	 */
+
+	handleItemTriggerClick(event) {
+		//
+		console.log('handleItemTriggerClick');
+		console.log(this);
+		console.log(event);
+	} // End method: handleItemTriggerClick
+
+	/**
+	 *
+	 */
+
+	handleItemTransitionEnd(event) {
+		//
+		console.log('handleItemTransitionEnd');
+		console.log(this);
+		console.log(event);
+	} // End method: handleItemTransitionEnd
 
 	/**
 	 *
@@ -200,11 +235,24 @@ const Item = class {
 
 		// Get the content element.
 		const content_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.content);
-		this.content = new Content(this, content_element);
+		//
+		if (content_element) {
+			//
+			this.content = this.initializeContent(content_element);
+		}
 
 		// Get the heading element.
 		const heading_element = this.element.querySelector(this.selector + ' > ' + this.options.selectors.heading);
-		this.heading = new Heading(this, heading_element);
+		//
+		if (heading_element) {
+			//
+			this.heading = this.initializeHeading(heading_element);
+		}
+
+		//
+		this.heading.trigger_element.addEventListener('click', this.handleItemTriggerClick);
+		//
+		this.element.addEventListener('transitionend', this.handleItemTransitionEnd);
 
 		// Return this instance.
 		return this;
