@@ -150,6 +150,14 @@ const AceAccordion = class {
 	} // End method: addAccordion
 
 	/**
+	 *
+	 */
+
+	setOption(option, value) {
+		//
+	} // End method: setOption
+
+	/**
 	 * AceAccordion class constructor.
 	 * @param {object} options_user - A set of override options supplied by the user.
 	 * @returns {object} this - The reference to this instance.
