@@ -18,7 +18,6 @@ $accordion-item-content-selector: '.accordion__item__content';
 #{$accordion-item-heading-selector} {
 	box-sizing: border-box;
 	display: inline-block;
-	outline: 0;
 }
 #{$accordion-item-content-selector} {
 	box-sizing: border-box;
