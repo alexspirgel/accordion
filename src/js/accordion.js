@@ -52,56 +52,6 @@ const Accordion = class {
 	 *
 	 */
 
-	get nested_level() {
-		// Return the private nested level.
-		return this._nested_level;
-	} // End method: get nested_level
-
-	/**
-	 *
-	 */
-
-	set nested_level(level) {
-		// Set the private nested level value.
-		this._nested_level = level;
-		// If this accordion has items.
-		if (this.items) {
-			// For each item in this accordion.
-			for (let item in this.items) {
-				// If this item has a heading.
-				if (this.items[item].heading) {
-					// Set the nested level value on the heading.
-					this.items[item].heading.element.setAttribute('aria-level', this._nested_level);
-				}
-			}
-		}
-	} // End method: set nested_level
-
-	/**
-	 *
-	 */
-
-	updateNestedLevel() {
-		// If there is a parent accordion.
-		if (this.parent_accordion) {
-			// Get the parent level from calculating the parent nested level.
-			const parent_level = this.parent_accordion.updateNestedLevel();
-			// Increment the parent level and set this nested level.
-			this.nested_level = parent_level + 1;
-		}
-		// If this is the top most parent accordion.
-		else {
-			// Set this accordion level to one.
-			this.nested_level = 1;
-		}
-		// Return the nested level.
-		return this.nested_level;
-	} // End method: updateNestedLevel
-
-	/**
-	 *
-	 */
-
 	get item_elements() {
 		// Get item elements and convert the result into an array.
 		return Array.from(this.element.querySelectorAll(this.selector + ' > ' + this.options.selectors.item));
@@ -163,9 +113,6 @@ const Accordion = class {
 
 		// Add this instance to the wrapper instance and set the instance id.
 		this.id = this.addInstance();
-
-		// Get this nested level.
-		this.updateNestedLevel();
 
 		// Set the AceAccordion class instance id data attribute.
 		this.element.setAttribute(this.wrapper_ace_accordion.constructor.constants.id_attribute, this.wrapper_ace_accordion.id);
