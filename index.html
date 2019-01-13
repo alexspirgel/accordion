@@ -14,7 +14,7 @@
 	<br>
 	<ul class="accordion accordion-1">
 		<li class="accordion__item">
-			<button class="accordion__item__heading">Lorem Ipsum<span>test</span></button>
+			<heading class="accordion__item__heading">Lorem Ipsum<button class="test">test</button></heading>
 			<div class="accordion__item__content">
 				<p>Lorem ipsum dolor sit amet</p>
 			</div>
@@ -59,29 +59,7 @@
 			selectors: {
 				accordion: '.accordion-1'
 			},
-			default_open_items: 2,
-			callbacks: {
-				accordion: {
-					initialize: {
-						before: function(element) {
-							console.log('before accordion');
-						},
-						after: function(element) {
-							console.log('after accordion ' + this.id);
-						}
-					}
-				},
-				item: {
-					initialize: {
-						before: function(element) {
-							console.log('before item');
-						},
-						after: function(element) {
-							console.log('after item ' + this.id);
-						}
-					}
-				}
-			},
+			heading_trigger_selector: '.test',
 			debug: true
 		};
 		const accordion_1 = new AceAccordion(accordion_1_user_options);
