@@ -37,6 +37,17 @@ const Heading = class {
 	 *
 	 */
 
+	handleClick(event) {
+		//
+		console.log('handleClick');
+		console.log(this);
+		console.log(event);
+	} // End method: handleClick
+
+	/**
+	 *
+	 */
+
 	constructor(item, heading_element) {
 
 		// Set references to the wrapper instances.
@@ -64,6 +75,9 @@ const Heading = class {
 		}
 		// Set the heading aria-expanded attribute.
 		this.trigger_element.setAttribute('aria-expanded', aria_expanded_value);
+
+		//
+		this.clickListener = this.trigger_element.addEventListener('click', this.handleClick);
 
 		// Return this instance.
 		return this;

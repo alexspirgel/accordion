@@ -176,23 +176,12 @@ const Item = class {
 	 *
 	 */
 
-	handleItemTriggerClick(event) {
+	handleTransitionend(event) {
 		//
-		console.log('handleItemTriggerClick');
+		console.log('handleTransitionend');
 		console.log(this);
 		console.log(event);
-	} // End method: handleItemTriggerClick
-
-	/**
-	 *
-	 */
-
-	handleItemTransitionEnd(event) {
-		//
-		console.log('handleItemTransitionEnd');
-		console.log(this);
-		console.log(event);
-	} // End method: handleItemTransitionEnd
+	} // End method: handleTransitionend
 
 	/**
 	 *
@@ -250,9 +239,7 @@ const Item = class {
 		}
 
 		//
-		this.heading.trigger_element.addEventListener('click', this.handleItemTriggerClick);
-		//
-		this.element.addEventListener('transitionend', this.handleItemTransitionEnd);
+		this.transitionendListener = this.element.addEventListener('transitionend', this.handleTransitionend);
 
 		// Return this instance.
 		return this;
