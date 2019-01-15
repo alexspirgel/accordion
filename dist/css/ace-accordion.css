@@ -1,35 +1,25 @@
 .accordion {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0; }
+  box-sizing: border-box; }
 
 .accordion__item {
   box-sizing: border-box;
-  list-style: none;
   overflow: hidden;
+  list-style: none;
   transition-property: height;
   transition-duration: 500ms; }
+  .accordion__item[data-item-state="closing"] > .accordion__item__heading {
+    background-color: lightblue; }
+  .accordion__item[data-item-state="closed"] > .accordion__item__heading {
+    background-color: lightblue; }
+  .accordion__item[data-item-state="closed"] > .accordion__item__content {
+    display: none; }
+  .accordion__item[data-item-state="opening"] > .accordion__item__heading {
+    background-color: lightgreen; }
+  .accordion__item[data-item-state="opened"] > .accordion__item__heading {
+    background-color: lightgreen; }
 
 .accordion__item__heading {
-  box-sizing: border-box;
-  display: inline-block; }
+  box-sizing: border-box; }
 
 .accordion__item__content {
-  box-sizing: border-box;
-  width: 100%;
-  padding: 10px 20px; }
-
-.accordion__item[data-item-state="closing"] > .accordion__item__heading {
-  background-color: lightblue; }
-
-.accordion__item[data-item-state="closed"] > .accordion__item__heading {
-  background-color: lightblue; }
-
-.accordion__item[data-item-state="closed"] > .accordion__item__content {
-  display: none; }
-
-.accordion__item[data-item-state="opening"] > .accordion__item__heading {
-  background-color: lightgreen; }
-
-.accordion__item[data-item-state="opened"] > .accordion__item__heading {
-  background-color: lightgreen; }
+  box-sizing: border-box; }
