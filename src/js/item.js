@@ -176,6 +176,96 @@ const Item = class {
 	 *
 	 */
 
+	open() {
+
+		// Get the current item height.
+		const height_start = this.element.offsetHeight;
+		// Set the item to its starting height..
+		this.element.style.height = height_start + 'px';
+
+		// Update the item state.
+		this.state = 'opening';
+		// Update the aria-expanded property on the heading trigger element.
+		this.heading.trigger_element.setAttribute('aria-expanded', 'true');
+		// Update the aria-hidden attribute on the content element.
+		this.content.element.setAttribute('aria-hidden', 'false');
+
+		// static openItem(accordion_item, skip_transition) {
+
+		// 	// Remove the close transitionend event listener.
+		// 	accordion_item.removeEventListener('transitionend', Accordion.headingCloseTransitionEndEventHandler);
+		// 	// Get the accordion element.
+		// 	const accordion_parent = accordion_item.accordion_parent;
+		// 	// Get the accordion options.
+		// 	const accordion_options = accordion_parent.accordion_options;
+
+		// 	// If multiple open items are not allowed.
+		// 	if(accordion_options.multiple_open_items === false) {
+		// 		// Get all the accordion items within this accordion.
+		// 		const accordion_items = accordion_parent.children;
+		// 		// For each accordion item.
+		// 		for(let accordion_item = 0; accordion_item < accordion_items.length; accordion_item++) {
+		// 			// If the accordion item is open or opening.
+		// 			if(accordion_items[accordion_item].matches('[' + Accordion.item_state_attrubute + '="opening"], [' + Accordion.item_state_attrubute + '="opened"]')) {
+		// 				// Close the accordion item.
+		// 				Accordion.closeItem(accordion_items[accordion_item]);
+		// 			}
+		// 		}
+		// 	} // End option: multiple_open_items.
+
+		// 	// Get the current item height.
+		// 	const item_height_start = accordion_item.offsetHeight;
+		// 	// Set the item to its current height, keeping it at that height.
+		// 	accordion_item.style.height = item_height_start + 'px';
+		// 	// Set the accordion item state attribute to show the beginning of the opening process.
+		// 	accordion_item.setAttribute(Accordion.item_state_attrubute, 'opening');
+		// 	// Set the related aria attributes to show the accordion is open.
+		// 	accordion_item.accordion_item_heading.setAttribute('aria-expanded', 'true');
+		// 	accordion_item.accordion_item_content.setAttribute('aria-hidden', 'false');
+
+		// 	// Skip transition is true.
+		// 	if(skip_transition) {
+		// 		// Finish opening the item immediately, disregarding transitions.
+		// 		Accordion.finishOpeningItem(accordion_item);
+		// 	}
+		// 	// If skip transition is false or not passed, continue with the transition as normal.
+		// 	else {
+		// 		// Get the height of the accordion heading.
+		// 		const item_heading_height = accordion_item.accordion_item_heading.offsetHeight;
+		// 		// Get the height of the accordion content.
+		// 		const item_content_height = accordion_item.accordion_item_content.offsetHeight;
+		// 		// Calculate the end height for the accordion item.
+		// 		const item_height_end = item_heading_height + item_content_height;
+		// 		// Add an open transitionend event listener to the accordion item.
+		// 		accordion_item.addEventListener('transitionend', Accordion.headingOpenTransitionEndEventHandler);
+		// 		// Set the accordion item to it's end height.
+		// 		accordion_item.style.height = item_height_end + 'px';
+		// 	}
+
+		// } // End function: openItem.
+		
+	} // End method: open
+
+	/**
+	 *
+	 */
+
+	close() {
+		//
+	} // End method: close
+
+	/**
+	 *
+	 */
+
+	toggle() {
+		//
+	} // End method: toggle
+
+	/**
+	 *
+	 */
+
 	handleTransitionend(event) {
 		//
 		console.log('handleTransitionend');

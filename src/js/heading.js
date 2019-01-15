@@ -77,7 +77,7 @@ const Heading = class {
 		this.trigger_element.setAttribute('aria-expanded', aria_expanded_value);
 
 		//
-		this.clickListener = this.trigger_element.addEventListener('click', this.handleClick);
+		this.trigger_element.addEventListener('click', this.handleClick);
 
 		// Return this instance.
 		return this;
@@ -94,10 +94,14 @@ const Heading = class {
 		this.element.ace_object = undefined;
 		// Remove the reference to this object from the trigger element.
 		this.trigger_element.ace_object = undefined;
+		
 		// Remove the aria-controls attribute. 
 		this.trigger_element.removeAttribute('aria-controls');
 		// Remove the aria-expanded attribute. 
 		this.trigger_element.removeAttribute('aria-expanded');
+
+		// Remove the click event listener.
+		this.trigger_element.removeEventListener('click', this.handleClick);
 
 		// Remove the reference to this object from the parent.
 		this.wrapper_item.heading = undefined;
