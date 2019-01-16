@@ -8,19 +8,6 @@ const Item = require('./item.js');
 const Accordion = class {
 
 	/**
-	 * Defines constant class variables.
-	 */
-
-	static get constants() {
-		return {
-			count_property: 'accordion_count',
-			instances_property: 'accordions',
-			id_attribute: 'data-accordion-id',
-			item_instances_property: 'items'
-		};
-	} // End method: static get constants
-
-	/**
 	 *
 	 */
 
@@ -28,6 +15,19 @@ const Accordion = class {
 		// Return options from the wrapper AceAccordion object.
 		return this.wrapper_ace_accordion.options;
 	} // End method: get options
+
+	/**
+	 * Defines constant class variables.
+	 */
+
+	static get constants() {
+		return {
+			count_property: 'accordion_count',
+			instances_property: 'accordions',
+			id_attribute: 'data-ace-accordion-id',
+			item_instances_property: 'items'
+		};
+	} // End method: static get constants
 
 	/**
 	 *

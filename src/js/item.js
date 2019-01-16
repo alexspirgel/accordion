@@ -11,6 +11,15 @@ const Content = require('./content.js');
 const Item = class {
 
 	/**
+	 *
+	 */
+
+	get options() {
+		// Return options from the wrapper AceAccordion object.
+		return this.wrapper_accordion.wrapper_ace_accordion.options;
+	} // End method: get options
+
+	/**
 	 * Defines constant class variables.
 	 */
 
@@ -18,8 +27,8 @@ const Item = class {
 		return {
 			count_property: 'item_count',
 			instances_property: 'items',
-			id_attribute: 'data-item-id',
-			state_attrubute: 'data-item-state',
+			id_attribute: 'data-ace-item-id',
+			state_attrubute: 'data-ace-item-state',
 			states: [
 				'opening',
 				'opened',
@@ -28,15 +37,6 @@ const Item = class {
 			]
 		};
 	} // End method: static get constants
-
-	/**
-	 *
-	 */
-
-	get options() {
-		// Return options from the wrapper AceAccordion object.
-		return this.wrapper_accordion.wrapper_ace_accordion.options;
-	} // End method: get options
 
 	/**
 	 *

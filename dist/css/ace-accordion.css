@@ -1,19 +1,13 @@
-.accordion__item {
-  /* Required */
+[data-ace-item-id] {
   height: auto;
   /* Allow element to adjust to the height of children */
   overflow: hidden;
-  /* Prevent item content from being visible during the opening/closing transitions. */
-  /* Custom */
-  transition-property: test,height, width;
-  transition-duration: 350ms; }
-  .accordion__item[data-item-state="closed"] > .accordion__item__content {
-    /* Required */
+  /* Prevent item content from being visible during the opening/closing transitions. */ }
+  [data-ace-item-id][data-ace-item-state="closed"] > [data-ace-content] {
     display: none;
     /* Hide the content from screen-readers. */ }
 
-.accordion__item__heading {
-  /* Required */
+[data-ace-heading] {
   display: block;
   /* For accurate item height calculations. */
   margin: 0;
@@ -21,8 +15,7 @@
   overflow: auto;
   /* Account for height of margins of children. */ }
 
-.accordion__item__content {
-  /* Required */
+[data-ace-content] {
   display: block;
   /* For accurate item height calculations. */
   margin: 0;

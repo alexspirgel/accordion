@@ -66,7 +66,7 @@ const AceAccordion = class {
 		return {
 			count_property: 'ace_accordion_count',
 			instances_property: 'ace_accordions',
-			id_attribute: 'data-ace-accordion-id'
+			id_attribute: 'data-ace-instance-id'
 		};
 	} // End method: static get constants
 

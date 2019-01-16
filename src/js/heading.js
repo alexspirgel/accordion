@@ -14,6 +14,16 @@ const Heading = class {
 	} // End method: get options
 
 	/**
+	 * Defines constant class variables.
+	 */
+
+	static get constants() {
+		return {
+			ace_attribute: 'data-ace-heading'
+		};
+	} // End method: static get constants
+
+	/**
 	 *
 	 */
 
@@ -64,6 +74,9 @@ const Heading = class {
 		this.element.ace_object = this;
 		// Add the this instance object reference to the trigger element.
 		this.trigger_element.ace_object = this;
+
+		// Set the ace attribute on the element.
+		this.element.setAttribute(this.constructor.constants.ace_attribute, '');
 
 		// Set the heading aria-controls attribute to the item content id.
 		this.trigger_element.setAttribute('aria-controls', this.wrapper_item.content.element.id);

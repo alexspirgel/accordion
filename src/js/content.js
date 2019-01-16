@@ -14,6 +14,16 @@ const Content = class {
 	} // End method: get options
 
 	/**
+	 * Defines constant class variables.
+	 */
+
+	static get constants() {
+		return {
+			ace_attribute: 'data-ace-content'
+		};
+	} // End method: static get constants
+
+	/**
 	 *
 	 */
 
@@ -36,6 +46,9 @@ const Content = class {
 
 		// Add the this instance object reference to the element.
 		this.element.ace_object = this;
+
+		// Set the ace attribute on the element.
+		this.element.setAttribute(this.constructor.constants.ace_attribute, '');
 
 		// Set the initial_id property.
 		this.initial_id = this.element.id;
