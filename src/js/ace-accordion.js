@@ -30,7 +30,7 @@ const AceAccordion = class {
 			// close_nested_items: false, // {boolean} Close immediate nested items. Can chain to close nested items depending on nested options.
 			default_open_items: null, // {number|string|object|array} Initializes item(s) to default open by default.
 			heading_trigger_selector: null, // {string} Selector (scoped within heading) to trigger item open/close, rather than entire heading element.
-			// multiple_open_items: true, // {boolean} Allow multiple items to be open at the same time.
+			multiple_open_items: true, // {boolean} Allow multiple items to be open at the same time.
 			// open_anchored_items: false, // {boolean} When anchored to an accordion item, open it.
 			callbacks: {
 				accordion: {

@@ -42,6 +42,7 @@ const Heading = class {
 		console.log('handleClick');
 		console.log(this);
 		console.log(event);
+		this.ace_object.wrapper_item.open();
 	} // End method: handleClick
 
 	/**
@@ -94,7 +95,7 @@ const Heading = class {
 		this.element.ace_object = undefined;
 		// Remove the reference to this object from the trigger element.
 		this.trigger_element.ace_object = undefined;
-		
+
 		// Remove the aria-controls attribute. 
 		this.trigger_element.removeAttribute('aria-controls');
 		// Remove the aria-expanded attribute. 
