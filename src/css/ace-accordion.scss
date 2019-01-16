@@ -4,47 +4,31 @@ $accordion-item-heading: '.accordion__item__heading';
 $accordion-item-content: '.accordion__item__content';
 
 #{$accordion} {
-	// Required
-	box-sizing: border-box;
+	//
 }
 #{$accordion-item} {
-	// Required
-	box-sizing: border-box;
-	overflow: hidden;
-	// Custom
-	list-style: none;
-	transition-property: height;
-	transition-duration: 500ms;
-	&[data-item-state="closing"] {
-		> #{$accordion-item-heading} {
-			background-color: lightblue;
-		}
-	}
+	/* Required */
+	height: auto; /* Allow element to adjust to the height of children */
+	overflow: hidden; /* Prevent item content from being visible during the opening/closing transitions. */
+	/* Custom */
+	transition-property: test,height, width;
+	transition-duration: 350ms;
 	&[data-item-state="closed"] {
-		> #{$accordion-item-heading} {
-			background-color: lightblue;
-		}
 		> #{$accordion-item-content} {
-			// Required
-			display: none;
-		}
-	}
-	&[data-item-state="opening"] {
-		> #{$accordion-item-heading} {
-			background-color: lightgreen;
-		}
-	}
-	&[data-item-state="opened"] {
-		> #{$accordion-item-heading} {
-			background-color: lightgreen;
+			/* Required */
+			display: none; /* Hide the content from screen-readers. */
 		}
 	}
 }
 #{$accordion-item-heading} {
-	// Required
-	box-sizing: border-box;
+	/* Required */
+	display: block; /* For accurate item height calculations. */
+	margin: 0; /* For accurate item height calculations. */
+	overflow: auto; /* Account for height of margins of children. */
 }
 #{$accordion-item-content} {
-	// Required
-	box-sizing: border-box;
+	/* Required */
+	display: block; /* For accurate item height calculations. */
+	margin: 0; /* For accurate item height calculations. */
+	overflow: auto; /* Account for height of margins of children. */
 }
