@@ -233,9 +233,11 @@ const Item = class {
 		// If height is not a transition property.
 		else {
 			// Create a transitionend event;
-			const transitionend = new Event('transitionend');
+			const transitionend_event = new Event('transitionend');
+			// Manually set the property name on the event.
+			transitionend_event.propertyName = 'height';
 			// Manually trigger the transitionend event on the element.
-			this.element.dispatchEvent(transitionend);
+			this.element.dispatchEvent(transitionend_event);
 		}
 
 	} // End method: open
@@ -276,6 +278,7 @@ const Item = class {
 		console.log('handleTransitionend');
 		console.log(this);
 		console.log(event);
+		console.log(event.propertyName);
 		this.ace_object.open_finish();
 	} // End method: handleTransitionend
 
