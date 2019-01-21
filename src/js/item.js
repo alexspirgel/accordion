@@ -195,13 +195,20 @@ const Item = class {
 	 *
 	 */
 
-	open() {
+	open(immediate) {
 
 		// If the multiple_open_items option is set to false.
 		if (this.options.multiple_open_items === false) {
-			//get all opened or opening accordion(s)
-			//loop through them all
-			//close each item if it isn't this item
+			// Get all items in this accordion.
+			let items = this.wrapper_accordion.items;
+			// For each item.
+			for (let item = 0; item < items.length; item++) {
+				// If this element is not equal to the current loop item element.
+				if (this.element !== items[item].element) {
+					// Close the loop item.
+					items[item].close();
+				}
+			}
 		}
 
 		// Update the aria-expanded property on the heading trigger element.
@@ -210,16 +217,13 @@ const Item = class {
 		this.content.element.setAttribute('aria-hidden', 'false');
 
 		// If height is a transition property.
-		if (this.hasHeightTransition()) {
-
+		if (this.hasHeightTransition() && immediate !== true) {
 			// Get the current item height.
 			const height_start = this.element.offsetHeight;
 			// Set the item to its starting height..
 			this.element.style.height = height_start + 'px';
-
 			// Update the item state.
 			this.state = 'opening';
-
 			// Get the height of the heading.
 			const heading_height = this.heading.element.getBoundingClientRect().height;
 			// Get the height of the content.
@@ -228,16 +232,11 @@ const Item = class {
 			const end_height = heading_height + content_height;
 			// Set the accordion item to it's end height.
 			this.element.style.height = end_height + 'px';
-
 		}
 		// If height is not a transition property.
 		else {
-			// Create a transitionend event;
-			const transitionend_event = new Event('transitionend');
-			// Manually set the property name on the event.
-			transitionend_event.propertyName = 'height';
-			// Manually trigger the transitionend event on the element.
-			this.element.dispatchEvent(transitionend_event);
+			// Finish the opening process immediately.
+			this.open_finish();
 		}
 
 	} // End method: open
@@ -247,17 +246,17 @@ const Item = class {
 	 */
 
 	open_finish() {
-		// Remove the explicit height (default back to auto).
-		this.element.style.removeProperty('height');
 		// Update the item state.
 		this.state = 'opened';
+		// Remove the inline height style, if there is one.
+		this.element.style.removeProperty('height');
 	} // End method: open_finish
 
 	/**
 	 *
 	 */
 
-	close() {
+	close(immediate) {
 		//
 	} // End method: close
 
@@ -265,8 +264,25 @@ const Item = class {
 	 *
 	 */
 
-	toggle() {
+	close_finish() {
 		//
+	} // End method: close_finish
+
+	/**
+	 *
+	 */
+
+	toggle() {
+		// If this item is opening, or opened.
+		if (this.state === 'opening' || this.state === 'opened') {
+			console.log('close it');
+		}
+		// If this item is closing, or closed.
+		else if (this.state === 'closing' || this.state === 'closed') {
+			console.log('open it');
+			// Open the item.
+			this.open();
+		}
 	} // End method: toggle
 
 	/**
@@ -274,12 +290,11 @@ const Item = class {
 	 */
 
 	handleTransitionend(event) {
-		//
-		console.log('handleTransitionend');
-		console.log(this);
-		console.log(event);
-		console.log(event.propertyName);
-		this.ace_object.open_finish();
+		// If the transitionend event was on the height property.
+		if (event.propertyName === 'height') {
+			// Finish opening th item.
+			this.ace_object.open_finish();
+		}
 	} // End method: handleTransitionend
 
 	/**
