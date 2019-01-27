@@ -2,25 +2,59 @@ $accordion-selector: '[data-ace-accordion-id]';
 $item-selector: '[data-ace-item-id]';
 $heading-selector: '[data-ace-heading]';
 $content-selector: '[data-ace-content]';
+$content-inner-selector: '[data-ace-content-inner]';
 $item-state-attribute: 'data-ace-item-state';
 
+//
 #{$accordion-selector} {}
-#{$item-selector} {
-	height: auto; /* Allow element to adjust to the height of children */
-	overflow: hidden; /* Prevent item content from being visible during the opening/closing transitions. */
-	&[#{$item-state-attribute}="closed"] {
-		> #{$content-selector} {
-			display: none; /* Hide the content from screen-readers. */
+//
+#{$item-selector} {}
+//
+#{$heading-selector} {}
+//
+#{$content-selector} {}
+//
+#{$content-inner-selector} {
+	margin-top: 0 !important; // Vertical margins on this element will cause incorrect height calculations.
+	margin-bottom: 0 !important; // Vertical margins on this element will cause incorrect height calculations.
+	overflow: auto !important; // This will force the height of this element to take children margins into account.
+}
+//
+[#{$item-state-attribute}="closed"] {
+	> #{$content-selector} {
+		> #{$content-inner-selector} {
+			display: none !important; // Hide the content from users and screen readers.
 		}
 	}
 }
-#{$heading-selector} {
-	display: block; /* For accurate item height calculations. */
-	margin: 0; /* For accurate item height calculations. */
-	overflow: auto; /* Account for height of margins of children. */
+//
+[#{$item-state-attribute}="closing"] {
+	> #{$content-selector} {
+		overflow: hidden !important; // Prevent the content from displaying outside the transitioning parent. 
+	}
+}
+//
+[#{$item-state-attribute}="open"] {
+	> #{$content-selector} {
+		//
+	}
+}
+//
+[#{$item-state-attribute}="opening"] {
+	> #{$content-selector} {
+		overflow: hidden !important; // Prevent the content from displaying outside the transitioning parent. 
+	}
+}
+
+/* ======= */
+/* Custom */
+/* ===== */
+
+body {
+	background-color: #353535;
+	color: #c5c5c5;
 }
 #{$content-selector} {
-	display: block; /* For accurate item height calculations. */
-	margin: 0; /* For accurate item height calculations. */
-	overflow: auto; /* Account for height of margins of children. */
+	transition-property: height;
+	transition-duration: 350ms;
 }

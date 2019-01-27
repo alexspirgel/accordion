@@ -24,13 +24,15 @@ const AceAccordion = class {
 				accordion: '.accordion', // {string} Custom accordion element selector.
 				item: '.accordion__item', // {string} Custom item element selector.
 				heading: '.accordion__item__heading', // {string} Custom heading element selector.
-				content: '.accordion__item__content' // {string} Custom content element selector.
+				content: '.accordion__item__content', // {string} Custom content element selector.
+				content_inner: '.accordion__item__content__inner' // {string} Custom content inner element selector.
 			},
 			// accessibility_warnings: true, // {boolean} Log detected accessibility issues as warnings.
 			// close_nested_items: false, // {boolean} Close immediate nested items. Can chain to close nested items depending on nested options.
+			// custom_css: false, // {boolean} When true, prevent the script from adding it's own styles (not recommended).
 			default_open_items: null, // {number|string|object|array} Initializes item(s) to default open by default.
 			heading_trigger_selector: null, // {string} Selector (scoped within heading) to trigger item open/close, rather than entire heading element.
-			multiple_open_items: true, // {boolean} Allow multiple items to be open at the same time.
+			multiple_open_items: true, // {boolean} When true, allow multiple items to be open at the same time.
 			// open_anchored_items: false, // {boolean} When anchored to an accordion item, open it.
 			callbacks: {
 				accordion: {

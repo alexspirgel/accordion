@@ -1,24 +1,24 @@
-[data-ace-item-id] {
-  height: auto;
-  /* Allow element to adjust to the height of children */
-  overflow: hidden;
-  /* Prevent item content from being visible during the opening/closing transitions. */ }
-  [data-ace-item-id][data-ace-item-state="closed"] > [data-ace-content] {
-    display: none;
-    /* Hide the content from screen-readers. */ }
+[data-ace-content-inner] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  overflow: auto !important; }
 
-[data-ace-heading] {
-  display: block;
-  /* For accurate item height calculations. */
-  margin: 0;
-  /* For accurate item height calculations. */
-  overflow: auto;
-  /* Account for height of margins of children. */ }
+[data-ace-item-state="closed"] > [data-ace-content] > [data-ace-content-inner] {
+  display: none !important; }
+
+[data-ace-item-state="closing"] > [data-ace-content] {
+  overflow: hidden !important; }
+
+[data-ace-item-state="opening"] > [data-ace-content] {
+  overflow: hidden !important; }
+
+/* ======= */
+/* Custom */
+/* ===== */
+body {
+  background-color: #353535;
+  color: #c5c5c5; }
 
 [data-ace-content] {
-  display: block;
-  /* For accurate item height calculations. */
-  margin: 0;
-  /* For accurate item height calculations. */
-  overflow: auto;
-  /* Account for height of margins of children. */ }
+  transition-property: height;
+  transition-duration: 350ms; }

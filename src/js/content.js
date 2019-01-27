@@ -19,7 +19,8 @@ const Content = class {
 
 	static get constants() {
 		return {
-			ace_attribute: 'data-ace-content'
+			ace_attribute: 'data-ace-content',
+			ace_attribute_inner: 'data-ace-content-inner'
 		};
 	} // End method: static get constants
 
@@ -36,26 +37,66 @@ const Content = class {
 	 *
 	 */
 
-	constructor(item, content_element) {
+	hasHeightTransition(computed_styles) {
+		// If a computed style object was not passed.
+		if (!computed_styles) {
+			// Get the computed styles of the item element.
+			computed_styles = window.getComputedStyle(this.element);
+		}
+		// Split the transition property value into an array of values.
+		const transition_property_array = computed_styles.transitionProperty.split(', ');
+		// If height is a transition property.
+		if (transition_property_array.indexOf('height') >= 0) {
+			return true;
+		}
+		// If height is not a transition property.
+		else {
+			return false;
+		}
+	} // End method: hasHeightTransition
+
+	/**
+	 *
+	 */
+
+	getComputedHeight(computed_styles) {
+		// If a computed style object was not passed.
+		if (!computed_styles) {
+			// Get the computed styles of the item element.
+			computed_styles = window.getComputedStyle(this.element);
+		}
+		// Get the height and remove 'px' from the end.
+		const height = computed_styles.height.slice(0, -2);
+		// Return the unitless pixel value.
+		return height;
+	} // End method: get height
+
+	/**
+	 *
+	 */
+
+	constructor(item, content_element, content_inner_element) {
 
 		// Set references to the wrapper instances.
 		this.wrapper_item = item;
 
 		// Add the content element reference.
 		this.element = content_element;
-
+		// Set the ace attribute on the element.
+		this.element.setAttribute(this.constructor.constants.ace_attribute, '');
 		// Add the this instance object reference to the element.
 		this.element.ace_object = this;
 
+		// Add the content inner element reference.
+		this.inner_element = content_inner_element;
 		// Set the ace attribute on the element.
-		this.element.setAttribute(this.constructor.constants.ace_attribute, '');
+		this.inner_element.setAttribute(this.constructor.constants.ace_attribute_inner, '');
 
 		// Set the initial_id property.
 		this.initial_id = this.element.id;
 		// If the element has an id.
 		if (this.initial_id !== '') {
 			// Assume the initial id is unique.
-			// Leave as is.
 		}
 		// If the element does not have an id.
 		else {
