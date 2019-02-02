@@ -17,7 +17,8 @@
 /* ===== */
 body {
   background-color: #353535;
-  color: #c5c5c5; }
+  color: #c5c5c5;
+  padding-bottom: 200px; }
 
 [data-ace-content] {
   transition-property: height;

@@ -34,7 +34,7 @@ $item-state-attribute: 'data-ace-item-state';
 	}
 }
 //
-[#{$item-state-attribute}="open"] {
+[#{$item-state-attribute}="opened"] {
 	> #{$content-selector} {
 		//
 	}
@@ -53,6 +53,7 @@ $item-state-attribute: 'data-ace-item-state';
 body {
 	background-color: #353535;
 	color: #c5c5c5;
+	padding-bottom: 200px;
 }
 #{$content-selector} {
 	transition-property: height;
