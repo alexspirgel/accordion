@@ -237,57 +237,6 @@ const AceAccordion = class {
 	} // End function: headingKeyDownEventHandler.
 
 	/**
-	 * Handles a close transition end event.
-	 */
-
-	static headingCloseTransitionEndEventHandler(event) {
-		const accordion_parent = event.target.accordion_parent;
-		const accordion_options = accordion_parent.accordion_options;
-		if(event.target.matches(accordion_options.selectors.item)){
-				Accordion.finishClosingItem(event.target);
-		}
-	} // End function: headingCloseTransitionEndEventHandler.
-
-	/**
-	 *
-	 */
-
-	static closeItem(accordion_item, skip_transition) {
-
-		// Remove the open transitionend event listener.
-		accordion_item.removeEventListener('transitionend', Accordion.headingOpenTransitionEndEventHandler);
-		// Get the accordion element.
-		const accordion_parent = accordion_item.accordion_parent;
-		// Get the accordion options.
-		const accordion_options = accordion_parent.accordion_options;
-		// Get the current item height.
-		const item_height_start = accordion_item.offsetHeight;
-		// Set the item to its current height.
-		accordion_item.style.height = item_height_start + 'px';
-		// Set the accordion item state attribute to show the beginning of the closing process.
-		accordion_item.setAttribute(Accordion.item_state_attrubute, 'closing');
-		// Set the related aria attributes to show the accordion is closed.
-		accordion_item.accordion_item_heading.setAttribute('aria-expanded', 'false');
-		accordion_item.accordion_item_content.setAttribute('aria-hidden', 'true');
-
-		// Skip transition is true.
-		if(skip_transition) {
-			// Finish closing the item immediately, disregarding transitions.
-			// The passed argument must mimic the event listener event.
-			Accordion.finishClosingItem(accordion_item);
-		}
-		else {
-			// Get the height of the accordion heading.
-			const item_heading_height = accordion_item.accordion_item_heading.offsetHeight;
-			// Add a close transitionend event listener to the accordion item.
-			accordion_item.addEventListener('transitionend', Accordion.headingCloseTransitionEndEventHandler);
-			// Set the accordion item to it's heading height.
-			accordion_item.style.height = item_heading_height + 'px';
-		}
-
-	} // End function: closeItem.
-
-	/**
 	 * Finish closing the accordion item.
 	 */
 
