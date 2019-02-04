@@ -24,10 +24,13 @@ const Item = class {
 	 */
 
 	static get constants() {
+		const id_attribute = 'data-ace-item-id';
+		const global_selector = '[' + id_attribute + ']';
 		return {
 			count_property: 'item_count',
+			global_selector: global_selector,
+			id_attribute: id_attribute,
 			instances_property: 'items',
-			id_attribute: 'data-ace-item-id',
 			state_attrubute: 'data-ace-item-state',
 			states: [
 				'opening',
@@ -176,6 +179,35 @@ const Item = class {
 	 *
 	 */
 
+	get immediateChildrenAccordions() {
+		//
+		const immediate_children_accordions = [];
+		//
+		const global_accordion_selector = this.wrapper_accordion.constructor.constants.global_selector;
+		//
+		const global_item_selector = this.constructor.constants.global_selector;
+		// Get all nested accordions.
+		const nested_accordions = this.element.querySelectorAll(global_accordion_selector);
+		// For each nested accordion.
+		for (let accordion = 0; accordion < nested_accordions.length; accordion++) {
+			//
+			let current_accordion = nested_accordions[accordion];
+			//
+			let current_accordion_parent_item = current_accordion.parentNode.closest(global_item_selector);
+			//
+			if (current_accordion_parent_item === this.element) {
+				//
+				immediate_children_accordions.push(current_accordion);
+			}
+		}
+		//
+		return immediate_children_accordions;
+	}
+
+	/**
+	 *
+	 */
+
 	open(immediate) {
 
 		// If the multiple_open_items option is set to false.
@@ -270,6 +302,37 @@ const Item = class {
 
 		// Remove the inline height style, if there is one.
 		this.content.element.style.height = '';
+
+		// If the close_nested_items option is set to true.
+		if (this.options.close_nested_items === true) {}
+
+
+/**/
+// If the close item children is true.
+// if(accordion_options.close_child_items === true) {
+// 	// Get nested accordions.
+// 	const nested_accordions = accordion_item.querySelectorAll('[' + Accordion.id_attribute + ']');
+// 	// For each nested accordion.
+// 	for(let nested_accordion = 0; nested_accordion < nested_accordions.length; nested_accordion++) {
+// 		// Get this current nested accordion.
+// 		const this_nested_accordion = nested_accordions[nested_accordion];
+// 		// Get this nested accordion parent accordion.
+// 		const this_nested_accordion_parent_accordion = this_nested_accordion.parentNode.closest('[' + Accordion.id_attribute + ']');
+// 		// If the parent accordion matches the original item parent accordion. This ensures we only select accordions one level away.
+// 		if(this_nested_accordion_parent_accordion === accordion_parent) {
+// 			// For each item in the nested accordion.
+// 			for(let nested_item = 0; nested_item < this_nested_accordion.accordion_items.length; nested_item++) {
+// 				// Get the current nested item.
+// 				const this_nested_item = this_nested_accordion.accordion_items[nested_item];
+// 				// Close the nested item.
+// 				Accordion.closeItem(this_nested_item, true);
+// 			}
+// 		}
+// 	} // End option: close_child_items.
+
+// }
+/**/
+
 
 	} // End method: close_finish
 
