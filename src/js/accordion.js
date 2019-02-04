@@ -21,10 +21,13 @@ const Accordion = class {
 	 */
 
 	static get constants() {
+		const id_attribute = 'data-ace-accordion-id';
+		const global_selector = '[' + id_attribute + ']';
 		return {
 			count_property: 'accordion_count',
+			global_selector: global_selector,
+			id_attribute: id_attribute,
 			instances_property: 'accordions',
-			id_attribute: 'data-ace-accordion-id',
 			item_instances_property: 'items'
 		};
 	} // End method: static get constants
