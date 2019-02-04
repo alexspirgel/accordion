@@ -28,7 +28,7 @@ const AceAccordion = class {
 				content_inner: '.accordion__item__content__inner' // {string} Custom content inner element selector.
 			},
 			// accessibility_warnings: true, // {boolean} Log detected accessibility issues as warnings.
-			// close_nested_items: false, // {boolean} Close immediate nested items. Can chain to close nested items depending on nested options.
+			close_nested_items: false, // {boolean} Close immediate nested items. Can chain to close nested items depending on nested options.
 			// custom_css: false, // {boolean} When true, prevent the script from adding it's own styles (not recommended).
 			default_open_items: null, // {number|string|object|array} Initializes item(s) to default open by default.
 			heading_trigger_selector: null, // {string} Selector (scoped within heading) to trigger item open/close, rather than entire heading element.
