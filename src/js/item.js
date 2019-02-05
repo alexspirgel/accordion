@@ -179,29 +179,31 @@ const Item = class {
 	 *
 	 */
 
-	get immediateChildrenAccordions() {
+	get immediateChildAccordions() {
 		//
-		const immediate_children_accordions = [];
+		const immediate_child_accordions = [];
 		//
 		const global_accordion_selector = this.wrapper_accordion.constructor.constants.global_selector;
 		//
 		const global_item_selector = this.constructor.constants.global_selector;
 		// Get all nested accordions.
 		const nested_accordions = this.element.querySelectorAll(global_accordion_selector);
+		//
+		let loop_accordion;
 		// For each nested accordion.
 		for (let accordion = 0; accordion < nested_accordions.length; accordion++) {
 			//
-			let current_accordion = nested_accordions[accordion];
+			loop_accordion = nested_accordions[accordion];
 			//
-			let current_accordion_parent_item = current_accordion.parentNode.closest(global_item_selector);
+			let loop_accordion_parent_item = loop_accordion.parentNode.closest(global_item_selector);
 			//
-			if (current_accordion_parent_item === this.element) {
+			if (loop_accordion_parent_item === this.element) {
 				//
-				immediate_children_accordions.push(current_accordion);
+				immediate_child_accordions.push(loop_accordion.ace_object);
 			}
 		}
 		//
-		return immediate_children_accordions;
+		return immediate_child_accordions;
 	}
 
 	/**
@@ -222,7 +224,7 @@ const Item = class {
 					items[item].close();
 				}
 			}
-		}
+		} // End: options.multiple_open_items
 
 		// Update the aria-expanded property on the heading trigger element.
 		this.heading.trigger_element.setAttribute('aria-expanded', 'true');
@@ -304,7 +306,28 @@ const Item = class {
 		this.content.element.style.height = '';
 
 		// If the close_nested_items option is set to true.
-		if (this.options.close_nested_items === true) {}
+		if (this.options.close_nested_items === true) {
+			//
+			const immediateChildAccordions = this.immediateChildAccordions;
+			//
+			let loop_accordion;
+			//
+			for (let accordion = 0; accordion < immediateChildAccordions.length; accordion++) {
+				//
+				loop_accordion = immediateChildAccordions[accordion];
+				console.log(loop_accordion.items.length);
+				console.log(loop_accordion.items);
+				//
+				let loop_item;
+				//
+				for (let item in loop_accordion.items) {
+					//
+					loop_item = loop_accordion.items[item];
+					//
+					loop_item.close(true);
+				}
+			}
+		} // End: options.close_nested_items
 
 
 /**/
