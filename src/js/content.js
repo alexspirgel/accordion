@@ -5,15 +5,6 @@
 const Content = class {
 
 	/**
-	 *
-	 */
-
-	get options() {
-		// Return options from the wrapper AceAccordion object.
-		return this.wrapper_item.wrapper_accordion.wrapper_ace_accordion.options;
-	} // End method: get options
-
-	/**
 	 * Defines constant class variables.
 	 */
 
@@ -23,6 +14,15 @@ const Content = class {
 			ace_attribute_inner: 'data-ace-content-inner'
 		};
 	} // End method: static get constants
+
+	/**
+	 *
+	 */
+
+	get options() {
+		// Return options from the wrapper AceAccordion object.
+		return this.wrapper_item.wrapper_accordion.wrapper_ace_accordion.options;
+	} // End method: get options
 
 	/**
 	 *

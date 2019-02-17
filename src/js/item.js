@@ -11,15 +11,6 @@ const Content = require('./content.js');
 const Item = class {
 
 	/**
-	 *
-	 */
-
-	get options() {
-		// Return options from the wrapper AceAccordion object.
-		return this.wrapper_accordion.wrapper_ace_accordion.options;
-	} // End method: get options
-
-	/**
 	 * Defines constant class variables.
 	 */
 
@@ -27,10 +18,8 @@ const Item = class {
 		const id_attribute = 'data-ace-item-id';
 		const global_selector = '[' + id_attribute + ']';
 		return {
-			count_property: 'item_count',
 			global_selector: global_selector,
 			id_attribute: id_attribute,
-			instances_property: 'items',
 			state_attrubute: 'data-ace-item-state',
 			states: [
 				'opening',
@@ -40,6 +29,15 @@ const Item = class {
 			]
 		};
 	} // End method: static get constants
+
+	/**
+	 *
+	 */
+
+	get options() {
+		// Return options from the wrapper AceAccordion object.
+		return this.wrapper_accordion.wrapper_ace_accordion.options;
+	} // End method: get options
 
 	/**
 	 *
@@ -65,6 +63,37 @@ const Item = class {
 	 *
 	 */
 
+	get immediateChildAccordions() {
+		//
+		const immediate_child_accordions = [];
+		//
+		const global_accordion_selector = this.wrapper_accordion.constructor.constants.global_selector;
+		//
+		const global_item_selector = this.constructor.constants.global_selector;
+		// Get all nested accordions.
+		const nested_accordions = this.element.querySelectorAll(global_accordion_selector);
+		//
+		let loop_accordion;
+		// For each nested accordion.
+		for (let accordion = 0; accordion < nested_accordions.length; accordion++) {
+			//
+			loop_accordion = nested_accordions[accordion];
+			//
+			let loop_accordion_parent_item = loop_accordion.parentNode.closest(global_item_selector);
+			//
+			if (loop_accordion_parent_item === this.element) {
+				//
+				immediate_child_accordions.push(loop_accordion.ace_object);
+			}
+		}
+		//
+		return immediate_child_accordions;
+	}
+
+	/**
+	 *
+	 */
+
 	set state(state) {
 		// If the passed value is a valid state.
 		if (this.constructor.constants.states.indexOf(state) >= 0) {
@@ -79,22 +108,6 @@ const Item = class {
 			return false;
 		}
 	} // End method: set state
-
-	/**
-	 *
-	 */
-
-	addInstance() {
-		// Call the static function to add the instance and return the instance id.
-		const instance_id = this.wrapper_accordion.wrapper_ace_accordion.constructor.addInstance({
-			instance: this, // The instance to add.
-			class_reference: this.wrapper_accordion, // The class to add the instance to.
-			count_property: this.constructor.constants.count_property, // The count property on the class.
-			list_property: this.constructor.constants.instances_property // The instance list property on the class.
-		});
-		// Return the instance id.
-		return instance_id;
-	} // End method: addInstance
 
 	/**
 	 * Check if this item matches the criteria.
@@ -153,58 +166,6 @@ const Item = class {
 		return false;
 
 	} // End method: matches
-
-	/**
-	 *
-	 */
-
-	initializeContent(element, inner_element) {
-		//
-		return new Content(this, element, inner_element);
-	} // End method: initializeContent
-
-	/**
-	 *
-	 */
-
-	initializeHeading(element) {
-		//
-		if (this.content) {
-			//
-			return new Heading(this, element);
-		}
-	} // End method: initializeHeading
-
-	/**
-	 *
-	 */
-
-	get immediateChildAccordions() {
-		//
-		const immediate_child_accordions = [];
-		//
-		const global_accordion_selector = this.wrapper_accordion.constructor.constants.global_selector;
-		//
-		const global_item_selector = this.constructor.constants.global_selector;
-		// Get all nested accordions.
-		const nested_accordions = this.element.querySelectorAll(global_accordion_selector);
-		//
-		let loop_accordion;
-		// For each nested accordion.
-		for (let accordion = 0; accordion < nested_accordions.length; accordion++) {
-			//
-			loop_accordion = nested_accordions[accordion];
-			//
-			let loop_accordion_parent_item = loop_accordion.parentNode.closest(global_item_selector);
-			//
-			if (loop_accordion_parent_item === this.element) {
-				//
-				immediate_child_accordions.push(loop_accordion.ace_object);
-			}
-		}
-		//
-		return immediate_child_accordions;
-	}
 
 	/**
 	 *
@@ -315,8 +276,6 @@ const Item = class {
 			for (let accordion = 0; accordion < immediateChildAccordions.length; accordion++) {
 				//
 				loop_accordion = immediateChildAccordions[accordion];
-				console.log(loop_accordion.items.length);
-				console.log(loop_accordion.items);
 				//
 				let loop_item;
 				//
@@ -328,34 +287,6 @@ const Item = class {
 				}
 			}
 		} // End: options.close_nested_items
-
-
-/**/
-// If the close item children is true.
-// if(accordion_options.close_child_items === true) {
-// 	// Get nested accordions.
-// 	const nested_accordions = accordion_item.querySelectorAll('[' + Accordion.id_attribute + ']');
-// 	// For each nested accordion.
-// 	for(let nested_accordion = 0; nested_accordion < nested_accordions.length; nested_accordion++) {
-// 		// Get this current nested accordion.
-// 		const this_nested_accordion = nested_accordions[nested_accordion];
-// 		// Get this nested accordion parent accordion.
-// 		const this_nested_accordion_parent_accordion = this_nested_accordion.parentNode.closest('[' + Accordion.id_attribute + ']');
-// 		// If the parent accordion matches the original item parent accordion. This ensures we only select accordions one level away.
-// 		if(this_nested_accordion_parent_accordion === accordion_parent) {
-// 			// For each item in the nested accordion.
-// 			for(let nested_item = 0; nested_item < this_nested_accordion.accordion_items.length; nested_item++) {
-// 				// Get the current nested item.
-// 				const this_nested_item = this_nested_accordion.accordion_items[nested_item];
-// 				// Close the nested item.
-// 				Accordion.closeItem(this_nested_item, true);
-// 			}
-// 		}
-// 	} // End option: close_child_items.
-
-// }
-/**/
-
 
 	} // End method: close_finish
 
@@ -401,7 +332,7 @@ const Item = class {
 	 *
 	 */
 
-	constructor(accordion, item_element) {
+	constructor(accordion, item_id, item_element) {
 
 		// Set a reference to the wrapper instance.
 		this.wrapper_accordion = accordion;
@@ -413,7 +344,7 @@ const Item = class {
 		this.element.ace_object = this;
 
 		// Add this instance to the wrapper instance and set the instance id.
-		this.id = this.addInstance();
+		this.id = item_id;
 
 		// Set the Accordion class instance id data attribute.
 		this.element.setAttribute(this.constructor.constants.id_attribute, this.id);
@@ -441,7 +372,7 @@ const Item = class {
 		//
 		if (content_element && content_inner_element) {
 			//
-			this.content = this.initializeContent(content_element, content_inner_element);
+			this.content = new Content(this, content_element, content_inner_element);
 		}
 
 		// Get the heading element.
@@ -449,7 +380,7 @@ const Item = class {
 		//
 		if (heading_element) {
 			//
-			this.heading = this.initializeHeading(heading_element);
+			this.heading = new Heading(this, heading_element);
 		}
 
 		//

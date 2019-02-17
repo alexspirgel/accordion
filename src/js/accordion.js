@@ -8,15 +8,6 @@ const Item = require('./item.js');
 const Accordion = class {
 
 	/**
-	 *
-	 */
-
-	get options() {
-		// Return options from the wrapper AceAccordion object.
-		return this.wrapper_ace_accordion.options;
-	} // End method: get options
-
-	/**
 	 * Defines constant class variables.
 	 */
 
@@ -24,13 +15,20 @@ const Accordion = class {
 		const id_attribute = 'data-ace-accordion-id';
 		const global_selector = '[' + id_attribute + ']';
 		return {
-			count_property: 'accordion_count',
 			global_selector: global_selector,
 			id_attribute: id_attribute,
-			instances_property: 'accordions',
 			item_instances_property: 'items'
 		};
 	} // End method: static get constants
+
+	/**
+	 *
+	 */
+
+	get options() {
+		// Return options from the wrapper AceAccordion object.
+		return this.wrapper_ace_accordion.options;
+	} // End method: get options
 
 	/**
 	 *
@@ -64,22 +62,6 @@ const Accordion = class {
 	 *
 	 */
 
-	addInstance() {
-		// Call the static function to add the instance and return the instance id.
-		const instance_id = this.wrapper_ace_accordion.constructor.addInstance({
-			instance: this, // The instance to add.
-			class_reference: this.wrapper_ace_accordion, // The class to add the instance to.
-			count_property: this.constructor.constants.count_property, // The count property on the class.
-			list_property: this.constructor.constants.instances_property // The instance list property on the class.
-		});
-		// Return the instance id.
-		return instance_id;
-	} // End method: addInstance
-
-	/**
-	 *
-	 */
-
 	addItem(item_element) {
 
 		// If the callback option value is a function.
@@ -88,8 +70,18 @@ const Accordion = class {
 			this.options.callbacks.item.initialize.before.call(null, item_element);
 		}
 
+		// Get the next instance id.
+		// The current instance count equals the next instance id because the id is zero indexed.
+		const item_id = this.item_count;
+
 		// Create a new item.
-		const item = new Item(this, item_element);
+		const item = new Item(this, item_id, item_element);
+
+		//
+		if (item) {
+			// Call the static function to add the instance.
+			this.wrapper_ace_accordion.constructor.addInstance(this, 'item_count', 'items', item);
+		}
 
 		// If the callback option value is a function.
 		if (typeof this.options.callbacks.item.initialize.after === 'function') {
@@ -103,7 +95,7 @@ const Accordion = class {
 	 *
 	 */
 
-	constructor(ace_accordion, accordion_element) {
+	constructor(ace_accordion, accordion_id, accordion_element) {
 
 		// Set a reference to the wrapper instance.
 		this.wrapper_ace_accordion = ace_accordion;
@@ -115,7 +107,7 @@ const Accordion = class {
 		this.element.ace_object = this;
 
 		// Add this instance to the wrapper instance and set the instance id.
-		this.id = this.addInstance();
+		this.id = accordion_id;
 
 		// Set the AceAccordion class instance id data attribute.
 		this.element.setAttribute(this.wrapper_ace_accordion.constructor.constants.id_attribute, this.wrapper_ace_accordion.id);
@@ -124,6 +116,11 @@ const Accordion = class {
 
 		// Create a unique selector for this Accordion.
 		this.selector = this.wrapper_ace_accordion.selector + '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
+
+		//
+		this.item_count = 0;
+		//
+		this.items = {};
 
 		// If there is at least one item.
 		if (this.item_elements.length > 0) {

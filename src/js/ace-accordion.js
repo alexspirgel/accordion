@@ -34,6 +34,7 @@ const AceAccordion = class {
 			heading_trigger_selector: null, // {string} Selector (scoped within heading) to trigger item open/close, rather than entire heading element.
 			multiple_open_items: true, // {boolean} When true, allow multiple items to be open at the same time.
 			// open_anchored_items: false, // {boolean} When anchored to an accordion item, open it.
+			// trigger_on_hover: false, // {boolean} Trigger open/close based on if the cursor is hovered over the item.
 			callbacks: {
 				accordion: {
 					initialize: {
@@ -66,8 +67,6 @@ const AceAccordion = class {
 
 	static get constants() {
 		return {
-			count_property: 'ace_accordion_count',
-			instances_property: 'ace_accordions',
 			id_attribute: 'data-ace-instance-id'
 		};
 	} // End method: static get constants
@@ -86,28 +85,14 @@ const AceAccordion = class {
 	 * @returns {number} instance_id - The id of the instance (zero indexed).
 	 */
 
-	static addInstance(parameters) {
-
-		// If the class instance count has not been initialized.
-		if (typeof parameters.class_reference[parameters.count_property] !== 'number') {
-			// Set the class instance count to 0.
-			parameters.class_reference[parameters.count_property] = 0;
-		}
-
-		// If the class instance list has not been initialized.
-		if (typeof parameters.class_reference[parameters.list_property] !== 'object') {
-			// Initialize the class instances list.
-			parameters.class_reference[parameters.list_property] = {};
-		}
-
-		// Increment the class instance count.
-		parameters.class_reference[parameters.count_property]++;
-		// Generate the instance id from the instance count. Subtract one to have the id be zero indexed.
-		const instance_id = parameters.class_reference[parameters.count_property] - 1;
-		// Add the instance to the class instances object.
-		parameters.class_reference[parameters.list_property][instance_id] = parameters.instance;
-
-		// Return this instance's unique id.
+	static addInstance(holder, count_property, list_property, instance) {
+		// Generate the instance id from the instance count.
+		const instance_id = holder[count_property];
+		// Increment the instance count.
+		holder[count_property]++;
+		// Add the instance to the instances list.
+		holder[list_property][instance_id] = instance;
+		// Return the instance id.
 		return instance_id;
 
 	} // End method: static addInstance
@@ -116,17 +101,22 @@ const AceAccordion = class {
 	 *
 	 */
 
-	addInstance() {
-		// Call the static function to add the instance and return the instance id.
-		const instance_id = this.constructor.addInstance({
-			instance: this, // The instance to add.
-			class_reference: this.constructor, // The class to add the instance to.
-			count_property: this.constructor.constants.count_property, // The count property on the class.
-			list_property: this.constructor.constants.instances_property // The instance list property on the class.
-		});
-		// Return the instance id.
-		return instance_id;
-	} // End method: addInstance
+	addAceAccordion() {
+
+		if (typeof this.constructor.ace_accordion_count !== 'number') {
+			//
+			this.constructor.ace_accordion_count = 0;
+		}
+
+		if (typeof this.constructor.ace_accordions !== 'object') {
+			//
+			this.constructor.ace_accordions = {};
+		}
+
+		// Call the static function to add the instance.
+		return this.constructor.addInstance(this.constructor, 'ace_accordion_count', 'ace_accordions', this);
+
+	} // End method: addAceAccordion
 
 	/**
 	 *
@@ -140,8 +130,18 @@ const AceAccordion = class {
 			this.options.callbacks.accordion.initialize.before.call(null, accordion_element);
 		}
 
+		// Get the next instance id.
+		// The current instance count equals the next instance id because the id is zero indexed.
+		const accordion_id = this.accordion_count;
+
 		// Create a new accordion.
-		const accordion = new Accordion(this, accordion_element);
+		const accordion = new Accordion(this, accordion_id, accordion_element);
+
+		//
+		if (accordion) {
+			// Call the static function to add the instance.
+			this.constructor.addInstance(this, 'accordion_count', 'accordions', accordion);
+		}
 
 		// If the callback option value is a function.
 		if (typeof this.options.callbacks.accordion.initialize.after === 'function') {
@@ -173,9 +173,14 @@ const AceAccordion = class {
 		// Merge default options and user options into new object using the imported extend function.
 		this.options = extend([{}, this.constructor.options_default, options_user], true);
 		// Add this instance to the static class object and set the instance id on this instance.
-		this.id = this.addInstance();
+		this.id = this.addAceAccordion();
 		// Create a selector for the unique local instance id.
 		this.selector = '[' + this.constructor.constants.id_attribute + '="' + this.id + '"]';
+
+		//
+		this.accordion_count = 0;
+		//
+		this.accordions = {};
 
 		// If there at least one element matching the accordion selector.
 		if (this.accordion_elements.length > 0) {
