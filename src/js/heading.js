@@ -49,7 +49,7 @@ const Heading = class {
 
 	handleClick(event) {
 		// Trigger the toggle method on the wrapper item.
-		this.ace_object.wrapper_item.toggle();
+		this.ace_object.wrapper_item.toggle('click', false);
 	} // End method: handleClick
 
 	/**

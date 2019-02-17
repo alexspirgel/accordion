@@ -20,13 +20,8 @@ const Item = class {
 		return {
 			global_selector: global_selector,
 			id_attribute: id_attribute,
+			controller_attrubute: 'data-ace-item-controller',
 			state_attrubute: 'data-ace-item-state',
-			states: [
-				'opening',
-				'opened',
-				'closing',
-				'closed'
-			]
 		};
 	} // End method: static get constants
 
@@ -58,6 +53,15 @@ const Item = class {
 		// Returns null if attribute is not set.
 		return this.element.getAttribute(this.constructor.constants.state_attrubute);
 	} // End method: get state
+
+	/**
+	 *
+	 */
+
+	get controller() {
+		// Returns null if attribute is not set.
+		return this.element.getAttribute(this.constructor.constants.controller_attrubute);
+	} // End method: get controller
 
 	/**
 	 *
@@ -95,19 +99,22 @@ const Item = class {
 	 */
 
 	set state(state) {
-		// If the passed value is a valid state.
-		if (this.constructor.constants.states.indexOf(state) >= 0) {
-			// Set the item state attribute equal to the passed state.
-			this.element.setAttribute(this.constructor.constants.state_attrubute, state);
-			// Return the state value.
-			return state;
-		}
-		// If the passed value is not a valid state.
-		else {
-			console.warn('invalid state, options are: ' + this.constructor.constants.states);
-			return false;
-		}
+		// Set the item state attribute equal to the passed state.
+		this.element.setAttribute(this.constructor.constants.state_attrubute, state);
+		// Return the state value.
+		return state;
 	} // End method: set state
+
+	/**
+	 *
+	 */
+
+	set controller(controller) {
+		// Set the item controller attribute equal to the passed controller.
+		this.element.setAttribute(this.constructor.constants.controller_attrubute, controller);
+		// Return the controller value.
+		return controller;
+	} // End method: set controller
 
 	/**
 	 * Check if this item matches the criteria.
@@ -171,45 +178,53 @@ const Item = class {
 	 *
 	 */
 
-	open(immediate) {
+	open(controller = '', immediate = false) {
 
-		// If the multiple_open_items option is set to false.
-		if (this.options.multiple_open_items === false) {
-			// Get all items in this accordion.
-			let items = this.wrapper_accordion.items;
-			// For each item.
-			for (let item = 0; item < items.length; item++) {
-				// If this element is not equal to the current loop item element.
-				if (this.element !== items[item].element) {
-					// Close the loop item.
-					items[item].close();
+		// If the item is not already opened or in the process of opening.
+		if (this.state !== 'opened' && this.state !== 'opening') {
+
+			// Set the controller used to open the item.
+			this.controller = controller;
+
+			// If the multiple_open_items option is set to false.
+			if (this.options.multiple_open_items === false) {
+				// Get all items in this accordion.
+				let items = this.wrapper_accordion.items;
+				// For each item.
+				for (let item = 0; item < items.length; item++) {
+					// If this element is not equal to the current loop item element.
+					if (this.element !== items[item].element) {
+						// Close the loop item.
+						items[item].close('', false);
+					}
 				}
+			} // End: options.multiple_open_items
+
+			// Update the aria-expanded property on the heading trigger element.
+			this.heading.trigger_element.setAttribute('aria-expanded', 'true');
+			// Update the aria-hidden attribute on the content element.
+			this.content.element.setAttribute('aria-hidden', 'false');
+
+			// If height is a transition property on the content element and the immediate flag is not true.
+			if (this.content.hasHeightTransition() && !immediate) {
+				// Get the current content height.
+				const content_height_start = this.content.getComputedHeight();
+				// Set the content to its starting height.
+				this.content.element.style.height = content_height_start + 'px';
+				// Update the item state.
+				this.state = 'opening';
+				// Get the height of the inner content.
+				const content_inner_height = this.content.inner_element.offsetHeight;
+				// Set the content height to match the content inner height.
+				this.content.element.style.height = content_inner_height + 'px';
 			}
-		} // End: options.multiple_open_items
+			// If height is not a transition property or the immediate flag is true.
+			else {
+				// Open immediately.
+				this.open_finish();
+			}
 
-		// Update the aria-expanded property on the heading trigger element.
-		this.heading.trigger_element.setAttribute('aria-expanded', 'true');
-		// Update the aria-hidden attribute on the content element.
-		this.content.element.setAttribute('aria-hidden', 'false');
-
-		// If height is a transition property on the content element and the immediate flag is not true.
-		if (this.content.hasHeightTransition() && !immediate) {
-			// Get the current content height.
-			const content_height_start = this.content.getComputedHeight();
-			// Set the content to its starting height.
-			this.content.element.style.height = content_height_start + 'px';
-			// Update the item state.
-			this.state = 'opening';
-			// Get the height of the inner content.
-			const content_inner_height = this.content.inner_element.offsetHeight;
-			// Set the content height to match the content inner height.
-			this.content.element.style.height = content_inner_height + 'px';
-		}
-		// If height is not a transition property or the immediate flag is true.
-		else {
-			// Open immediately.
-			this.open_finish();
-		}
+		} // End: state check
 
 	} // End method: open
 
@@ -228,25 +243,34 @@ const Item = class {
 	 *
 	 */
 
-	close(immediate) {
-		// If height is a transition property on the content element and the immediate flag is not true.
-		if (this.content.hasHeightTransition() && !immediate) {
-			// Get the current content height.
-			const content_height_start = this.content.getComputedHeight();
-			// Set the content to its starting height.
-			this.content.element.style.height = content_height_start + 'px';
-			// Update the item state.
-			this.state = 'closing';
-			// This line does nothing but force repaint of the content element for the transition to work properly.
-			this.content.element.offsetHeight;
-			// Set the content height to zero.
-			this.content.element.style.height = '0px';
-		}
-		// If height is not a transition property or the immediate flag is true.
-		else {
-			// Close immediately.
-			this.close_finish();
-		}
+	close(controller = '', immediate = false) {
+		// If the item is not already closed or in the process of closing.
+		if (this.state !== 'closed' && this.state !== 'closing') {
+			// If the passed controller equals the controller set on the item, or no controller was passed.
+			if (controller === this.controller || controller === '') {
+				// If height is a transition property on the content element and the immediate flag is not true.
+				if (this.content.hasHeightTransition() && !immediate) {
+					// Get the current content height.
+					const content_height_start = this.content.getComputedHeight();
+					// Set the content to its starting height.
+					this.content.element.style.height = content_height_start + 'px';
+					// Update the item state.
+					this.state = 'closing';
+					// This line does nothing but force repaint of the content element for the transition to work properly.
+					this.content.element.offsetHeight;
+					// Set the content height to zero.
+					this.content.element.style.height = '0px';
+				}
+				// If height is not a transition property or the immediate flag is true.
+				else {
+					// Close immediately.
+					this.close_finish();
+				}
+			}
+			else {
+				// Do nothing. Do not have proper controller access.
+			}
+		} // End: state check
 	} // End method: close
 
 	/**
@@ -266,6 +290,9 @@ const Item = class {
 		// Remove the inline height style, if there is one.
 		this.content.element.style.height = '';
 
+		// Clear the controller value.
+		this.controller = '';
+
 		// If the close_nested_items option is set to true.
 		if (this.options.close_nested_items === true) {
 			//
@@ -283,7 +310,7 @@ const Item = class {
 					//
 					loop_item = loop_accordion.items[item];
 					//
-					loop_item.close(true);
+					loop_item.close('', true);
 				}
 			}
 		} // End: options.close_nested_items
@@ -294,15 +321,15 @@ const Item = class {
 	 *
 	 */
 
-	toggle() {
+	toggle(controller, immediate = false) {
 		// If this item is opening, or opened.
 		if (this.state === 'opening' || this.state === 'opened') {
-			this.close();
+			this.close(controller, immediate);
 		}
 		// If this item is closing, or closed.
 		else if (this.state === 'closing' || this.state === 'closed') {
 			// Open the item.
-			this.open();
+			this.open(controller, immediate);
 		}
 	} // End method: toggle
 
@@ -310,7 +337,7 @@ const Item = class {
 	 *
 	 */
 
-	handleTransitionend(event) {
+	handleTransitionEnd(event) {
 		// If the transitionend event was on the height property.
 		if (event.propertyName === 'height') {
 			// Get the item object.
@@ -326,7 +353,35 @@ const Item = class {
 				item.close_finish();
 			}
 		}
-	} // End method: handleTransitionend
+	} // End method: handleTransitionEnd
+
+	/**
+	 *
+	 */
+
+	handleMouseEnter(event) {
+		//
+		const this_item = this.ace_object;
+		//
+		if (this_item.options.trigger_on_hover) {
+			//
+			this_item.open('hover');
+		}
+	} // End method: handleMouseEnter
+
+	/**
+	 *
+	 */
+
+	handleMouseLeave(event) {
+		//
+		const this_item = this.ace_object;
+		//
+		if (this_item.options.trigger_on_hover) {
+			//
+			this_item.close('hover');
+		}
+	} // End method: handleMouseEnter
 
 	/**
 	 *
@@ -384,7 +439,11 @@ const Item = class {
 		}
 
 		//
-		this.transitionendListener = this.content.element.addEventListener('transitionend', this.handleTransitionend);
+		this.transitionendListener = this.content.element.addEventListener('transitionend', this.handleTransitionEnd);
+		//
+		this.transitionendListener = this.element.addEventListener('mouseenter', this.handleMouseEnter);
+		//
+		this.transitionendListener = this.element.addEventListener('mouseleave', this.handleMouseLeave);
 
 		// Return this instance.
 		return this;

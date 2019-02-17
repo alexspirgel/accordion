@@ -34,7 +34,7 @@ const AceAccordion = class {
 			heading_trigger_selector: null, // {string} Selector (scoped within heading) to trigger item open/close, rather than entire heading element.
 			multiple_open_items: true, // {boolean} When true, allow multiple items to be open at the same time.
 			// open_anchored_items: false, // {boolean} When anchored to an accordion item, open it.
-			// trigger_on_hover: false, // {boolean} Trigger open/close based on if the cursor is hovered over the item.
+			trigger_on_hover: false, // {boolean} Trigger open/close based on if the cursor is hovered over the item.
 			callbacks: {
 				accordion: {
 					initialize: {
@@ -103,11 +103,13 @@ const AceAccordion = class {
 
 	addAceAccordion() {
 
+		//
 		if (typeof this.constructor.ace_accordion_count !== 'number') {
 			//
 			this.constructor.ace_accordion_count = 0;
 		}
 
+		//
 		if (typeof this.constructor.ace_accordions !== 'object') {
 			//
 			this.constructor.ace_accordions = {};
