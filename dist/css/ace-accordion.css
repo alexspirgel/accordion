@@ -1,0 +1,25 @@
+[data-ace-content-inner] {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  overflow: auto !important; }
+
+[data-ace-item-state="closed"] > [data-ace-content] > [data-ace-content-inner] {
+  display: none !important; }
+
+[data-ace-item-state="closing"] > [data-ace-content] {
+  overflow: hidden !important; }
+
+[data-ace-item-state="opening"] > [data-ace-content] {
+  overflow: hidden !important; }
+
+/* ======= */
+/* Custom */
+/* ===== */
+body {
+  background-color: #353535;
+  color: #c5c5c5;
+  padding-bottom: 200px; }
+
+[data-ace-content] {
+  transition-property: height;
+  transition-duration: 350ms; }

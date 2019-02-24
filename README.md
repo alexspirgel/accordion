@@ -1,8 +1,8 @@
 # accordion
 ## To-do:
-* Implement better content height getter. Currently it's inaccurate. Reproduce by explicitly setting height to zero with css.
-* FInd good solution to content height changing mid transition causing incorrect end point and jumpiness at the end of the transition.
-* Implement vanilla solution to jQuery data using weakmaps, the use that associate data rather than directly on DOM objects (https://stackoverflow.com/questions/29222027/vanilla-alternative-to-jquery-data-function-any-native-javascript-alternati).
-* Find better method for creating unique ids, only use ids for content wrapper beacause of accessibility, everything else should be referenced in data associations on the DOM or in weakmap.
-* Implement scroll to top options.
-* Implement callbacks.
+* Switch global CSS identifiers from data attributes to prefixed classes??? maybe.
+* Remove CSS style sheet in favor of adding styles inline with optional override for external styles
+* Find good solution to content height changing mid transition causing incorrect end point and jumpiness at the end of the transition.
+	* Idea: On height transition end, check the current ending height against the original ending height, if it is different (maybe give a pixel of wiggle room) transition all over again to the new height.
+* Use try catch statements for error catching.
+* Implement commented out options.
