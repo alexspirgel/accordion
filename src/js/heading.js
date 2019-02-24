@@ -56,6 +56,25 @@ const Heading = class {
 	 *
 	 */
 
+	handleKeyDown(event) {
+		// Get the accordion parent item.
+		const this_ace_object = event.target.ace_object;
+		switch(event.keyCode) {
+			// If key code is up arrow.
+			case 38:
+				this_ace_object.wrapper_item.focusTrigger('previous');
+				break;
+			// If key code is down arrow.
+			case 40:
+				this_ace_object.wrapper_item.focusTrigger('next');
+				break;
+		}
+	} // End method: handleKeyDown
+
+	/**
+	 *
+	 */
+
 	constructor(item, heading_element) {
 
 		// Set references to the wrapper instances.
@@ -89,6 +108,8 @@ const Heading = class {
 
 		//
 		this.trigger_element.addEventListener('click', this.handleClick);
+		//
+		this.trigger_element.addEventListener('keydown', this.handleKeyDown);
 
 		// Return this instance.
 		return this;
@@ -113,6 +134,8 @@ const Heading = class {
 
 		// Remove the click event listener.
 		this.trigger_element.removeEventListener('click', this.handleClick);
+		// Remove the key down event listener.
+		this.trigger_element.removeEventListener('keydown', this.handleKeyDown);
 
 		// Remove the reference to this object from the parent.
 		this.wrapper_item.heading = undefined;

@@ -98,6 +98,42 @@ const Item = class {
 	 *
 	 */
 
+	get previousItem() {
+		//
+		const previous_item = this.wrapper_accordion.item_elements[this.index - 1];
+		//
+		if (previous_item) {
+			//
+			return previous_item;
+		}
+		else {
+			//
+			return false;
+		}
+	}
+
+	/**
+	 *
+	 */
+
+	get nextItem() {
+		//
+		const next_item = this.wrapper_accordion.item_elements[this.index + 1];
+		//
+		if (next_item) {
+			//
+			return next_item;
+		}
+		else {
+			//
+			return false;
+		}
+	}
+
+	/**
+	 *
+	 */
+
 	set state(state) {
 		// Set the item state attribute equal to the passed state.
 		this.element.setAttribute(this.constructor.constants.state_attrubute, state);
@@ -382,6 +418,27 @@ const Item = class {
 			this_item.close('hover');
 		}
 	} // End method: handleMouseEnter
+
+	/**
+	 *
+	 */
+
+	focusTrigger(option) {
+		// If a previous option is passed.
+		if (option === 'previous' && this.previousItem) {
+			//
+			this.previousItem.ace_object.focusTrigger();
+		}
+		// If a next option is passed.
+		else if (option === 'next' && this.nextItem) {
+			//
+			this.nextItem.ace_object.focusTrigger();
+		}
+		// If no valid option passed.
+		else {
+			this.heading.trigger_element.focus();
+		}
+	}
 
 	/**
 	 *
