@@ -227,7 +227,7 @@ const Item = class {
 				// Get all items in this accordion.
 				let items = this.wrapper_accordion.items;
 				// For each item.
-				for (let item = 0; item < items.length; item++) {
+				for (let item in items) {
 					// If this element is not equal to the current loop item element.
 					if (this.element !== items[item].element) {
 						// Close the loop item.
