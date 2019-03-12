@@ -9,3 +9,4 @@
 * Use try catch statements for error catching.
 * Implement commented out options.
 * Figure out solution to unique open item option closing an item above the triggered item causing the current item to shift out of view.
+	* Maybe constant anchor linking to opening item header during animation?
