@@ -284,6 +284,10 @@ const Item = class {
 		if (this.state !== 'closed' && this.state !== 'closing') {
 			// If the passed controller equals the controller set on the item, or no controller was passed.
 			if (controller === this.controller || controller === '') {
+				// Update the aria-expanded property on the heading trigger element.
+				this.heading.trigger_element.setAttribute('aria-expanded', 'false');
+				// Update the aria-hidden attribute on the content element.
+				this.content.element.setAttribute('aria-hidden', 'true');
 				// If height is a transition property on the content element and the immediate flag is not true.
 				if (this.content.hasHeightTransition() && !immediate) {
 					// Get the current content height.
