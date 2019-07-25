@@ -289,8 +289,6 @@ const Item = class {
 	close(controller, immediate = false) {
 		// If the item is not already closed or in the process of closing.
 		if (this.state !== 'closed' && this.state !== 'closing') {
-			console.log(this.controller);
-			console.log(controller);
 			// If the passed controller equals the controller set on the item, or no controller exists for either value.
 			if (controller === this.controller || this.controller === null || controller === null) {
 				// If height is a transition property on the content element and the immediate flag is not true.
