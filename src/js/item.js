@@ -146,10 +146,17 @@ const Item = class {
 	 */
 
 	set controller(controller) {
-		// Set the item controller attribute equal to the passed controller.
-		this.element.setAttribute(this.constructor.constants.controller_attrubute, controller);
+		// If no controller value is passed or the passed value is null.
+		if (controller === undefined || controller === null) {
+			// Remove the item controller attribute.
+			this.element.removeAttribute(this.constructor.constants.controller_attrubute);
+		}
+		else {
+			// Set the item controller attribute equal to the passed controller.
+			this.element.setAttribute(this.constructor.constants.controller_attrubute, controller);
+		}
 		// Return the controller value.
-		return controller;
+		return this.controller;
 	} // End method: set controller
 
 	/**
@@ -214,7 +221,7 @@ const Item = class {
 	 *
 	 */
 
-	open(controller = '', immediate = false) {
+	open(controller, immediate = false) {
 
 		// If the item is not already opened or in the process of opening.
 		if (this.state !== 'opened' && this.state !== 'opening') {
@@ -231,7 +238,7 @@ const Item = class {
 					// If this element is not equal to the current loop item element.
 					if (this.element !== items[item].element) {
 						// Close the loop item.
-						items[item].close('', false);
+						items[item].close(null, false);
 					}
 				}
 			} // End: options.multiple_open_items
@@ -279,11 +286,13 @@ const Item = class {
 	 *
 	 */
 
-	close(controller = '', immediate = false) {
+	close(controller, immediate = false) {
 		// If the item is not already closed or in the process of closing.
 		if (this.state !== 'closed' && this.state !== 'closing') {
-			// If the passed controller equals the controller set on the item, or no controller was passed.
-			if (controller === this.controller || controller === '') {
+			console.log(this.controller);
+			console.log(controller);
+			// If the passed controller equals the controller set on the item, or no controller exists for either value.
+			if (controller === this.controller || this.controller === null || controller === null) {
 				// If height is a transition property on the content element and the immediate flag is not true.
 				if (this.content.hasHeightTransition() && !immediate) {
 					// Get the current content height.
@@ -327,7 +336,7 @@ const Item = class {
 		this.content.element.style.height = '';
 
 		// Clear the controller value.
-		this.controller = '';
+		this.controller = null;
 
 		// If the close_nested_items option is set to true.
 		if (this.options.close_nested_items === true) {
@@ -346,7 +355,7 @@ const Item = class {
 					//
 					loop_item = loop_accordion.items[item];
 					//
-					loop_item.close('', true);
+					loop_item.close(null, true);
 				}
 			}
 		} // End: options.close_nested_items
@@ -474,7 +483,7 @@ const Item = class {
 				initial_state = 'opened';
 			}
 		}
-		// Set the item state.
+		// Set the initial item state.
 		this.state = initial_state;
 
 		// Get the content element.
