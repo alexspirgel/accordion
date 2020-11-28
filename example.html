@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Accordion</title>
+	<script type="text/javascript" src="dist/accordion.js"></script>
+	<style>
+		/* Accordion CSS */
+		.accordion__item-content {
+			/* Prevent the content from overflowing the parent. */
+			overflow: hidden;
+		}
+		.accordion__item-content-inner {
+			/* Vertical margins will cause incorrect height calculations. */
+			margin-top: 0;
+			margin-bottom: 0;
+			/* Force the height of this element to take children margins into account. */
+			overflow: auto;
+		}
+
+		/* Custom CSS */
+		body {
+			background-color: #353535;
+			color: #c5c5c5;
+			padding-bottom: 200px;
+		}
+		.accordion__item-content {
+			transition-property: height, visibility;
+			transition-duration: 0.5s;
+		}
+	</style>
+</head>
+<body>
+
+	<h1>Accordion</h1>
+
+	<ul class="accordion">
+		<li class="accordion__item">
+			<div class="accordion__item-heading">Basic Content</div>
+			<div class="accordion__item-content">
+				<div class="accordion__item-content-inner">
+					<p>Lorem ipsum dolor sit amet</p>
+				</div>
+			</div>
+		</li>
+		<li class="accordion__item">
+			<div class="accordion__item-heading">Longer Basic Content</div>
+			<div class="accordion__item-content">
+				<div class="accordion__item-content-inner">
+					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in magna eu turpis semper rhoncus eu at elit. Maecenas malesuada dictum massa in tristique. Nulla a semper dui. Vivamus dapibus sem vitae elit malesuada tempor. Suspendisse sed urna ut nisi malesuada vulputate. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc scelerisque ante a libero vulputate, ac molestie diam fringilla. Integer et nisl ac mauris dapibus congue at vel tortor. In consectetur, dui in aliquam viverra, risus dolor placerat nibh, pharetra semper ex massa in dolor. Vestibulum iaculis, sapien quis auctor feugiat, augue dui scelerisque magna, vitae pretium magna eros eu nulla. Nulla euismod neque quis lacus congue molestie.</p>
+					<p>Aliquam varius gravida pharetra. Quisque tristique finibus malesuada. Nulla eleifend rhoncus neque rutrum dapibus. Sed commodo enim nec placerat placerat. Ut rhoncus semper rutrum. Praesent a elit a quam accumsan convallis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas dictum, nisl at scelerisque posuere, felis lorem interdum lacus, ut malesuada ex dui vitae enim. Praesent placerat id diam id dapibus. Ut ultrices interdum maximus. Donec venenatis arcu nec magna rutrum imperdiet. Aliquam erat volutpat. Etiam convallis urna non mollis luctus.</p>
+					<p>Duis congue est id egestas eleifend. Vestibulum neque mauris, mattis nec pharetra egestas, consectetur eu ante. Mauris ultricies id lacus eget finibus. Phasellus interdum viverra sem in tristique. Praesent porttitor auctor auctor. Fusce lacinia vehicula consequat. Ut faucibus nisi ut risus porta commodo. Ut eu auctor justo, et accumsan arcu. Phasellus ultricies pellentesque purus id pulvinar. Aliquam tempus lacinia massa sed dictum.</p>
+					<p>Integer eu pellentesque arcu, ac feugiat sem. Cras vel augue felis. Nulla euismod nunc et dui ultrices, a aliquam leo rhoncus. In laoreet volutpat turpis nec fermentum. Quisque quis eros sit amet sapien posuere dapibus ac ut leo. Phasellus id aliquam turpis. Suspendisse augue erat, facilisis eu dapibus vitae, cursus vitae libero. Nullam et porta sem, ullamcorper tristique arcu. Maecenas urna nulla, faucibus ac lacinia in, pellentesque ut neque. Cras libero dolor, pulvinar ac malesuada id, auctor quis urna.</p>
+					<p>Proin sed rutrum ligula. Sed mollis pellentesque turpis ut ornare. Maecenas aliquam interdum nunc, bibendum imperdiet mauris luctus a. In in neque vel felis condimentum tristique id id lectus. Aliquam nec porttitor metus, ac suscipit tortor. Fusce et risus ante. Sed eget arcu felis. Donec pharetra vitae tortor vitae commodo. Maecenas posuere dui mauris, in sagittis nisi malesuada quis. Proin efficitur nunc tellus, et commodo diam convallis quis. Morbi ut nisi a purus eleifend pharetra at et est. Donec lobortis metus non pharetra condimentum. Quisque ex nulla, hendrerit sed commodo cursus, condimentum vitae est. Nullam placerat aliquam dui, vitae vulputate nunc rhoncus a. Nam eget lorem convallis, fringilla quam nec, ullamcorper justo.</p>
+				</div>
+			</div>
+		</li>
+		<li class="accordion__item">
+			<div class="accordion__item-heading">Nested Accordion</div>
+			<div class="accordion__item-content">
+				<div class="accordion__item-content-inner">
+					<ul class="accordion">
+						<li class="accordion__item">
+							<div class="accordion__item-heading">Basic Content (depth 2)</div>
+							<div class="accordion__item-content">
+								<div class="accordion__item-content-inner">
+									<p>Lorem ipsum dolor sit amet</p>
+								</div>
+							</div>
+						</li>
+						<li class="accordion__item">
+							<div class="accordion__item-heading">Longer Basic Content (depth 2)</div>
+							<div class="accordion__item-content">
+								<div class="accordion__item-content-inner">
+									<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in magna eu turpis semper rhoncus eu at elit. Maecenas malesuada dictum massa in tristique. Nulla a semper dui. Vivamus dapibus sem vitae elit malesuada tempor. Suspendisse sed urna ut nisi malesuada vulputate. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc scelerisque ante a libero vulputate, ac molestie diam fringilla. Integer et nisl ac mauris dapibus congue at vel tortor. In consectetur, dui in aliquam viverra, risus dolor placerat nibh, pharetra semper ex massa in dolor. Vestibulum iaculis, sapien quis auctor feugiat, augue dui scelerisque magna, vitae pretium magna eros eu nulla. Nulla euismod neque quis lacus congue molestie.</p>
+									<p>Aliquam varius gravida pharetra. Quisque tristique finibus malesuada. Nulla eleifend rhoncus neque rutrum dapibus. Sed commodo enim nec placerat placerat. Ut rhoncus semper rutrum. Praesent a elit a quam accumsan convallis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas dictum, nisl at scelerisque posuere, felis lorem interdum lacus, ut malesuada ex dui vitae enim. Praesent placerat id diam id dapibus. Ut ultrices interdum maximus. Donec venenatis arcu nec magna rutrum imperdiet. Aliquam erat volutpat. Etiam convallis urna non mollis luctus.</p>
+									<p>Duis congue est id egestas eleifend. Vestibulum neque mauris, mattis nec pharetra egestas, consectetur eu ante. Mauris ultricies id lacus eget finibus. Phasellus interdum viverra sem in tristique. Praesent porttitor auctor auctor. Fusce lacinia vehicula consequat. Ut faucibus nisi ut risus porta commodo. Ut eu auctor justo, et accumsan arcu. Phasellus ultricies pellentesque purus id pulvinar. Aliquam tempus lacinia massa sed dictum.</p>
+									<p>Integer eu pellentesque arcu, ac feugiat sem. Cras vel augue felis. Nulla euismod nunc et dui ultrices, a aliquam leo rhoncus. In laoreet volutpat turpis nec fermentum. Quisque quis eros sit amet sapien posuere dapibus ac ut leo. Phasellus id aliquam turpis. Suspendisse augue erat, facilisis eu dapibus vitae, cursus vitae libero. Nullam et porta sem, ullamcorper tristique arcu. Maecenas urna nulla, faucibus ac lacinia in, pellentesque ut neque. Cras libero dolor, pulvinar ac malesuada id, auctor quis urna.</p>
+									<p>Proin sed rutrum ligula. Sed mollis pellentesque turpis ut ornare. Maecenas aliquam interdum nunc, bibendum imperdiet mauris luctus a. In in neque vel felis condimentum tristique id id lectus. Aliquam nec porttitor metus, ac suscipit tortor. Fusce et risus ante. Sed eget arcu felis. Donec pharetra vitae tortor vitae commodo. Maecenas posuere dui mauris, in sagittis nisi malesuada quis. Proin efficitur nunc tellus, et commodo diam convallis quis. Morbi ut nisi a purus eleifend pharetra at et est. Donec lobortis metus non pharetra condimentum. Quisque ex nulla, hendrerit sed commodo cursus, condimentum vitae est. Nullam placerat aliquam dui, vitae vulputate nunc rhoncus a. Nam eget lorem convallis, fringilla quam nec, ullamcorper justo.</p>
+								</div>
+							</div>
+						</li>
+						<li class="accordion__item">
+							<div class="accordion__item-heading">Nested Accordion (depth 2)</div>
+							<div class="accordion__item-content">
+								<div class="accordion__item-content-inner">
+									<ul class="accordion">
+										<li class="accordion__item">
+											<div class="accordion__item-heading">Basic Content (depth 3)</div>
+											<div class="accordion__item-content">
+												<div class="accordion__item-content-inner">
+													<p>Lorem ipsum dolor sit amet</p>
+												</div>
+											</div>
+										</li>
+										<li class="accordion__item">
+											<div class="accordion__item-heading">Longer Basic Content (depth 3)</div>
+											<div class="accordion__item-content">
+												<div class="accordion__item-content-inner">
+													<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in magna eu turpis semper rhoncus eu at elit. Maecenas malesuada dictum massa in tristique. Nulla a semper dui. Vivamus dapibus sem vitae elit malesuada tempor. Suspendisse sed urna ut nisi malesuada vulputate. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc scelerisque ante a libero vulputate, ac molestie diam fringilla. Integer et nisl ac mauris dapibus congue at vel tortor. In consectetur, dui in aliquam viverra, risus dolor placerat nibh, pharetra semper ex massa in dolor. Vestibulum iaculis, sapien quis auctor feugiat, augue dui scelerisque magna, vitae pretium magna eros eu nulla. Nulla euismod neque quis lacus congue molestie.</p>
+													<p>Aliquam varius gravida pharetra. Quisque tristique finibus malesuada. Nulla eleifend rhoncus neque rutrum dapibus. Sed commodo enim nec placerat placerat. Ut rhoncus semper rutrum. Praesent a elit a quam accumsan convallis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas dictum, nisl at scelerisque posuere, felis lorem interdum lacus, ut malesuada ex dui vitae enim. Praesent placerat id diam id dapibus. Ut ultrices interdum maximus. Donec venenatis arcu nec magna rutrum imperdiet. Aliquam erat volutpat. Etiam convallis urna non mollis luctus.</p>
+													<p>Duis congue est id egestas eleifend. Vestibulum neque mauris, mattis nec pharetra egestas, consectetur eu ante. Mauris ultricies id lacus eget finibus. Phasellus interdum viverra sem in tristique. Praesent porttitor auctor auctor. Fusce lacinia vehicula consequat. Ut faucibus nisi ut risus porta commodo. Ut eu auctor justo, et accumsan arcu. Phasellus ultricies pellentesque purus id pulvinar. Aliquam tempus lacinia massa sed dictum.</p>
+													<p>Integer eu pellentesque arcu, ac feugiat sem. Cras vel augue felis. Nulla euismod nunc et dui ultrices, a aliquam leo rhoncus. In laoreet volutpat turpis nec fermentum. Quisque quis eros sit amet sapien posuere dapibus ac ut leo. Phasellus id aliquam turpis. Suspendisse augue erat, facilisis eu dapibus vitae, cursus vitae libero. Nullam et porta sem, ullamcorper tristique arcu. Maecenas urna nulla, faucibus ac lacinia in, pellentesque ut neque. Cras libero dolor, pulvinar ac malesuada id, auctor quis urna.</p>
+													<p>Proin sed rutrum ligula. Sed mollis pellentesque turpis ut ornare. Maecenas aliquam interdum nunc, bibendum imperdiet mauris luctus a. In in neque vel felis condimentum tristique id id lectus. Aliquam nec porttitor metus, ac suscipit tortor. Fusce et risus ante. Sed eget arcu felis. Donec pharetra vitae tortor vitae commodo. Maecenas posuere dui mauris, in sagittis nisi malesuada quis. Proin efficitur nunc tellus, et commodo diam convallis quis. Morbi ut nisi a purus eleifend pharetra at et est. Donec lobortis metus non pharetra condimentum. Quisque ex nulla, hendrerit sed commodo cursus, condimentum vitae est. Nullam placerat aliquam dui, vitae vulputate nunc rhoncus a. Nam eget lorem convallis, fringilla quam nec, ullamcorper justo.</p>
+												</div>
+											</div>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</li>
+	</ul>
+
+	<script type="text/javascript">
+		const accordionOptions = {
+			debug: true
+		};
+		const accordion = new Accordion(accordionOptions);
+	</script>
+
+</body>
+</html>

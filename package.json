@@ -1,30 +1,35 @@
 {
-  "name": "accordion",
-  "version": "1.0.1",
-  "description": "",
-  "main": "accordion.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "name": "@alexspirgel/accordion",
+  "version": "2.0.0",
+  "author": "Alexander Spirgel",
+  "description": "A JavaScript class to create accordion functionality.",
+  "keywords": [
+    "accordion"
+  ],
+  "main": "src/index.js",
+  "files": [
+    "/src"
+  ],
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/alexspirgel/accordion.git"
   },
-  "author": "",
-  "license": "ISC",
+  "homepage": "https://github.com/alexspirgel/accordion#readme",
   "bugs": {
     "url": "https://github.com/alexspirgel/accordion/issues"
   },
-  "homepage": "https://github.com/alexspirgel/accordion#readme",
-  "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-sass": "^4.0.2",
-    "node-sass": "^4.9.4",
-    "sass-loader": "^7.1.0",
-    "webpack": "^4.21.0",
-    "webpack-stream": "^5.1.1"
+  "scripts": {
+    "build": "webpack"
   },
   "dependencies": {
-    "@alexspirgel/extend": "^2.0.3"
+    "@alexspirgel/extend": "^3.0.0",
+    "@alexspirgel/schema": "^1.1.4",
+    "@alexspirgel/transition-auto": "^1.0.1"
+  },
+  "devDependencies": {
+    "terser-webpack-plugin": "^3.1.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
   }
 }
