@@ -34,10 +34,14 @@ class Bundle {
 	}
 
 	set accordion(accordion) {
-		if (accordion.constructor.name !== 'Accordion') {
+		if (!(accordion instanceof require('./accordion.js'))) {
 			throw new Error('`accordion` must be an instance of the Accordion class.');
 		}
 		this._accordion = accordion;
+	}
+
+	get options() {
+		return this.accordion.options;
 	}
 
 	get element() {
@@ -45,7 +49,7 @@ class Bundle {
 	}
 
 	set element(element) {
-		if (element.nodeType !== 1) {
+		if (!this.accordion.constructor.isElement(element)) {
 			throw new Error('`element` must be an element.');
 		}
 		this._element = element;
@@ -57,6 +61,31 @@ class Bundle {
 			this._items = [];
 		}
 		return this._items;
+	}
+
+	set items(items) {
+		if (Array.isArray(items)) {
+			this._items = items;
+		}
+		else {
+			throw new Error('`items` must be an array.');
+		}
+		return this._items;
+	}
+
+	addItem(item) {
+		if (!(item instanceof Item)) {
+			throw new Error('`item` must be an instance of the Item class.');
+		}
+		const existingItem = this.items.find((existingItem) => {
+			return existingItem.element === item.element;
+		});
+		if (existingItem) {
+			this.debug('Item was already added.');
+			return false;
+		}
+		this.items.push(item);
+		return true;
 	}
 
 }
