@@ -1,31 +1,28 @@
+const AccordionError = require('./accordion-error.js');
 const Item = require('./item.js');
 
 class Bundle {
 
-	static get instanceCount() {
-		if (typeof this._instanceCount !== 'number') {
-			this._instanceCount = 0;
-		}
-		return this._instanceCount;
+	static get dataAttribute() {
+		return 'data-accordion-bundle';
 	}
 
-	static set instanceCount(count) {
-		if (typeof count !== 'number') {
-			throw('`instanceCount` must be a number.');
-		}
-		else {
-			return this._instanceCount = count;
-		}
+	static isBundle(bundle) {
+		return bundle instanceof this;
 	}
 
-	static instanceCountIncrement() {
-		return this.instanceCount = this.instanceCount + 1;
+	static isExistingBundleElement(element) {
+		return element.hasAttribute(this.dataAttribute);
 	}
 
 	constructor(options) {
-		this.id = this.constructor.instanceCountIncrement();
 		this.accordion = options.accordion;
 		this.element = options.element;
+		if (this.constructor.isExistingBundleElement(this.element)) {
+			throw new AccordionError('bundle-exists', 'A bundle already exists for this element.');
+		}
+		this.element.setAttribute(this.constructor.dataAttribute, '');
+		this.initializeItems();
 		return this;
 	}
 
@@ -38,6 +35,7 @@ class Bundle {
 			throw new Error('`accordion` must be an instance of the Accordion class.');
 		}
 		this._accordion = accordion;
+		return this._accordion;
 	}
 
 	get options() {
@@ -64,28 +62,21 @@ class Bundle {
 	}
 
 	set items(items) {
-		if (Array.isArray(items)) {
-			this._items = items;
-		}
-		else {
+		if (!Array.isArray(items)) {
 			throw new Error('`items` must be an array.');
 		}
+		if (!items.every(Item.isItem(item))) {
+			throw new Error('`items` must only contain Item class instances.');
+		}
+		this._items = items;
 		return this._items;
 	}
 
-	addItem(item) {
-		if (!(item instanceof Item)) {
-			throw new Error('`item` must be an instance of the Item class.');
-		}
-		const existingItem = this.items.find((existingItem) => {
-			return existingItem.element === item.element;
-		});
-		if (existingItem) {
-			this.debug('Item was already added.');
-			return false;
-		}
-		this.items.push(item);
-		return true;
+	initializeItems() {
+		let elements = this.accordion.constructor.getElementsFromInput(this.options.elements.item);
+		const nestedBundles = Array.from(this.element.querySelectorAll('[' + this.constructor.dataAttribute + ']'));
+		elements = this.accordion.constructor.filterElementsByContainers(elements, this.element, nestedBundles);
+		console.log(elements);
 	}
 
 }

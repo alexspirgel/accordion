@@ -1,8 +1,33 @@
 class Item {
 
+	static isItem(item) {
+		return item instanceof this;
+	}
+
+	static get instanceCount() {
+		if (typeof this._instanceCount !== 'number') {
+			this._instanceCount = 0;
+		}
+		return this._instanceCount;
+	}
+
+	static set instanceCount(count) {
+		if (typeof count !== 'number') {
+			throw('`instanceCount` must be a number.');
+		}
+		else {
+			return this._instanceCount = count;
+		}
+	}
+
+	static instanceCountIncrement() {
+		return this.instanceCount = this.instanceCount + 1;
+	}
+
 	constructor(options) {
 		this.bundle = options.accordion;
 		this.element = options.element;
+		this.id = this.constructor.instanceCountIncrement();
 		return this;
 	}
 

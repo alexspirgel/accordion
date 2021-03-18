@@ -123,29 +123,82 @@ class Accordion {
 		}
 	}
 
-	static getOptionElements(optionValue, elementsSet = new Set()) {
-		if (Array.isArray(optionValue)) {
-			for (let value of optionValue) {
-				this.getOptionElements(value, elementsSet);
+	static getElementsFromInput(inputValue, elementsSet = new Set()) {
+		if (Array.isArray(inputValue)) {
+			for (let value of inputValue) {
+				this.getElementsFromInput(value, elementsSet);
 			}
 		}
-		else if (typeof optionValue === 'string') {
-			let elements = document.querySelectorAll(optionValue);
-			this.getOptionElements(elements, elementsSet);
+		else if (typeof inputValue === 'string') {
+			let elements = document.querySelectorAll(inputValue);
+			this.getElementsFromInput(elements, elementsSet);
 		}
-		else if (optionValue instanceof NodeList) {
-			for (let element of optionValue) {
-				this.getOptionElements(element, elementsSet);
+		else if (inputValue instanceof NodeList) {
+			for (let element of inputValue) {
+				this.getElementsFromInput(element, elementsSet);
 			}
 		}
-		else if (optionValue instanceof Element && optionValue.nodeType === 1) {
-			elementsSet.add(optionValue);
+		else if (inputValue instanceof Element && inputValue.nodeType === 1) {
+			elementsSet.add(inputValue);
 		}
 		const optionElements = Array.from(elementsSet);
 		return optionElements;
 	}
 
-	static sortElementsByMostNested(elements) {
+	static filterElementsByContainers(elements, containedBy = [], notContainedBy = []) {
+		if (!Array.isArray(elements)) {
+			throw new Error('`elements` must be an array.');
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error('`elements` array must only contain elements.');
+		}
+		if (!this.isElement(containedBy) && !Array.isArray(containedBy)) {
+			throw new Error('`containedBy` must be an element or an array.');
+		}
+		if (Array.isArray(containedBy)) {
+			if (!containedBy.every(this.isElement)) {
+				throw new Error('`containedBy` array must only contain elements.');
+			}
+		}
+		else {
+			containedBy = [containedBy];
+		}
+		if (!this.isElement(notContainedBy) && !Array.isArray(notContainedBy)) {
+			throw new Error('`notContainedBy` must be an element or an array.');
+		}
+		if (Array.isArray(notContainedBy)) {
+			if (!notContainedBy.every(this.isElement)) {
+				throw new Error('`notContainedBy` array must only contain elements.');
+			}
+		}
+		else {
+			notContainedBy = [notContainedBy];
+		}
+		const filteredElements = [];
+		for (let element of elements) {
+			let keep = true;
+			for (let containedByElement of containedBy) {
+				if (!containedByElement.contains(element)) {
+					keep = false;
+					break;
+				}
+			}
+			if (keep) {
+				for (let notContainedByElement of notContainedBy) {
+					if (notContainedByElement.contains(element)) {
+						keep = false;
+						break;
+					}
+				}
+			}
+			if (keep) {
+				filteredElements.push(element);
+			}
+		}
+		return filteredElements;
+	}
+
+	static sortElementsByMostNestedFirst(elements) {
 		if (!Array.isArray(elements)) {
 			throw new Error('`elements` must be an array.');
 		}
@@ -211,42 +264,55 @@ class Accordion {
 	}
 
 	set bundles(bundles) {
-		if (Array.isArray(bundles)) {
-			this._bundles = bundles;
-		}
-		else {
+		if (!Array.isArray(bundles)) {
 			throw new Error('`bundles` must be an array.');
 		}
+		if (!bundles.every(Bundle.isBundle(bundle))) {
+			throw new Error('`bundles` must only contain Bundle class instances.');
+		}
+		this._bundles = bundles;
 		return this._bundles;
 	}
 
-	addBundle(bundle) {
-		if (!(bundle instanceof Bundle)) {
-			throw new Error('`bundle` must be an instance of the Bundle class.');
+	addBundle(element) {
+		try {
+			const bundle = new Bundle({
+				accordion: this,
+				element: element
+			});
+			this.bundles.push(bundle);
+			return true;
 		}
-		const existingBundle = this.bundles.find((existingBundle) => {
-			return existingBundle.element === bundle.element;
-		});
-		if (existingBundle) {
-			this.debug('Bundle was already added.');
-			return false;
+		catch (error) {
+			if (error.code = 'bundle-exists') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
 		}
-		this.bundles.push(bundle);
-		return true;
+	}
+
+	addBundles(elements) {
+		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
+			throw new Error('`elements` must be an array or node list.');
+		}
+		if (elements instanceof NodeList) {
+			elements = Array.from(elements);
+		}
+		elements = this.constructor.sortElementsByMostNestedFirst(elements);
+		for (const element of elements) {
+			this.addBundle(element);
+		}
 	}
 
 	initializeBundles() {
-		let bundleElements = this.constructor.getOptionElements(this.options.elements.bundle);
-		bundleElements = this.constructor.sortElementsByMostNested(bundleElements);
-		console.log(bundleElements);
-		
-		// for (const bundleElement of bundleElements) {
-		// 	this.addBundle(new Bundle({
-		// 		accordion: this,
-		// 		element: bundleElement
-		// 	}));
-		// }
+		let elements = this.constructor.getElementsFromInput(this.options.elements.bundle);
+		this.addBundles(elements);
 	}
+
+	destroy() {}
 
 	debug(...messages) {
 		if (this.options.debug) {

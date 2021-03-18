@@ -86,7 +86,7 @@ var Accordion =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -201,7 +201,330 @@ module.exports = ValidationError;
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Accordion = __webpack_require__(7);
+const extend = __webpack_require__(0);
+const Schema = __webpack_require__(6);
+const Bundle = __webpack_require__(4);
+
+class Accordion {
+
+	static get optionsDefault() {
+		return {
+			elements: {
+				bundle: '.accordion',
+				item: '.accordion__item',
+				trigger: '.accordion__trigger',
+				content: '.accordion__content',
+				container: '.accordion__container'
+			},
+			accessibilityWarnings: true,
+			closeNestedItems: false,
+			defaultOpenItems: null,
+			inlineStyles: true,
+			multipleOpenItems: true,
+			openAnchoredItems: true,
+			debug: false
+		};
+	}
+
+	static get optionsSchema () {
+		const elementsModel = [
+			{
+				type: 'string'
+			},
+			{
+				type: 'object',
+				instanceOf: [Element, NodeList]
+			},
+			{
+				type: 'array',
+				allPropertySchema: [
+					{
+						type: 'string'
+					},
+					{
+						type: 'object',
+						instanceOf: [Element, NodeList]
+					}
+				]
+			}
+		];
+		const optionsModel = {
+			type: 'object',
+			allowUnvalidatedProperties: false,
+			propertySchema: {
+				elements: {
+					type: 'object',
+					allowUnvalidatedProperties: false,
+					propertySchema: {
+						bundle: elementsModel,
+						item: elementsModel,
+						trigger: elementsModel,
+						content: elementsModel,
+						container: elementsModel
+					}
+				},
+				accessibilityWarnings: {
+					type: 'boolean'
+				},
+				closeNestedItems: {
+					type: 'boolean'
+				},
+				defaultOpenItems: [
+					{
+						type: 'string'
+					},
+					{
+						type: 'number',
+						greaterThanOrEqualTo: 0,
+						divisibleBy: 1
+					},
+					{
+						type: 'object',
+						instanceOf: [Element, NodeList]
+					},
+					{
+						type: 'array',
+						allPropertySchema: [
+							{
+								type: 'string'
+							},
+							{
+								type: 'number',
+								greaterThanOrEqualTo: 0,
+								divisibleBy: 1
+							},
+							{
+								type: 'object',
+								instanceOf: [Element, NodeList]
+							}
+						]
+					}
+				],
+				inlineStyles: {
+					type: 'boolean'
+				},
+				multipleOpenItems: {
+					type: 'boolean'
+				},
+				openAnchoredItems: {
+					type: 'boolean'
+				},
+				debug: {
+					type: 'boolean'
+				}
+			}
+		};
+		return new Schema(optionsModel);
+	}
+
+	static isElement(element) {
+		if (element instanceof Element && element.nodeType === 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	static getElementsFromInput(inputValue, elementsSet = new Set()) {
+		if (Array.isArray(inputValue)) {
+			for (let value of inputValue) {
+				this.getElementsFromInput(value, elementsSet);
+			}
+		}
+		else if (typeof inputValue === 'string') {
+			let elements = document.querySelectorAll(inputValue);
+			this.getElementsFromInput(elements, elementsSet);
+		}
+		else if (inputValue instanceof NodeList) {
+			for (let element of inputValue) {
+				this.getElementsFromInput(element, elementsSet);
+			}
+		}
+		else if (inputValue instanceof Element && inputValue.nodeType === 1) {
+			elementsSet.add(inputValue);
+		}
+		const optionElements = Array.from(elementsSet);
+		return optionElements;
+	}
+
+	static filterElementsByContainers(elements, containedBy = [], notContainedBy = []) {
+		if (!Array.isArray(elements)) {
+			throw new Error('`elements` must be an array.');
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error('`elements` array must only contain elements.');
+		}
+		if (!this.isElement(containedBy) && !Array.isArray(containedBy)) {
+			throw new Error('`containedBy` must be an element or an array.');
+		}
+		if (Array.isArray(containedBy)) {
+			if (!containedBy.every(this.isElement)) {
+				throw new Error('`containedBy` array must only contain elements.');
+			}
+		}
+		else {
+			containedBy = [containedBy];
+		}
+		if (!this.isElement(notContainedBy) && !Array.isArray(notContainedBy)) {
+			throw new Error('`notContainedBy` must be an element or an array.');
+		}
+		if (Array.isArray(notContainedBy)) {
+			if (!notContainedBy.every(this.isElement)) {
+				throw new Error('`notContainedBy` array must only contain elements.');
+			}
+		}
+		else {
+			notContainedBy = [notContainedBy];
+		}
+		const filteredElements = [];
+		for (let element of elements) {
+			let keep = true;
+			for (let containedByElement of containedBy) {
+				if (!containedByElement.contains(element)) {
+					keep = false;
+					break;
+				}
+			}
+			if (keep) {
+				for (let notContainedByElement of notContainedBy) {
+					if (notContainedByElement.contains(element)) {
+						keep = false;
+						break;
+					}
+				}
+			}
+			if (keep) {
+				filteredElements.push(element);
+			}
+		}
+		return filteredElements;
+	}
+
+	static sortElementsByMostNestedFirst(elements) {
+		if (!Array.isArray(elements)) {
+			throw new Error('`elements` must be an array.');
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error('`elements` array must only contain elements.');
+		}
+		const elementsMapContainedElements = elements.map((mapElement, mapIndex) => {
+			const contains = new Set();
+			elements.forEach((element, index) => {
+				if (mapIndex !== index) {
+					if (mapElement.contains(element)) {
+						contains.add(element);
+					}
+				}
+			});
+			return {
+				'element': mapElement,
+				'contains': contains
+			};
+		});
+		elementsMapContainedElements.sort((a, b) => {
+			if (a.contains.size < b.contains.size) {
+				return -1;
+			}
+			else if (a.contains.size > b.contains.size) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		});
+		const sortedElements = elementsMapContainedElements.map((mapElement) => {
+			return mapElement.element;
+		});
+		return sortedElements;
+	}
+	
+	constructor(options) {
+		this.options = options;
+		this.initializeBundles();
+		this.debug(this);
+		return this;
+	}
+
+	get options() {
+		if (this._options === undefined || this._options === null) {
+			this._options = extend({}, this.constructor.optionsDefault);
+		}
+		return this._options;
+	}
+
+	set options(options) {
+		this.constructor.optionsSchema.validate(options);
+		this._options = extend(this.options, options);
+		return this._options;
+	}
+
+	get bundles() {
+		if (!this._bundles) {
+			this._bundles = [];
+		}
+		return this._bundles;
+	}
+
+	set bundles(bundles) {
+		if (!Array.isArray(bundles)) {
+			throw new Error('`bundles` must be an array.');
+		}
+		if (!bundles.every(Bundle.isBundle(bundle))) {
+			throw new Error('`bundles` must only contain Bundle class instances.');
+		}
+		this._bundles = bundles;
+		return this._bundles;
+	}
+
+	addBundle(element) {
+		try {
+			const bundle = new Bundle({
+				accordion: this,
+				element: element
+			});
+			this.bundles.push(bundle);
+			return true;
+		}
+		catch (error) {
+			if (error.code = 'bundle-exists') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+	}
+
+	addBundles(elements) {
+		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
+			throw new Error('`elements` must be an array or node list.');
+		}
+		if (elements instanceof NodeList) {
+			elements = Array.from(elements);
+		}
+		elements = this.constructor.sortElementsByMostNestedFirst(elements);
+		for (const element of elements) {
+			this.addBundle(element);
+		}
+	}
+
+	initializeBundles() {
+		let elements = this.constructor.getElementsFromInput(this.options.elements.bundle);
+		this.addBundles(elements);
+	}
+
+	destroy() {}
+
+	debug(...messages) {
+		if (this.options.debug) {
+			console.log('Accordion Debug:', ...messages);
+		}
+	}
+
+}
+
 module.exports = Accordion;
 
 /***/ }),
@@ -288,10 +611,106 @@ module.exports = DataPathManager;
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
+const AccordionError = __webpack_require__(10);
+const Item = __webpack_require__(9);
+
+class Bundle {
+
+	static get dataAttribute() {
+		return 'data-accordion-bundle';
+	}
+
+	static isBundle(bundle) {
+		return bundle instanceof this;
+	}
+
+	static isExistingBundleElement(element) {
+		return element.hasAttribute(this.dataAttribute);
+	}
+
+	constructor(options) {
+		this.accordion = options.accordion;
+		this.element = options.element;
+		if (this.constructor.isExistingBundleElement(this.element)) {
+			throw new AccordionError('bundle-exists', 'A bundle already exists for this element.');
+		}
+		this.element.setAttribute(this.constructor.dataAttribute, '');
+		this.initializeItems();
+		return this;
+	}
+
+	get accordion() {
+		return this._accordion;
+	}
+
+	set accordion(accordion) {
+		if (!(accordion instanceof __webpack_require__(2))) {
+			throw new Error('`accordion` must be an instance of the Accordion class.');
+		}
+		this._accordion = accordion;
+		return this._accordion;
+	}
+
+	get options() {
+		return this.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.accordion.constructor.isElement(element)) {
+			throw new Error('`element` must be an element.');
+		}
+		this._element = element;
+		return this._element;
+	}
+
+	get items() {
+		if (!this._items) {
+			this._items = [];
+		}
+		return this._items;
+	}
+
+	set items(items) {
+		if (!Array.isArray(items)) {
+			throw new Error('`items` must be an array.');
+		}
+		if (!items.every(Item.isItem(item))) {
+			throw new Error('`items` must only contain Item class instances.');
+		}
+		this._items = items;
+		return this._items;
+	}
+
+	initializeItems() {
+		let elements = this.accordion.constructor.getElementsFromInput(this.options.elements.item);
+		const nestedBundles = Array.from(this.element.querySelectorAll('[' + this.constructor.dataAttribute + ']'));
+		elements = this.accordion.constructor.filterElementsByContainers(elements, this.element, nestedBundles);
+		console.log(elements);
+	}
+
+}
+
+module.exports = Bundle;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Accordion = __webpack_require__(2);
+module.exports = Accordion;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
 const DataPathManager = __webpack_require__(3);
 const ValidationError = __webpack_require__(1);
-const ValidationErrors = __webpack_require__(5);
-const modelModel = __webpack_require__(6);
+const ValidationErrors = __webpack_require__(7);
+const modelModel = __webpack_require__(8);
 
 class Schema {
 	
@@ -700,7 +1119,7 @@ Schema.ValidationError = ValidationError;
 module.exports = Schema;
 
 /***/ }),
-/* 5 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const ValidationError = __webpack_require__(1);
@@ -754,7 +1173,7 @@ class ValidationErrors {
 module.exports = ValidationErrors;
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const extend = __webpack_require__(0);
@@ -894,276 +1313,14 @@ modelPropertySchema.propertySchema.allPropertySchema = model;
 module.exports = model;
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(0);
-const Schema = __webpack_require__(4);
-const Bundle = __webpack_require__(8);
+class Item {
 
-class Accordion {
-
-	static get optionsDefault() {
-		return {
-			elements: {
-				bundle: '.accordion',
-				item: '.accordion__item',
-				trigger: '.accordion__trigger',
-				content: '.accordion__content',
-				container: '.accordion__container'
-			},
-			accessibilityWarnings: true,
-			closeNestedItems: false,
-			defaultOpenItems: null,
-			inlineStyles: true,
-			multipleOpenItems: true,
-			openAnchoredItems: true,
-			debug: false
-		};
+	static isItem(item) {
+		return item instanceof this;
 	}
-
-	static get optionsSchema () {
-		const elementsModel = [
-			{
-				type: 'string'
-			},
-			{
-				type: 'object',
-				instanceOf: [Element, NodeList]
-			},
-			{
-				type: 'array',
-				allPropertySchema: [
-					{
-						type: 'string'
-					},
-					{
-						type: 'object',
-						instanceOf: [Element, NodeList]
-					}
-				]
-			}
-		];
-		const optionsModel = {
-			type: 'object',
-			allowUnvalidatedProperties: false,
-			propertySchema: {
-				elements: {
-					type: 'object',
-					allowUnvalidatedProperties: false,
-					propertySchema: {
-						bundle: elementsModel,
-						item: elementsModel,
-						trigger: elementsModel,
-						content: elementsModel,
-						container: elementsModel
-					}
-				},
-				accessibilityWarnings: {
-					type: 'boolean'
-				},
-				closeNestedItems: {
-					type: 'boolean'
-				},
-				defaultOpenItems: [
-					{
-						type: 'string'
-					},
-					{
-						type: 'number',
-						greaterThanOrEqualTo: 0,
-						divisibleBy: 1
-					},
-					{
-						type: 'object',
-						instanceOf: [Element, NodeList]
-					},
-					{
-						type: 'array',
-						allPropertySchema: [
-							{
-								type: 'string'
-							},
-							{
-								type: 'number',
-								greaterThanOrEqualTo: 0,
-								divisibleBy: 1
-							},
-							{
-								type: 'object',
-								instanceOf: [Element, NodeList]
-							}
-						]
-					}
-				],
-				inlineStyles: {
-					type: 'boolean'
-				},
-				multipleOpenItems: {
-					type: 'boolean'
-				},
-				openAnchoredItems: {
-					type: 'boolean'
-				},
-				debug: {
-					type: 'boolean'
-				}
-			}
-		};
-		return new Schema(optionsModel);
-	}
-
-	static isElement(element) {
-		if (element instanceof Element && element.nodeType === 1) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	static getOptionElements(optionValue, elementsSet = new Set()) {
-		if (Array.isArray(optionValue)) {
-			for (let value of optionValue) {
-				this.getOptionElements(value, elementsSet);
-			}
-		}
-		else if (typeof optionValue === 'string') {
-			let elements = document.querySelectorAll(optionValue);
-			this.getOptionElements(elements, elementsSet);
-		}
-		else if (optionValue instanceof NodeList) {
-			for (let element of optionValue) {
-				this.getOptionElements(element, elementsSet);
-			}
-		}
-		else if (optionValue instanceof Element && optionValue.nodeType === 1) {
-			elementsSet.add(optionValue);
-		}
-		const optionElements = Array.from(elementsSet);
-		return optionElements;
-	}
-
-	static sortElementsByMostNested(elements) {
-		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
-		}
-		const elementsMapContainedElements = elements.map((mapElement, mapIndex) => {
-			const contains = new Set();
-			elements.forEach((element, index) => {
-				if (mapIndex !== index) {
-					if (mapElement.contains(element)) {
-						contains.add(element);
-					}
-				}
-			});
-			return {
-				'element': mapElement,
-				'contains': contains
-			};
-		});
-		elementsMapContainedElements.sort((a, b) => {
-			if (a.contains.size < b.contains.size) {
-				return -1;
-			}
-			else if (a.contains.size > b.contains.size) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		});
-		const sortedElements = elementsMapContainedElements.map((mapElement) => {
-			return mapElement.element;
-		});
-		return sortedElements;
-	}
-	
-	constructor(options) {
-		this.options = options;
-		this.initializeBundles();
-		this.debug(this);
-		return this;
-	}
-
-	get options() {
-		if (this._options === undefined || this._options === null) {
-			this._options = extend({}, this.constructor.optionsDefault);
-		}
-		return this._options;
-	}
-
-	set options(options) {
-		this.constructor.optionsSchema.validate(options);
-		this._options = extend(this.options, options);
-		return this._options;
-	}
-
-	get bundles() {
-		if (!this._bundles) {
-			this._bundles = [];
-		}
-		return this._bundles;
-	}
-
-	set bundles(bundles) {
-		if (Array.isArray(bundles)) {
-			this._bundles = bundles;
-		}
-		else {
-			throw new Error('`bundles` must be an array.');
-		}
-		return this._bundles;
-	}
-
-	addBundle(bundle) {
-		if (!(bundle instanceof Bundle)) {
-			throw new Error('`bundle` must be an instance of the Bundle class.');
-		}
-		const existingBundle = this.bundles.find((existingBundle) => {
-			return existingBundle.element === bundle.element;
-		});
-		if (existingBundle) {
-			this.debug('Bundle was already added.');
-			return false;
-		}
-		this.bundles.push(bundle);
-		return true;
-	}
-
-	initializeBundles() {
-		let bundleElements = this.constructor.getOptionElements(this.options.elements.bundle);
-		bundleElements = this.constructor.sortElementsByMostNested(bundleElements);
-		console.log(bundleElements);
-		
-		// for (const bundleElement of bundleElements) {
-		// 	this.addBundle(new Bundle({
-		// 		accordion: this,
-		// 		element: bundleElement
-		// 	}));
-		// }
-	}
-
-	debug(...messages) {
-		if (this.options.debug) {
-			console.log('Accordion Debug:', ...messages);
-		}
-	}
-
-}
-
-module.exports = Accordion;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Item = __webpack_require__(9);
-
-class Bundle {
 
 	static get instanceCount() {
 		if (typeof this._instanceCount !== 'number') {
@@ -1186,84 +1343,9 @@ class Bundle {
 	}
 
 	constructor(options) {
-		this.id = this.constructor.instanceCountIncrement();
-		this.accordion = options.accordion;
-		this.element = options.element;
-		return this;
-	}
-
-	get accordion() {
-		return this._accordion;
-	}
-
-	set accordion(accordion) {
-		if (!(accordion instanceof __webpack_require__(7))) {
-			throw new Error('`accordion` must be an instance of the Accordion class.');
-		}
-		this._accordion = accordion;
-	}
-
-	get options() {
-		return this.accordion.options;
-	}
-
-	get element() {
-		return this._element;
-	}
-
-	set element(element) {
-		if (!this.accordion.constructor.isElement(element)) {
-			throw new Error('`element` must be an element.');
-		}
-		this._element = element;
-		return this._element;
-	}
-
-	get items() {
-		if (!this._items) {
-			this._items = [];
-		}
-		return this._items;
-	}
-
-	set items(items) {
-		if (Array.isArray(items)) {
-			this._items = items;
-		}
-		else {
-			throw new Error('`items` must be an array.');
-		}
-		return this._items;
-	}
-
-	addItem(item) {
-		if (!(item instanceof Item)) {
-			throw new Error('`item` must be an instance of the Item class.');
-		}
-		const existingItem = this.items.find((existingItem) => {
-			return existingItem.element === item.element;
-		});
-		if (existingItem) {
-			this.debug('Item was already added.');
-			return false;
-		}
-		this.items.push(item);
-		return true;
-	}
-
-}
-
-module.exports = Bundle;
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-class Item {
-
-	constructor(options) {
 		this.bundle = options.accordion;
 		this.element = options.element;
+		this.id = this.constructor.instanceCountIncrement();
 		return this;
 	}
 
@@ -1272,7 +1354,7 @@ class Item {
 	}
 
 	set bundle(bundle) {
-		if (!(bundle instanceof __webpack_require__(8))) {
+		if (!(bundle instanceof __webpack_require__(4))) {
 			throw new Error('`bundle` must be an instance of the Bundle class.');
 		}
 		this._bundle = bundle;
@@ -1297,6 +1379,23 @@ class Item {
 }
 
 module.exports = Item;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
+
+class AccordionError extends Error {
+  constructor(code, ...params) {
+    super(...params);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AccordionError);
+    }
+    this.code = code;
+    this.message = params[0];
+  }
+}
+
+module.exports = AccordionError;
 
 /***/ })
 /******/ ]);
