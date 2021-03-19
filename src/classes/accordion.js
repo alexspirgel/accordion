@@ -1,8 +1,9 @@
+const Base = require('./base.js');
 const extend = require('@alexspirgel/extend');
 const Schema = require('@alexspirgel/schema');
 const Bundle = require('./bundle.js');
 
-class Accordion {
+module.exports = class Accordion extends Base {
 
 	static get optionsDefault() {
 		return {
@@ -113,130 +114,9 @@ class Accordion {
 		};
 		return new Schema(optionsModel);
 	}
-
-	static isElement(element) {
-		if (element instanceof Element && element.nodeType === 1) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	static getElementsFromInput(inputValue, elementsSet = new Set()) {
-		if (Array.isArray(inputValue)) {
-			for (let value of inputValue) {
-				this.getElementsFromInput(value, elementsSet);
-			}
-		}
-		else if (typeof inputValue === 'string') {
-			let elements = document.querySelectorAll(inputValue);
-			this.getElementsFromInput(elements, elementsSet);
-		}
-		else if (inputValue instanceof NodeList) {
-			for (let element of inputValue) {
-				this.getElementsFromInput(element, elementsSet);
-			}
-		}
-		else if (inputValue instanceof Element && inputValue.nodeType === 1) {
-			elementsSet.add(inputValue);
-		}
-		const optionElements = Array.from(elementsSet);
-		return optionElements;
-	}
-
-	static filterElementsByContainers(elements, containedBy = [], notContainedBy = []) {
-		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
-		}
-		if (!this.isElement(containedBy) && !Array.isArray(containedBy)) {
-			throw new Error('`containedBy` must be an element or an array.');
-		}
-		if (Array.isArray(containedBy)) {
-			if (!containedBy.every(this.isElement)) {
-				throw new Error('`containedBy` array must only contain elements.');
-			}
-		}
-		else {
-			containedBy = [containedBy];
-		}
-		if (!this.isElement(notContainedBy) && !Array.isArray(notContainedBy)) {
-			throw new Error('`notContainedBy` must be an element or an array.');
-		}
-		if (Array.isArray(notContainedBy)) {
-			if (!notContainedBy.every(this.isElement)) {
-				throw new Error('`notContainedBy` array must only contain elements.');
-			}
-		}
-		else {
-			notContainedBy = [notContainedBy];
-		}
-		const filteredElements = [];
-		for (let element of elements) {
-			let keep = true;
-			for (let containedByElement of containedBy) {
-				if (!containedByElement.contains(element)) {
-					keep = false;
-					break;
-				}
-			}
-			if (keep) {
-				for (let notContainedByElement of notContainedBy) {
-					if (notContainedByElement.contains(element)) {
-						keep = false;
-						break;
-					}
-				}
-			}
-			if (keep) {
-				filteredElements.push(element);
-			}
-		}
-		return filteredElements;
-	}
-
-	static sortElementsByMostNestedFirst(elements) {
-		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
-		}
-		const elementsMapContainedElements = elements.map((mapElement, mapIndex) => {
-			const contains = new Set();
-			elements.forEach((element, index) => {
-				if (mapIndex !== index) {
-					if (mapElement.contains(element)) {
-						contains.add(element);
-					}
-				}
-			});
-			return {
-				'element': mapElement,
-				'contains': contains
-			};
-		});
-		elementsMapContainedElements.sort((a, b) => {
-			if (a.contains.size < b.contains.size) {
-				return -1;
-			}
-			else if (a.contains.size > b.contains.size) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		});
-		const sortedElements = elementsMapContainedElements.map((mapElement) => {
-			return mapElement.element;
-		});
-		return sortedElements;
-	}
 	
 	constructor(options) {
+		super();
 		this.options = options;
 		this.initializeBundles();
 		this.debug(this);
@@ -267,7 +147,7 @@ class Accordion {
 		if (!Array.isArray(bundles)) {
 			throw new Error('`bundles` must be an array.');
 		}
-		if (!bundles.every(Bundle.isBundle(bundle))) {
+		if (!bundles.every(Bundle.isInstanceOfThis(bundle))) {
 			throw new Error('`bundles` must only contain Bundle class instances.');
 		}
 		this._bundles = bundles;
@@ -314,12 +194,4 @@ class Accordion {
 
 	destroy() {}
 
-	debug(...messages) {
-		if (this.options.debug) {
-			console.log('Accordion Debug:', ...messages);
-		}
-	}
-
-}
-
-module.exports = Accordion;
+};

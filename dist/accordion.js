@@ -201,11 +201,12 @@ module.exports = ValidationError;
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
+const Base = __webpack_require__(11);
 const extend = __webpack_require__(0);
 const Schema = __webpack_require__(6);
 const Bundle = __webpack_require__(4);
 
-class Accordion {
+module.exports = class Accordion extends Base {
 
 	static get optionsDefault() {
 		return {
@@ -316,130 +317,9 @@ class Accordion {
 		};
 		return new Schema(optionsModel);
 	}
-
-	static isElement(element) {
-		if (element instanceof Element && element.nodeType === 1) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	static getElementsFromInput(inputValue, elementsSet = new Set()) {
-		if (Array.isArray(inputValue)) {
-			for (let value of inputValue) {
-				this.getElementsFromInput(value, elementsSet);
-			}
-		}
-		else if (typeof inputValue === 'string') {
-			let elements = document.querySelectorAll(inputValue);
-			this.getElementsFromInput(elements, elementsSet);
-		}
-		else if (inputValue instanceof NodeList) {
-			for (let element of inputValue) {
-				this.getElementsFromInput(element, elementsSet);
-			}
-		}
-		else if (inputValue instanceof Element && inputValue.nodeType === 1) {
-			elementsSet.add(inputValue);
-		}
-		const optionElements = Array.from(elementsSet);
-		return optionElements;
-	}
-
-	static filterElementsByContainers(elements, containedBy = [], notContainedBy = []) {
-		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
-		}
-		if (!this.isElement(containedBy) && !Array.isArray(containedBy)) {
-			throw new Error('`containedBy` must be an element or an array.');
-		}
-		if (Array.isArray(containedBy)) {
-			if (!containedBy.every(this.isElement)) {
-				throw new Error('`containedBy` array must only contain elements.');
-			}
-		}
-		else {
-			containedBy = [containedBy];
-		}
-		if (!this.isElement(notContainedBy) && !Array.isArray(notContainedBy)) {
-			throw new Error('`notContainedBy` must be an element or an array.');
-		}
-		if (Array.isArray(notContainedBy)) {
-			if (!notContainedBy.every(this.isElement)) {
-				throw new Error('`notContainedBy` array must only contain elements.');
-			}
-		}
-		else {
-			notContainedBy = [notContainedBy];
-		}
-		const filteredElements = [];
-		for (let element of elements) {
-			let keep = true;
-			for (let containedByElement of containedBy) {
-				if (!containedByElement.contains(element)) {
-					keep = false;
-					break;
-				}
-			}
-			if (keep) {
-				for (let notContainedByElement of notContainedBy) {
-					if (notContainedByElement.contains(element)) {
-						keep = false;
-						break;
-					}
-				}
-			}
-			if (keep) {
-				filteredElements.push(element);
-			}
-		}
-		return filteredElements;
-	}
-
-	static sortElementsByMostNestedFirst(elements) {
-		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
-		}
-		const elementsMapContainedElements = elements.map((mapElement, mapIndex) => {
-			const contains = new Set();
-			elements.forEach((element, index) => {
-				if (mapIndex !== index) {
-					if (mapElement.contains(element)) {
-						contains.add(element);
-					}
-				}
-			});
-			return {
-				'element': mapElement,
-				'contains': contains
-			};
-		});
-		elementsMapContainedElements.sort((a, b) => {
-			if (a.contains.size < b.contains.size) {
-				return -1;
-			}
-			else if (a.contains.size > b.contains.size) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		});
-		const sortedElements = elementsMapContainedElements.map((mapElement) => {
-			return mapElement.element;
-		});
-		return sortedElements;
-	}
 	
 	constructor(options) {
+		super();
 		this.options = options;
 		this.initializeBundles();
 		this.debug(this);
@@ -470,7 +350,7 @@ class Accordion {
 		if (!Array.isArray(bundles)) {
 			throw new Error('`bundles` must be an array.');
 		}
-		if (!bundles.every(Bundle.isBundle(bundle))) {
+		if (!bundles.every(Bundle.isInstanceOfThis(bundle))) {
 			throw new Error('`bundles` must only contain Bundle class instances.');
 		}
 		this._bundles = bundles;
@@ -517,15 +397,7 @@ class Accordion {
 
 	destroy() {}
 
-	debug(...messages) {
-		if (this.options.debug) {
-			console.log('Accordion Debug:', ...messages);
-		}
-	}
-
-}
-
-module.exports = Accordion;
+};
 
 /***/ }),
 /* 3 */
@@ -611,28 +483,22 @@ module.exports = DataPathManager;
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const AccordionError = __webpack_require__(10);
+const Base = __webpack_require__(11);
+const CodedError = __webpack_require__(10);
 const Item = __webpack_require__(9);
 
-class Bundle {
+module.exports = class Bundle extends Base {
 
 	static get dataAttribute() {
-		return 'data-accordion-bundle';
-	}
-
-	static isBundle(bundle) {
-		return bundle instanceof this;
-	}
-
-	static isExistingBundleElement(element) {
-		return element.hasAttribute(this.dataAttribute);
+		return 'data-accordion';
 	}
 
 	constructor(options) {
+		super();
 		this.accordion = options.accordion;
 		this.element = options.element;
-		if (this.constructor.isExistingBundleElement(this.element)) {
-			throw new AccordionError('bundle-exists', 'A bundle already exists for this element.');
+		if (this.constructor.isElementInitialized(this.element)) {
+			throw new CodedError('bundle-exists', 'A bundle already exists for this element.');
 		}
 		this.element.setAttribute(this.constructor.dataAttribute, '');
 		this.initializeItems();
@@ -660,7 +526,7 @@ class Bundle {
 	}
 
 	set element(element) {
-		if (!this.accordion.constructor.isElement(element)) {
+		if (!this.constructor.isElement(element)) {
 			throw new Error('`element` must be an element.');
 		}
 		this._element = element;
@@ -678,30 +544,59 @@ class Bundle {
 		if (!Array.isArray(items)) {
 			throw new Error('`items` must be an array.');
 		}
-		if (!items.every(Item.isItem(item))) {
+		if (!items.every(Item.isInstanceOfThis(item))) {
 			throw new Error('`items` must only contain Item class instances.');
 		}
 		this._items = items;
 		return this._items;
 	}
 
-	initializeItems() {
-		let elements = this.accordion.constructor.getElementsFromInput(this.options.elements.item);
-		const nestedBundles = Array.from(this.element.querySelectorAll('[' + this.constructor.dataAttribute + ']'));
-		elements = this.accordion.constructor.filterElementsByContainers(elements, this.element, nestedBundles);
-		console.log(elements);
+	addItem(element) {
+		try {
+			const item = new Item({
+				bundle: this,
+				element: element
+			});
+			this.items.push(item);
+			return true;
+		}
+		catch (error) {
+			if (error.code = 'item-exists') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+	}
+	
+	addItems(elements) {
+		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
+			throw new Error('`elements` must be an array or node list.');
+		}
+		if (elements instanceof NodeList) {
+			elements = Array.from(elements);
+		}
+		for (const element of elements) {
+			this.addItem(element);
+		}
 	}
 
-}
+	initializeItems() {
+		let elements = this.constructor.getElementsFromInput(this.options.elements.item);
+		const nestedBundles = this.element.querySelectorAll('[' + this.constructor.dataAttribute + ']');
+		elements = this.constructor.filterElementsByContainers(elements, this.element, nestedBundles);
+		this.addItems(elements);
+	}
 
-module.exports = Bundle;
+};
 
 /***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Accordion = __webpack_require__(2);
-module.exports = Accordion;
+module.exports = __webpack_require__(2);
 
 /***/ }),
 /* 6 */
@@ -1316,10 +1211,13 @@ module.exports = model;
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
-class Item {
+const Base = __webpack_require__(11);
+const CodedError = __webpack_require__(10);
 
-	static isItem(item) {
-		return item instanceof this;
+module.exports = class Item extends Base {
+
+	static get dataAttribute() {
+		return 'data-accordion-item';
 	}
 
 	static get instanceCount() {
@@ -1343,8 +1241,12 @@ class Item {
 	}
 
 	constructor(options) {
-		this.bundle = options.accordion;
+		super();
+		this.bundle = options.bundle;
 		this.element = options.element;
+		if (this.constructor.isElementInitialized(this.element)) {
+			throw new CodedError('item-exists', 'An item already exists for this element.');
+		}
 		this.id = this.constructor.instanceCountIncrement();
 		return this;
 	}
@@ -1369,33 +1271,157 @@ class Item {
 	}
 
 	set element(element) {
-		if (!this.bundle.accordion.constructor.isElement(element)) {
+		if (!this.constructor.isElement(element)) {
 			throw new Error('`element` must be an element.');
 		}
 		this._element = element;
 		return this._element;
 	}
 
-}
-
-module.exports = Item;
+};
 
 /***/ }),
 /* 10 */
 /***/ (function(module, exports) {
 
-class AccordionError extends Error {
+module.exports = class CodedError extends Error {
   constructor(code, ...params) {
     super(...params);
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, AccordionError);
+      Error.captureStackTrace(this, CodedError);
     }
     this.code = code;
-    this.message = params[0];
   }
-}
+};
 
-module.exports = AccordionError;
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
+
+module.exports = class Base {
+
+	static get dataAttribute() {
+		return '';
+	}
+
+	static isInstanceOfThis(instance) {
+		return instance instanceof this;
+	}
+
+	static isElementInitialized(element) {
+		return element.hasAttribute(this.dataAttribute);
+	}
+	
+	static isElement(element) {
+		if (element instanceof Element && element.nodeType === 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	static getElementsFromInput(inputValue, elementsSet = new Set()) {
+		if (Array.isArray(inputValue) || inputValue instanceof NodeList) {
+			for (let value of inputValue) {
+				this.getElementsFromInput(value, elementsSet);
+			}
+		}
+		else if (typeof inputValue === 'string') {
+			let elements = document.querySelectorAll(inputValue);
+			this.getElementsFromInput(elements, elementsSet);
+		}
+		else if (this.isElement(inputValue)) {
+			elementsSet.add(inputValue);
+		}
+		const optionElements = Array.from(elementsSet);
+		return optionElements;
+	}
+
+	static filterElementsByContainers(elements, containedBy = [], notContainedBy = []) {
+		if (!Array.isArray(elements)) {
+			throw new Error('`elements` must be an array.');
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error('`elements` array must only contain elements.');
+		}
+		containedBy = this.getElementsFromInput(containedBy);
+		notContainedBy = this.getElementsFromInput(notContainedBy);
+		const filteredElements = [];
+		for (let element of elements) {
+			let keep = true;
+			for (let containedByElement of containedBy) {
+				if (!containedByElement.contains(element)) {
+					keep = false;
+					break;
+				}
+			}
+			if (keep) {
+				for (let notContainedByElement of notContainedBy) {
+					if (notContainedByElement.contains(element)) {
+						keep = false;
+						break;
+					}
+				}
+			}
+			if (keep) {
+				filteredElements.push(element);
+			}
+		}
+		return filteredElements;
+	}
+
+	static sortElementsByMostNestedFirst(elements) {
+		if (!Array.isArray(elements)) {
+			throw new Error('`elements` must be an array.');
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error('`elements` array must only contain elements.');
+		}
+		const elementsMapContainedElements = elements.map((mapElement, mapIndex) => {
+			const contains = new Set();
+			elements.forEach((element, index) => {
+				if (mapIndex !== index) {
+					if (mapElement.contains(element)) {
+						contains.add(element);
+					}
+				}
+			});
+			return {
+				'element': mapElement,
+				'contains': contains
+			};
+		});
+		elementsMapContainedElements.sort((a, b) => {
+			if (a.contains.size < b.contains.size) {
+				return -1;
+			}
+			else if (a.contains.size > b.contains.size) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		});
+		const sortedElements = elementsMapContainedElements.map((mapElement) => {
+			return mapElement.element;
+		});
+		return sortedElements;
+	}
+
+	constructor() {}
+
+	get options() {
+		return {};
+	}
+
+	debug(...messages) {
+		if (this.options.debug) {
+			console.log('Accordion Debug:', ...messages);
+		}
+	}
+
+};
 
 /***/ })
 /******/ ]);

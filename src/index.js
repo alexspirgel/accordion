@@ -1,2 +1,1 @@
-const Accordion = require('./classes/accordion.js');
-module.exports = Accordion;
+module.exports = require('./classes/accordion.js');

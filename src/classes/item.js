@@ -1,7 +1,10 @@
-class Item {
+const Base = require('./base.js');
+const CodedError = require('./coded-error.js');
 
-	static isItem(item) {
-		return item instanceof this;
+module.exports = class Item extends Base {
+
+	static get dataAttribute() {
+		return 'data-accordion-item';
 	}
 
 	static get instanceCount() {
@@ -25,8 +28,12 @@ class Item {
 	}
 
 	constructor(options) {
-		this.bundle = options.accordion;
+		super();
+		this.bundle = options.bundle;
 		this.element = options.element;
+		if (this.constructor.isElementInitialized(this.element)) {
+			throw new CodedError('item-exists', 'An item already exists for this element.');
+		}
 		this.id = this.constructor.instanceCountIncrement();
 		return this;
 	}
@@ -51,13 +58,11 @@ class Item {
 	}
 
 	set element(element) {
-		if (!this.bundle.accordion.constructor.isElement(element)) {
+		if (!this.constructor.isElement(element)) {
 			throw new Error('`element` must be an element.');
 		}
 		this._element = element;
 		return this._element;
 	}
 
-}
-
-module.exports = Item;
+};
