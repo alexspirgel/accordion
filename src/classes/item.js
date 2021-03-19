@@ -1,5 +1,6 @@
 const Base = require('./base.js');
 const CodedError = require('./coded-error.js');
+const Trigger = require('./trigger.js');
 
 module.exports = class Item extends Base {
 
@@ -27,14 +28,16 @@ module.exports = class Item extends Base {
 		return this.instanceCount = this.instanceCount + 1;
 	}
 
-	constructor(options) {
+	constructor(parameters) {
 		super();
-		this.bundle = options.bundle;
-		this.element = options.element;
+		this.bundle = parameters.bundle;
+		this.element = parameters.element;
 		if (this.constructor.isElementInitialized(this.element)) {
 			throw new CodedError('item-exists', 'An item already exists for this element.');
 		}
 		this.id = this.constructor.instanceCountIncrement();
+		this.element.setAttribute(this.constructor.dataAttribute, '');
+		this.initializeTriggers();
 		return this;
 	}
 
@@ -63,6 +66,63 @@ module.exports = class Item extends Base {
 		}
 		this._element = element;
 		return this._element;
+	}
+
+	get triggers() {
+		if (!this._triggers) {
+			this._triggers = [];
+		}
+		return this._triggers;
+	}
+
+	set triggers(triggers) {
+		if (!Array.isArray(triggers)) {
+			throw new Error('`triggers` must be an array.');
+		}
+		if (!triggers.every(Trigger.isInstanceOfThis)) {
+			throw new Error('`triggers` must only contain Trigger class instances.');
+		}
+		this._triggers = triggers;
+		return this._bundles;
+	}
+
+	addTrigger(element) {
+		try {
+			const trigger = new Trigger({
+				item: this,
+				element: element
+			});
+			this.triggers.push(trigger);
+			return true;
+		}
+		catch (error) {
+			if (error.code = 'trigger-exists') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+	}
+
+	addTriggers(elements) {
+		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
+			throw new Error('`elements` must be an array or node list.');
+		}
+		if (elements instanceof NodeList) {
+			elements = Array.from(elements);
+		}
+		for (const element of elements) {
+			this.addTrigger(element);
+		}
+	}
+
+	initializeTriggers() {
+		let elements = this.constructor.getElementsFromInput(this.options.elements.trigger);
+		const nestedBundles = this.element.querySelectorAll('[' + this.bundle.constructor.dataAttribute + ']');
+		elements = this.constructor.filterElementsByContainers(elements, this.element, nestedBundles);
+		this.addTriggers(elements);
 	}
 
 };

@@ -8,10 +8,10 @@ module.exports = class Bundle extends Base {
 		return 'data-accordion';
 	}
 
-	constructor(options) {
+	constructor(parameters) {
 		super();
-		this.accordion = options.accordion;
-		this.element = options.element;
+		this.accordion = parameters.accordion;
+		this.element = parameters.element;
 		if (this.constructor.isElementInitialized(this.element)) {
 			throw new CodedError('bundle-exists', 'A bundle already exists for this element.');
 		}
@@ -59,7 +59,7 @@ module.exports = class Bundle extends Base {
 		if (!Array.isArray(items)) {
 			throw new Error('`items` must be an array.');
 		}
-		if (!items.every(Item.isInstanceOfThis(item))) {
+		if (!items.every(Item.isInstanceOfThis)) {
 			throw new Error('`items` must only contain Item class instances.');
 		}
 		this._items = items;

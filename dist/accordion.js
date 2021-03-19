@@ -350,7 +350,7 @@ module.exports = class Accordion extends Base {
 		if (!Array.isArray(bundles)) {
 			throw new Error('`bundles` must be an array.');
 		}
-		if (!bundles.every(Bundle.isInstanceOfThis(bundle))) {
+		if (!bundles.every(Bundle.isInstanceOfThis)) {
 			throw new Error('`bundles` must only contain Bundle class instances.');
 		}
 		this._bundles = bundles;
@@ -394,8 +394,6 @@ module.exports = class Accordion extends Base {
 		let elements = this.constructor.getElementsFromInput(this.options.elements.bundle);
 		this.addBundles(elements);
 	}
-
-	destroy() {}
 
 };
 
@@ -493,10 +491,10 @@ module.exports = class Bundle extends Base {
 		return 'data-accordion';
 	}
 
-	constructor(options) {
+	constructor(parameters) {
 		super();
-		this.accordion = options.accordion;
-		this.element = options.element;
+		this.accordion = parameters.accordion;
+		this.element = parameters.element;
 		if (this.constructor.isElementInitialized(this.element)) {
 			throw new CodedError('bundle-exists', 'A bundle already exists for this element.');
 		}
@@ -544,7 +542,7 @@ module.exports = class Bundle extends Base {
 		if (!Array.isArray(items)) {
 			throw new Error('`items` must be an array.');
 		}
-		if (!items.every(Item.isInstanceOfThis(item))) {
+		if (!items.every(Item.isInstanceOfThis)) {
 			throw new Error('`items` must only contain Item class instances.');
 		}
 		this._items = items;
@@ -1213,6 +1211,7 @@ module.exports = model;
 
 const Base = __webpack_require__(11);
 const CodedError = __webpack_require__(10);
+const Trigger = __webpack_require__(12);
 
 module.exports = class Item extends Base {
 
@@ -1240,14 +1239,16 @@ module.exports = class Item extends Base {
 		return this.instanceCount = this.instanceCount + 1;
 	}
 
-	constructor(options) {
+	constructor(parameters) {
 		super();
-		this.bundle = options.bundle;
-		this.element = options.element;
+		this.bundle = parameters.bundle;
+		this.element = parameters.element;
 		if (this.constructor.isElementInitialized(this.element)) {
 			throw new CodedError('item-exists', 'An item already exists for this element.');
 		}
 		this.id = this.constructor.instanceCountIncrement();
+		this.element.setAttribute(this.constructor.dataAttribute, '');
+		this.initializeTriggers();
 		return this;
 	}
 
@@ -1276,6 +1277,63 @@ module.exports = class Item extends Base {
 		}
 		this._element = element;
 		return this._element;
+	}
+
+	get triggers() {
+		if (!this._triggers) {
+			this._triggers = [];
+		}
+		return this._triggers;
+	}
+
+	set triggers(triggers) {
+		if (!Array.isArray(triggers)) {
+			throw new Error('`triggers` must be an array.');
+		}
+		if (!triggers.every(Trigger.isInstanceOfThis)) {
+			throw new Error('`triggers` must only contain Trigger class instances.');
+		}
+		this._triggers = triggers;
+		return this._bundles;
+	}
+
+	addTrigger(element) {
+		try {
+			const trigger = new Trigger({
+				item: this,
+				element: element
+			});
+			this.triggers.push(trigger);
+			return true;
+		}
+		catch (error) {
+			if (error.code = 'trigger-exists') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+	}
+
+	addTriggers(elements) {
+		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
+			throw new Error('`elements` must be an array or node list.');
+		}
+		if (elements instanceof NodeList) {
+			elements = Array.from(elements);
+		}
+		for (const element of elements) {
+			this.addTrigger(element);
+		}
+	}
+
+	initializeTriggers() {
+		let elements = this.constructor.getElementsFromInput(this.options.elements.trigger);
+		const nestedBundles = this.element.querySelectorAll('[' + this.bundle.constructor.dataAttribute + ']');
+		elements = this.constructor.filterElementsByContainers(elements, this.element, nestedBundles);
+		this.addTriggers(elements);
 	}
 
 };
@@ -1419,6 +1477,59 @@ module.exports = class Base {
 		if (this.options.debug) {
 			console.log('Accordion Debug:', ...messages);
 		}
+	}
+
+};
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Base = __webpack_require__(11);
+const CodedError = __webpack_require__(10);
+
+module.exports = class Trigger extends Base {
+
+	static get dataAttribute() {
+		return 'data-accordion-trigger';
+	}
+
+	constructor(parameters) {
+		super();
+		this.item = parameters.item;
+		this.element = parameters.element;
+		if (this.constructor.isElementInitialized(this.element)) {
+			throw new CodedError('trigger-exists', 'A trigger already exists for this element.');
+		}
+		this.element.setAttribute(this.constructor.dataAttribute, '');
+		return this;
+	}
+
+	get item() {
+		return this._item;
+	}
+
+	set item(item) {
+		if (!(item instanceof __webpack_require__(9))) {
+			throw new Error('`item` must be an instance of the Item class.');
+		}
+		this._item = item;
+	}
+
+	get options() {
+		return this.item.bundle.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.constructor.isElement(element)) {
+			throw new Error('`element` must be an element.');
+		}
+		this._element = element;
+		return this._element;
 	}
 
 };

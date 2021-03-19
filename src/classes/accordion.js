@@ -147,7 +147,7 @@ module.exports = class Accordion extends Base {
 		if (!Array.isArray(bundles)) {
 			throw new Error('`bundles` must be an array.');
 		}
-		if (!bundles.every(Bundle.isInstanceOfThis(bundle))) {
+		if (!bundles.every(Bundle.isInstanceOfThis)) {
 			throw new Error('`bundles` must only contain Bundle class instances.');
 		}
 		this._bundles = bundles;
@@ -191,7 +191,5 @@ module.exports = class Accordion extends Base {
 		let elements = this.constructor.getElementsFromInput(this.options.elements.bundle);
 		this.addBundles(elements);
 	}
-
-	destroy() {}
 
 };
