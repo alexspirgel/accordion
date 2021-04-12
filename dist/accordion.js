@@ -86,84 +86,196 @@ var Accordion =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-/**
- * Extend v3.0.0
- * https://github.com/alexspirgel/extend
- */
+module.exports = class Base {
 
-const extend = (...arguments) => {
+	static isInstanceOfThis(instance) {
+		return instance instanceof this;
+	}
 
-	let target = arguments[0];
-	let argumentIndex, merge, mergeIsArray;
-	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
-		merge = arguments[argumentIndex];
-		if (merge === target) {
-			continue;
-		}
-		mergeIsArray = Array.isArray(merge);
-		if (mergeIsArray || extend.isPlainObject(merge)) {
-			if (mergeIsArray && !Array.isArray(target)) {
-				target = [];
-			}
-			else if (!mergeIsArray && !extend.isPlainObject(target)) {
-				target = {};
-			}
-			for (const property in merge) {
-				if (property === "__proto__") {
-					continue;
-				}
-				target[property] = extend(target[property], merge[property]);
-			}
+	static isElement(element) {
+		if (element instanceof Element) {
+			return true;
 		}
 		else {
-			if (merge !== undefined) {
-				target = merge;
-			}
+			return false;
 		}
 	}
 
-	return target;
-
-};
-
-extend.isPlainObject = (object) => {
-	const baseObject = {};
-	const toString = baseObject.toString;
-	const hasOwnProperty = baseObject.hasOwnProperty;
-	const functionToString = hasOwnProperty.toString;
-	const objectFunctionString = functionToString.call(Object);
-	if (toString.call(object) !== '[object Object]') {
-		return false;
+	static normalizeElements(inputValue, elementsSet = new Set()) {
+		if (Array.isArray(inputValue) || inputValue instanceof NodeList) {
+			for (let value of inputValue) {
+				this.normalizeElements(value, elementsSet);
+			}
+		}
+		else if (typeof inputValue === 'string') {
+			let elements = document.querySelectorAll(inputValue);
+			this.normalizeElements(elements, elementsSet);
+		}
+		else if (this.isElement(inputValue)) {
+			elementsSet.add(inputValue);
+		}
+		const optionElements = Array.from(elementsSet);
+		return optionElements;
 	}
-	const prototype = Object.getPrototypeOf(object);
-	if (prototype) {
-		if (hasOwnProperty.call(prototype, 'constructor')) {
-			if (typeof prototype.constructor === 'function') {
-				if (functionToString.call(prototype.constructor) !== objectFunctionString) {
-					return false;
+
+	static orderElementsByDOMTree(elements, order = 'asc') {
+		if (!Array.isArray(elements)) {
+			throw new Error(`'elements' must be an array.`);
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error(`'elements' array must only contain elements.`);
+		}
+		if (order !== 'asc' && order !== 'ASC' && order !== 'desc' && order !== 'DESC') {
+			throw new Error(`'order' must be 'asc' or 'desc'.`);
+		}
+		order = order.toLowerCase();
+	
+		const elementsMap = elements.map((mapElement, mapIndex) => {
+			const contains = new Set();
+			elements.forEach((element, index) => {
+				if (mapIndex !== index) {
+					if (mapElement.contains(element)) {
+						contains.add(element);
+					}
+				}
+			});
+			return {
+				'element': mapElement,
+				'contains': contains
+			};
+		});
+	
+		elementsMap.sort((a, b) => {
+			if (a.contains.size < b.contains.size) {
+				if (order === 'asc') {
+					return -1;
+				}
+				else {
+					return 1;
 				}
 			}
+			else if (a.contains.size > b.contains.size) {
+				if (order === 'asc') {
+					return 1;
+				}
+				else {
+					return -1;
+				}
+			}
+			else {
+				return 0;
+			}
+		});
+		const orderedElements = elementsMap.map((mapElement) => {
+			return mapElement.element;
+		});
+	
+		return orderedElements;
+	}
+
+	static isElementContainedBy(element, containedBy = []) {
+		if (!this.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		containedBy = this.normalizeElements(containedBy);
+		for (let containedByElement of containedBy) {
+			if (!containedByElement.contains(element)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	static isElementNotContainedBy(element, notContainedBy = []) {
+		if (!this.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		notContainedBy = this.normalizeElements(notContainedBy);
+		for (let notContainedByElement of notContainedBy) {
+			if (notContainedByElement.contains(element)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	static filterElementsByContainer(elements, containedBy = [], notContainedBy = []) {
+		if (!Array.isArray(elements)) {
+			throw new Error(`'elements' must be an array.`);
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error(`'elements' array must only contain elements.`);
+		}
+		const filteredElements = elements.filter((element) => {
+			let flag = true;
+			if (!this.isElementContainedBy(element, containedBy)) {
+				flag = false;
+			}
+			if (flag) {
+				if (!this.isElementNotContainedBy(element, notContainedBy)) {
+					flag = false;
+				}
+			}
+			return flag;
+		});
+		return filteredElements;
+	}
+
+	static get elementProperty() {
+		return 'accordionElement';
+	}
+
+	static get elementDataAttribute() {
+		return 'accordion';
+	}
+
+	static isElementInitialized(element) {
+		if (element[this.elementProperty] !== undefined && element.hasAttribute(this.elementDataAttribute)) {
+			return true;
 		}
 	}
-	return true;
-};
 
-if ( true && module.exports) {
-	module.exports = extend;
-}
+	constructor() {}
+
+	debug(...messages) {
+		try {
+			if (this.options.debug) {
+				console.log('Accordion Debug:', ...messages);
+			}
+		}
+		catch(error) {
+			// suppress
+		}
+	}
+
+};
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+module.exports = class CodedError extends Error {
+  constructor(code, ...params) {
+    super(...params);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CodedError);
+    }
+    this.code = code;
+  }
+};
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const DataPathManager = __webpack_require__(3);
+const DataPathManager = __webpack_require__(5);
 
 class ValidationError extends Error {
 	
@@ -198,13 +310,186 @@ class ValidationError extends Error {
 module.exports = ValidationError;
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Base = __webpack_require__(11);
-const extend = __webpack_require__(0);
-const Schema = __webpack_require__(6);
-const Bundle = __webpack_require__(4);
+const Base = __webpack_require__(0);
+const CodedError = __webpack_require__(1);
+const Trigger = __webpack_require__(15);
+const Content = __webpack_require__(8);
+
+module.exports = class Item extends Base {
+
+	static get instanceCount() {
+		if (typeof this._instanceCount !== 'number') {
+			this._instanceCount = 0;
+		}
+		return this._instanceCount;
+	}
+
+	static set instanceCount(count) {
+		if (typeof count !== 'number') {
+			throw('`instanceCount` must be a number.');
+		}
+		else {
+			return this._instanceCount = count;
+		}
+	}
+
+	static instanceCountIncrement() {
+		return this.instanceCount = this.instanceCount + 1;
+	}
+
+	constructor(parameters) {
+		super();
+		this.bundle = parameters.bundle;
+		this.element = parameters.element;
+		if (this.constructor.isElementInitialized(this.element)) {
+			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
+		}
+		this.id = this.constructor.instanceCountIncrement();
+		this.initializeElement();
+		this.initializeTriggers();
+		this.initializeContent();
+		return this;
+	}
+
+	get bundle() {
+		return this._bundle;
+	}
+
+	set bundle(bundle) {
+		if (!(bundle instanceof __webpack_require__(7))) {
+			throw new Error(`'bundle' must be an instance of the Bundle class.`);
+		}
+		this._bundle = bundle;
+	}
+
+	get options() {
+		return this.bundle.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.constructor.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		this._element = element;
+		return this._element;
+	}
+
+	initializeElement() {
+		this.element[this.constructor.elementProperty] = this;
+		this.element.setAttribute(this.constructor.elementDataAttribute, 'item');
+	}
+
+	filterElementsByScope(elementsInput) {
+		let elements = this.constructor.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
+		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
+	}
+
+	get triggers() {
+		if (!this._triggers) {
+			this._triggers = [];
+		}
+		return this._triggers;
+	}
+
+	set triggers(triggers) {
+		if (!Array.isArray(triggers)) {
+			throw new Error(`'triggers' must be an array.`);
+		}
+		if (!triggers.every(Trigger.isInstanceOfThis)) {
+			throw new Error(`'triggers' must only contain Trigger class instances.`);
+		}
+		this._triggers = triggers;
+		return this._triggers;
+	}
+
+	addTrigger(element) {
+		try {
+			const trigger = new Trigger({
+				item: this,
+				element: element
+			});
+			this.triggers.push(trigger);
+			return true;
+		}
+		catch (error) {
+			if (error.code === 'already-initialized') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+	}
+
+	addTriggers(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		for (const element of elements) {
+			this.addTrigger(element);
+		}
+	}
+
+	initializeTriggers() {
+		this.addTriggers(this.options.elements.trigger);
+	}
+
+	get content() {
+		return this._content;
+	}
+
+	set content(content) {
+		if (!(content instanceof Content)) {
+			throw new Error(`'content' must be a Content class instance.`);
+		}
+		this._content = content;
+		return this._content;
+	}
+
+	addContent(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		const element = elements[0];
+		try {
+			const content = new Content({
+				item: this,
+				element: element
+			});
+			this.content = content;
+			return true;
+		}
+		catch (error) {
+			if (error.code = 'already-initialized') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+
+	}
+
+	initializeContent() {
+		this.addContent(this.options.elements.content);
+	}
+
+};
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Base = __webpack_require__(0);
+const extend = __webpack_require__(10);
+const Schema = __webpack_require__(11);
+const Bundle = __webpack_require__(7);
 
 module.exports = class Accordion extends Base {
 
@@ -348,10 +633,10 @@ module.exports = class Accordion extends Base {
 
 	set bundles(bundles) {
 		if (!Array.isArray(bundles)) {
-			throw new Error('`bundles` must be an array.');
+			throw new Error(`'bundles' must be an array.`);
 		}
 		if (!bundles.every(Bundle.isInstanceOfThis)) {
-			throw new Error('`bundles` must only contain Bundle class instances.');
+			throw new Error(`'bundles' must only contain Bundle class instances.`);
 		}
 		this._bundles = bundles;
 		return this._bundles;
@@ -367,7 +652,7 @@ module.exports = class Accordion extends Base {
 			return true;
 		}
 		catch (error) {
-			if (error.code = 'bundle-exists') {
+			if (error.code === 'already-initialized') {
 				this.debug(error, element);
 				return false;
 			}
@@ -377,31 +662,25 @@ module.exports = class Accordion extends Base {
 		}
 	}
 
-	addBundles(elements) {
-		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
-			throw new Error('`elements` must be an array or node list.');
-		}
-		if (elements instanceof NodeList) {
-			elements = Array.from(elements);
-		}
-		elements = this.constructor.sortElementsByMostNestedFirst(elements);
+	addBundles(elementsInput) {
+		let elements = this.constructor.normalizeElements(elementsInput);
+		elements = this.constructor.orderElementsByDOMTree(elements, 'asc');
 		for (const element of elements) {
 			this.addBundle(element);
 		}
 	}
 
 	initializeBundles() {
-		let elements = this.constructor.getElementsFromInput(this.options.elements.bundle);
-		this.addBundles(elements);
+		this.addBundles(this.options.elements.bundle);
 	}
 
 };
 
 /***/ }),
-/* 3 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(0);
+const extend = __webpack_require__(6);
 
 class DataPathManager {
 	
@@ -478,27 +757,63 @@ class DataPathManager {
 module.exports = DataPathManager;
 
 /***/ }),
-/* 4 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Base = __webpack_require__(11);
-const CodedError = __webpack_require__(10);
-const Item = __webpack_require__(9);
+const isPlainObject = __webpack_require__(12);
+
+const extend = (...arguments) => {
+	let target = arguments[0];
+	let argumentIndex, merge, mergeIsArray;
+	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
+		merge = arguments[argumentIndex];
+		if (merge === target) {
+			continue;
+		}
+		mergeIsArray = Array.isArray(merge);
+		if (mergeIsArray || isPlainObject(merge)) {
+			if (mergeIsArray && !Array.isArray(target)) {
+				target = [];
+			}
+			else if (!mergeIsArray && !isPlainObject(target)) {
+				target = {};
+			}
+			for (const property in merge) {
+				if (property === "__proto__") {
+					continue;
+				}
+				target[property] = extend(target[property], merge[property]);
+			}
+		}
+		else {
+			if (merge !== undefined) {
+				target = merge;
+			}
+		}
+	}
+	return target;
+};
+
+module.exports = extend;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Base = __webpack_require__(0);
+const CodedError = __webpack_require__(1);
+const Item = __webpack_require__(3);
 
 module.exports = class Bundle extends Base {
-
-	static get dataAttribute() {
-		return 'data-accordion';
-	}
 
 	constructor(parameters) {
 		super();
 		this.accordion = parameters.accordion;
 		this.element = parameters.element;
 		if (this.constructor.isElementInitialized(this.element)) {
-			throw new CodedError('bundle-exists', 'A bundle already exists for this element.');
+			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
 		}
-		this.element.setAttribute(this.constructor.dataAttribute, '');
+		this.initializeElement();
 		this.initializeItems();
 		return this;
 	}
@@ -508,8 +823,8 @@ module.exports = class Bundle extends Base {
 	}
 
 	set accordion(accordion) {
-		if (!(accordion instanceof __webpack_require__(2))) {
-			throw new Error('`accordion` must be an instance of the Accordion class.');
+		if (!(accordion instanceof __webpack_require__(4))) {
+			throw new Error(`'accordion' must be an instance of the Accordion class.`);
 		}
 		this._accordion = accordion;
 		return this._accordion;
@@ -525,10 +840,21 @@ module.exports = class Bundle extends Base {
 
 	set element(element) {
 		if (!this.constructor.isElement(element)) {
-			throw new Error('`element` must be an element.');
+			throw new Error(`'element' must be an element.`);
 		}
 		this._element = element;
 		return this._element;
+	}
+
+	initializeElement() {
+		this.element[this.constructor.elementProperty] = this;
+		this.element.setAttribute(this.constructor.elementDataAttribute, 'bundle');
+	}
+
+	filterElementsByScope(elementsInput) {
+		let elements = this.constructor.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
+		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
 	}
 
 	get items() {
@@ -540,10 +866,10 @@ module.exports = class Bundle extends Base {
 
 	set items(items) {
 		if (!Array.isArray(items)) {
-			throw new Error('`items` must be an array.');
+			throw new Error(`'items' must be an array.`);
 		}
 		if (!items.every(Item.isInstanceOfThis)) {
-			throw new Error('`items` must only contain Item class instances.');
+			throw new Error(`'items' must only contain Item class instances.`);
 		}
 		this._items = items;
 		return this._items;
@@ -559,7 +885,7 @@ module.exports = class Bundle extends Base {
 			return true;
 		}
 		catch (error) {
-			if (error.code = 'item-exists') {
+			if (error.code === 'already-initialized') {
 				this.debug(error, element);
 				return false;
 			}
@@ -569,41 +895,204 @@ module.exports = class Bundle extends Base {
 		}
 	}
 	
-	addItems(elements) {
-		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
-			throw new Error('`elements` must be an array or node list.');
-		}
-		if (elements instanceof NodeList) {
-			elements = Array.from(elements);
-		}
+	addItems(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
 		for (const element of elements) {
 			this.addItem(element);
 		}
 	}
 
 	initializeItems() {
-		let elements = this.constructor.getElementsFromInput(this.options.elements.item);
-		const nestedBundles = this.element.querySelectorAll('[' + this.constructor.dataAttribute + ']');
-		elements = this.constructor.filterElementsByContainers(elements, this.element, nestedBundles);
-		this.addItems(elements);
+		this.addItems(this.options.elements.item);
 	}
 
 };
 
 /***/ }),
-/* 5 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(2);
+const Base = __webpack_require__(0);
+const CodedError = __webpack_require__(1);
+const Container = __webpack_require__(16);
+
+module.exports = class Content extends Base {
+
+	constructor(parameters) {
+		super();
+		this.item = parameters.item;
+		this.element = parameters.element;
+		if (this.constructor.isElementInitialized(this.element)) {
+			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
+		}
+		this.initializeElement();
+		this.initializeContainer();
+		return this;
+	}
+
+	get item() {
+		return this._item;
+	}
+
+	set item(item) {
+		if (!(item instanceof __webpack_require__(3))) {
+			throw new Error(`'item' must be an instance of the Item class.`);
+		}
+		this._item = item;
+	}
+
+	get options() {
+		return this.item.bundle.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.constructor.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		this._element = element;
+		return this._element;
+	}
+
+	initializeElement() {
+		this.element[this.constructor.elementProperty] = this;
+		this.element.setAttribute(this.constructor.elementDataAttribute, 'content');
+	}
+
+	filterElementsByScope(elementsInput) {
+		let elements = this.constructor.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
+		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
+	}
+
+	get container() {
+		return this._container;
+	}
+
+	set container(container) {
+		if (!(container instanceof Container)) {
+			throw new Error(`'container' must be a Container class instance.`);
+		}
+		this._container = container;
+		return this._container;
+	}
+
+	addContainer(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		const element = elements[0];
+		try {
+			const container = new Container({
+				content: this,
+				element: element
+			});
+			this.container = container;
+			return true;
+		}
+		catch (error) {
+			if (error.code = 'already-initialized') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+
+	}
+
+	initializeContainer() {
+		this.addContainer(this.options.elements.container);
+	}
+
+};
 
 /***/ }),
-/* 6 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const DataPathManager = __webpack_require__(3);
-const ValidationError = __webpack_require__(1);
-const ValidationErrors = __webpack_require__(7);
-const modelModel = __webpack_require__(8);
+module.exports = __webpack_require__(4);
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Extend v3.0.0
+ * https://github.com/alexspirgel/extend
+ */
+
+const extend = (...arguments) => {
+
+	let target = arguments[0];
+	let argumentIndex, merge, mergeIsArray;
+	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
+		merge = arguments[argumentIndex];
+		if (merge === target) {
+			continue;
+		}
+		mergeIsArray = Array.isArray(merge);
+		if (mergeIsArray || extend.isPlainObject(merge)) {
+			if (mergeIsArray && !Array.isArray(target)) {
+				target = [];
+			}
+			else if (!mergeIsArray && !extend.isPlainObject(target)) {
+				target = {};
+			}
+			for (const property in merge) {
+				if (property === "__proto__") {
+					continue;
+				}
+				target[property] = extend(target[property], merge[property]);
+			}
+		}
+		else {
+			if (merge !== undefined) {
+				target = merge;
+			}
+		}
+	}
+
+	return target;
+
+};
+
+extend.isPlainObject = (object) => {
+	const baseObject = {};
+	const toString = baseObject.toString;
+	const hasOwnProperty = baseObject.hasOwnProperty;
+	const functionToString = hasOwnProperty.toString;
+	const objectFunctionString = functionToString.call(Object);
+	if (toString.call(object) !== '[object Object]') {
+		return false;
+	}
+	const prototype = Object.getPrototypeOf(object);
+	if (prototype) {
+		if (hasOwnProperty.call(prototype, 'constructor')) {
+			if (typeof prototype.constructor === 'function') {
+				if (functionToString.call(prototype.constructor) !== objectFunctionString) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+};
+
+if ( true && module.exports) {
+	module.exports = extend;
+}
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const DataPathManager = __webpack_require__(5);
+const ValidationError = __webpack_require__(2);
+const ValidationErrors = __webpack_require__(13);
+const modelModel = __webpack_require__(14);
 
 class Schema {
 	
@@ -1012,10 +1501,39 @@ Schema.ValidationError = ValidationError;
 module.exports = Schema;
 
 /***/ }),
-/* 7 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const ValidationError = __webpack_require__(1);
+/**
+ * isPlainObject v1.0.1
+ * https://github.com/alexspirgel/isPlainObject
+ */
+
+const isPlainObject = (object) => {
+	if (Object.prototype.toString.call(object) !== '[object Object]') {
+		return false;
+	}
+  if (object.constructor === undefined) {
+		return true;
+	}
+  if (Object.prototype.toString.call(object.constructor.prototype) !== '[object Object]') {
+		return false;
+	}
+  if (!object.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
+    return false;
+  }
+  return true;
+};
+
+if ( true && module.exports) {
+	module.exports = isPlainObject;
+}
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const ValidationError = __webpack_require__(2);
 
 class ValidationErrors {
 	
@@ -1066,11 +1584,11 @@ class ValidationErrors {
 module.exports = ValidationErrors;
 
 /***/ }),
-/* 8 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(0);
-const ValidationError = __webpack_require__(1);
+const extend = __webpack_require__(6);
+const ValidationError = __webpack_require__(2);
 
 const typeRestriction = (types) => {
 	if (!Array.isArray(types)) {
@@ -1206,302 +1724,22 @@ modelPropertySchema.propertySchema.allPropertySchema = model;
 module.exports = model;
 
 /***/ }),
-/* 9 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Base = __webpack_require__(11);
-const CodedError = __webpack_require__(10);
-const Trigger = __webpack_require__(12);
-
-module.exports = class Item extends Base {
-
-	static get dataAttribute() {
-		return 'data-accordion-item';
-	}
-
-	static get instanceCount() {
-		if (typeof this._instanceCount !== 'number') {
-			this._instanceCount = 0;
-		}
-		return this._instanceCount;
-	}
-
-	static set instanceCount(count) {
-		if (typeof count !== 'number') {
-			throw('`instanceCount` must be a number.');
-		}
-		else {
-			return this._instanceCount = count;
-		}
-	}
-
-	static instanceCountIncrement() {
-		return this.instanceCount = this.instanceCount + 1;
-	}
-
-	constructor(parameters) {
-		super();
-		this.bundle = parameters.bundle;
-		this.element = parameters.element;
-		if (this.constructor.isElementInitialized(this.element)) {
-			throw new CodedError('item-exists', 'An item already exists for this element.');
-		}
-		this.id = this.constructor.instanceCountIncrement();
-		this.element.setAttribute(this.constructor.dataAttribute, '');
-		this.initializeTriggers();
-		return this;
-	}
-
-	get bundle() {
-		return this._bundle;
-	}
-
-	set bundle(bundle) {
-		if (!(bundle instanceof __webpack_require__(4))) {
-			throw new Error('`bundle` must be an instance of the Bundle class.');
-		}
-		this._bundle = bundle;
-	}
-
-	get options() {
-		return this.bundle.accordion.options;
-	}
-
-	get element() {
-		return this._element;
-	}
-
-	set element(element) {
-		if (!this.constructor.isElement(element)) {
-			throw new Error('`element` must be an element.');
-		}
-		this._element = element;
-		return this._element;
-	}
-
-	get triggers() {
-		if (!this._triggers) {
-			this._triggers = [];
-		}
-		return this._triggers;
-	}
-
-	set triggers(triggers) {
-		if (!Array.isArray(triggers)) {
-			throw new Error('`triggers` must be an array.');
-		}
-		if (!triggers.every(Trigger.isInstanceOfThis)) {
-			throw new Error('`triggers` must only contain Trigger class instances.');
-		}
-		this._triggers = triggers;
-		return this._bundles;
-	}
-
-	addTrigger(element) {
-		try {
-			const trigger = new Trigger({
-				item: this,
-				element: element
-			});
-			this.triggers.push(trigger);
-			return true;
-		}
-		catch (error) {
-			if (error.code = 'trigger-exists') {
-				this.debug(error, element);
-				return false;
-			}
-			else {
-				throw error;
-			}
-		}
-	}
-
-	addTriggers(elements) {
-		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
-			throw new Error('`elements` must be an array or node list.');
-		}
-		if (elements instanceof NodeList) {
-			elements = Array.from(elements);
-		}
-		for (const element of elements) {
-			this.addTrigger(element);
-		}
-	}
-
-	initializeTriggers() {
-		let elements = this.constructor.getElementsFromInput(this.options.elements.trigger);
-		const nestedBundles = this.element.querySelectorAll('[' + this.bundle.constructor.dataAttribute + ']');
-		elements = this.constructor.filterElementsByContainers(elements, this.element, nestedBundles);
-		this.addTriggers(elements);
-	}
-
-};
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports) {
-
-module.exports = class CodedError extends Error {
-  constructor(code, ...params) {
-    super(...params);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, CodedError);
-    }
-    this.code = code;
-  }
-};
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-module.exports = class Base {
-
-	static get dataAttribute() {
-		return '';
-	}
-
-	static isInstanceOfThis(instance) {
-		return instance instanceof this;
-	}
-
-	static isElementInitialized(element) {
-		return element.hasAttribute(this.dataAttribute);
-	}
-	
-	static isElement(element) {
-		if (element instanceof Element && element.nodeType === 1) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	static getElementsFromInput(inputValue, elementsSet = new Set()) {
-		if (Array.isArray(inputValue) || inputValue instanceof NodeList) {
-			for (let value of inputValue) {
-				this.getElementsFromInput(value, elementsSet);
-			}
-		}
-		else if (typeof inputValue === 'string') {
-			let elements = document.querySelectorAll(inputValue);
-			this.getElementsFromInput(elements, elementsSet);
-		}
-		else if (this.isElement(inputValue)) {
-			elementsSet.add(inputValue);
-		}
-		const optionElements = Array.from(elementsSet);
-		return optionElements;
-	}
-
-	static filterElementsByContainers(elements, containedBy = [], notContainedBy = []) {
-		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
-		}
-		containedBy = this.getElementsFromInput(containedBy);
-		notContainedBy = this.getElementsFromInput(notContainedBy);
-		const filteredElements = [];
-		for (let element of elements) {
-			let keep = true;
-			for (let containedByElement of containedBy) {
-				if (!containedByElement.contains(element)) {
-					keep = false;
-					break;
-				}
-			}
-			if (keep) {
-				for (let notContainedByElement of notContainedBy) {
-					if (notContainedByElement.contains(element)) {
-						keep = false;
-						break;
-					}
-				}
-			}
-			if (keep) {
-				filteredElements.push(element);
-			}
-		}
-		return filteredElements;
-	}
-
-	static sortElementsByMostNestedFirst(elements) {
-		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
-		}
-		const elementsMapContainedElements = elements.map((mapElement, mapIndex) => {
-			const contains = new Set();
-			elements.forEach((element, index) => {
-				if (mapIndex !== index) {
-					if (mapElement.contains(element)) {
-						contains.add(element);
-					}
-				}
-			});
-			return {
-				'element': mapElement,
-				'contains': contains
-			};
-		});
-		elementsMapContainedElements.sort((a, b) => {
-			if (a.contains.size < b.contains.size) {
-				return -1;
-			}
-			else if (a.contains.size > b.contains.size) {
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		});
-		const sortedElements = elementsMapContainedElements.map((mapElement) => {
-			return mapElement.element;
-		});
-		return sortedElements;
-	}
-
-	constructor() {}
-
-	get options() {
-		return {};
-	}
-
-	debug(...messages) {
-		if (this.options.debug) {
-			console.log('Accordion Debug:', ...messages);
-		}
-	}
-
-};
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Base = __webpack_require__(11);
-const CodedError = __webpack_require__(10);
+const Base = __webpack_require__(0);
+const CodedError = __webpack_require__(1);
 
 module.exports = class Trigger extends Base {
-
-	static get dataAttribute() {
-		return 'data-accordion-trigger';
-	}
 
 	constructor(parameters) {
 		super();
 		this.item = parameters.item;
 		this.element = parameters.element;
 		if (this.constructor.isElementInitialized(this.element)) {
-			throw new CodedError('trigger-exists', 'A trigger already exists for this element.');
+			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
 		}
-		this.element.setAttribute(this.constructor.dataAttribute, '');
+		this.initializeElement();
 		return this;
 	}
 
@@ -1510,8 +1748,8 @@ module.exports = class Trigger extends Base {
 	}
 
 	set item(item) {
-		if (!(item instanceof __webpack_require__(9))) {
-			throw new Error('`item` must be an instance of the Item class.');
+		if (!(item instanceof __webpack_require__(3))) {
+			throw new Error(`'item' must be an instance of the Item class.`);
 		}
 		this._item = item;
 	}
@@ -1526,10 +1764,69 @@ module.exports = class Trigger extends Base {
 
 	set element(element) {
 		if (!this.constructor.isElement(element)) {
-			throw new Error('`element` must be an element.');
+			throw new Error(`'element' must be an element.`);
 		}
 		this._element = element;
 		return this._element;
+	}
+
+	initializeElement() {
+		this.element[this.constructor.elementProperty] = this;
+		this.element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
+	}
+
+};
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const Base = __webpack_require__(0);
+const CodedError = __webpack_require__(1);
+
+module.exports = class Container extends Base {
+
+	constructor(parameters) {
+		super();
+		this.content = parameters.content;
+		this.element = parameters.element;
+		if (this.constructor.isElementInitialized(this.element)) {
+			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
+		}
+		this.initializeElement();
+		return this;
+	}
+
+	get content() {
+		return this._content;
+	}
+
+	set content(content) {
+		if (!(content instanceof __webpack_require__(8))) {
+			throw new Error(`'content' must be an instance of the Content class.`);
+		}
+		this._content = content;
+	}
+
+	get options() {
+		return this.content.item.bundle.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.constructor.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		this._element = element;
+		return this._element;
+	}
+
+	initializeElement() {
+		this.element[this.constructor.elementProperty] = this;
+		this.element.setAttribute(this.constructor.elementDataAttribute, 'container');
 	}
 
 };

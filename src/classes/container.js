@@ -1,11 +1,11 @@
 const Base = require('./base.js');
 const CodedError = require('./coded-error.js');
 
-module.exports = class Trigger extends Base {
+module.exports = class Container extends Base {
 
 	constructor(parameters) {
 		super();
-		this.item = parameters.item;
+		this.content = parameters.content;
 		this.element = parameters.element;
 		if (this.constructor.isElementInitialized(this.element)) {
 			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
@@ -14,19 +14,19 @@ module.exports = class Trigger extends Base {
 		return this;
 	}
 
-	get item() {
-		return this._item;
+	get content() {
+		return this._content;
 	}
 
-	set item(item) {
-		if (!(item instanceof require('./item.js'))) {
-			throw new Error(`'item' must be an instance of the Item class.`);
+	set content(content) {
+		if (!(content instanceof require('./content.js'))) {
+			throw new Error(`'content' must be an instance of the Content class.`);
 		}
-		this._item = item;
+		this._content = content;
 	}
 
 	get options() {
-		return this.item.bundle.accordion.options;
+		return this.content.item.bundle.accordion.options;
 	}
 
 	get element() {
@@ -43,7 +43,7 @@ module.exports = class Trigger extends Base {
 
 	initializeElement() {
 		this.element[this.constructor.elementProperty] = this;
-		this.element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
+		this.element.setAttribute(this.constructor.elementDataAttribute, 'container');
 	}
 
 };

@@ -1,35 +1,34 @@
 const Base = require('./base.js');
 const CodedError = require('./coded-error.js');
-const Item = require('./item.js');
+const Container = require('./container.js');
 
-module.exports = class Bundle extends Base {
+module.exports = class Content extends Base {
 
 	constructor(parameters) {
 		super();
-		this.accordion = parameters.accordion;
+		this.item = parameters.item;
 		this.element = parameters.element;
 		if (this.constructor.isElementInitialized(this.element)) {
 			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
 		}
 		this.initializeElement();
-		this.initializeItems();
+		this.initializeContainer();
 		return this;
 	}
 
-	get accordion() {
-		return this._accordion;
+	get item() {
+		return this._item;
 	}
 
-	set accordion(accordion) {
-		if (!(accordion instanceof require('./accordion.js'))) {
-			throw new Error(`'accordion' must be an instance of the Accordion class.`);
+	set item(item) {
+		if (!(item instanceof require('./item.js'))) {
+			throw new Error(`'item' must be an instance of the Item class.`);
 		}
-		this._accordion = accordion;
-		return this._accordion;
+		this._item = item;
 	}
 
 	get options() {
-		return this.accordion.options;
+		return this.item.bundle.accordion.options;
 	}
 
 	get element() {
@@ -46,7 +45,7 @@ module.exports = class Bundle extends Base {
 
 	initializeElement() {
 		this.element[this.constructor.elementProperty] = this;
-		this.element.setAttribute(this.constructor.elementDataAttribute, 'bundle');
+		this.element.setAttribute(this.constructor.elementDataAttribute, 'content');
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -55,35 +54,31 @@ module.exports = class Bundle extends Base {
 		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
 	}
 
-	get items() {
-		if (!this._items) {
-			this._items = [];
-		}
-		return this._items;
+	get container() {
+		return this._container;
 	}
 
-	set items(items) {
-		if (!Array.isArray(items)) {
-			throw new Error(`'items' must be an array.`);
+	set container(container) {
+		if (!(container instanceof Container)) {
+			throw new Error(`'container' must be a Container class instance.`);
 		}
-		if (!items.every(Item.isInstanceOfThis)) {
-			throw new Error(`'items' must only contain Item class instances.`);
-		}
-		this._items = items;
-		return this._items;
+		this._container = container;
+		return this._container;
 	}
 
-	addItem(element) {
+	addContainer(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		const element = elements[0];
 		try {
-			const item = new Item({
-				bundle: this,
+			const container = new Container({
+				content: this,
 				element: element
 			});
-			this.items.push(item);
+			this.container = container;
 			return true;
 		}
 		catch (error) {
-			if (error.code === 'already-initialized') {
+			if (error.code = 'already-initialized') {
 				this.debug(error, element);
 				return false;
 			}
@@ -91,17 +86,11 @@ module.exports = class Bundle extends Base {
 				throw error;
 			}
 		}
-	}
-	
-	addItems(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		for (const element of elements) {
-			this.addItem(element);
-		}
+
 	}
 
-	initializeItems() {
-		this.addItems(this.options.elements.item);
+	initializeContainer() {
+		this.addContainer(this.options.elements.container);
 	}
 
 };

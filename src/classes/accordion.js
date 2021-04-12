@@ -145,10 +145,10 @@ module.exports = class Accordion extends Base {
 
 	set bundles(bundles) {
 		if (!Array.isArray(bundles)) {
-			throw new Error('`bundles` must be an array.');
+			throw new Error(`'bundles' must be an array.`);
 		}
 		if (!bundles.every(Bundle.isInstanceOfThis)) {
-			throw new Error('`bundles` must only contain Bundle class instances.');
+			throw new Error(`'bundles' must only contain Bundle class instances.`);
 		}
 		this._bundles = bundles;
 		return this._bundles;
@@ -164,7 +164,7 @@ module.exports = class Accordion extends Base {
 			return true;
 		}
 		catch (error) {
-			if (error.code = 'bundle-exists') {
+			if (error.code === 'already-initialized') {
 				this.debug(error, element);
 				return false;
 			}
@@ -174,22 +174,16 @@ module.exports = class Accordion extends Base {
 		}
 	}
 
-	addBundles(elements) {
-		if (!Array.isArray(elements) && !(elements instanceof NodeList)) {
-			throw new Error('`elements` must be an array or node list.');
-		}
-		if (elements instanceof NodeList) {
-			elements = Array.from(elements);
-		}
-		elements = this.constructor.sortElementsByMostNestedFirst(elements);
+	addBundles(elementsInput) {
+		let elements = this.constructor.normalizeElements(elementsInput);
+		elements = this.constructor.orderElementsByDOMTree(elements, 'asc');
 		for (const element of elements) {
 			this.addBundle(element);
 		}
 	}
 
 	initializeBundles() {
-		let elements = this.constructor.getElementsFromInput(this.options.elements.bundle);
-		this.addBundles(elements);
+		this.addBundles(this.options.elements.bundle);
 	}
 
 };

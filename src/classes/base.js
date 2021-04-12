@@ -1,19 +1,11 @@
 module.exports = class Base {
 
-	static get dataAttribute() {
-		return '';
-	}
-
 	static isInstanceOfThis(instance) {
 		return instance instanceof this;
 	}
 
-	static isElementInitialized(element) {
-		return element.hasAttribute(this.dataAttribute);
-	}
-	
 	static isElement(element) {
-		if (element instanceof Element && element.nodeType === 1) {
+		if (element instanceof Element) {
 			return true;
 		}
 		else {
@@ -21,15 +13,15 @@ module.exports = class Base {
 		}
 	}
 
-	static getElementsFromInput(inputValue, elementsSet = new Set()) {
+	static normalizeElements(inputValue, elementsSet = new Set()) {
 		if (Array.isArray(inputValue) || inputValue instanceof NodeList) {
 			for (let value of inputValue) {
-				this.getElementsFromInput(value, elementsSet);
+				this.normalizeElements(value, elementsSet);
 			}
 		}
 		else if (typeof inputValue === 'string') {
 			let elements = document.querySelectorAll(inputValue);
-			this.getElementsFromInput(elements, elementsSet);
+			this.normalizeElements(elements, elementsSet);
 		}
 		else if (this.isElement(inputValue)) {
 			elementsSet.add(inputValue);
@@ -38,47 +30,19 @@ module.exports = class Base {
 		return optionElements;
 	}
 
-	static filterElementsByContainers(elements, containedBy = [], notContainedBy = []) {
+	static orderElementsByDOMTree(elements, order = 'asc') {
 		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
+			throw new Error(`'elements' must be an array.`);
 		}
 		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
+			throw new Error(`'elements' array must only contain elements.`);
 		}
-		containedBy = this.getElementsFromInput(containedBy);
-		notContainedBy = this.getElementsFromInput(notContainedBy);
-		const filteredElements = [];
-		for (let element of elements) {
-			let keep = true;
-			for (let containedByElement of containedBy) {
-				if (!containedByElement.contains(element)) {
-					keep = false;
-					break;
-				}
-			}
-			if (keep) {
-				for (let notContainedByElement of notContainedBy) {
-					if (notContainedByElement.contains(element)) {
-						keep = false;
-						break;
-					}
-				}
-			}
-			if (keep) {
-				filteredElements.push(element);
-			}
+		if (order !== 'asc' && order !== 'ASC' && order !== 'desc' && order !== 'DESC') {
+			throw new Error(`'order' must be 'asc' or 'desc'.`);
 		}
-		return filteredElements;
-	}
-
-	static sortElementsByMostNestedFirst(elements) {
-		if (!Array.isArray(elements)) {
-			throw new Error('`elements` must be an array.');
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error('`elements` array must only contain elements.');
-		}
-		const elementsMapContainedElements = elements.map((mapElement, mapIndex) => {
+		order = order.toLowerCase();
+	
+		const elementsMap = elements.map((mapElement, mapIndex) => {
 			const contains = new Set();
 			elements.forEach((element, index) => {
 				if (mapIndex !== index) {
@@ -92,32 +56,107 @@ module.exports = class Base {
 				'contains': contains
 			};
 		});
-		elementsMapContainedElements.sort((a, b) => {
+	
+		elementsMap.sort((a, b) => {
 			if (a.contains.size < b.contains.size) {
-				return -1;
+				if (order === 'asc') {
+					return -1;
+				}
+				else {
+					return 1;
+				}
 			}
 			else if (a.contains.size > b.contains.size) {
-				return 1;
+				if (order === 'asc') {
+					return 1;
+				}
+				else {
+					return -1;
+				}
 			}
 			else {
 				return 0;
 			}
 		});
-		const sortedElements = elementsMapContainedElements.map((mapElement) => {
+		const orderedElements = elementsMap.map((mapElement) => {
 			return mapElement.element;
 		});
-		return sortedElements;
+	
+		return orderedElements;
+	}
+
+	static isElementContainedBy(element, containedBy = []) {
+		if (!this.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		containedBy = this.normalizeElements(containedBy);
+		for (let containedByElement of containedBy) {
+			if (!containedByElement.contains(element)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	static isElementNotContainedBy(element, notContainedBy = []) {
+		if (!this.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		notContainedBy = this.normalizeElements(notContainedBy);
+		for (let notContainedByElement of notContainedBy) {
+			if (notContainedByElement.contains(element)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	static filterElementsByContainer(elements, containedBy = [], notContainedBy = []) {
+		if (!Array.isArray(elements)) {
+			throw new Error(`'elements' must be an array.`);
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error(`'elements' array must only contain elements.`);
+		}
+		const filteredElements = elements.filter((element) => {
+			let flag = true;
+			if (!this.isElementContainedBy(element, containedBy)) {
+				flag = false;
+			}
+			if (flag) {
+				if (!this.isElementNotContainedBy(element, notContainedBy)) {
+					flag = false;
+				}
+			}
+			return flag;
+		});
+		return filteredElements;
+	}
+
+	static get elementProperty() {
+		return 'accordionElement';
+	}
+
+	static get elementDataAttribute() {
+		return 'accordion';
+	}
+
+	static isElementInitialized(element) {
+		if (element[this.elementProperty] !== undefined && element.hasAttribute(this.elementDataAttribute)) {
+			return true;
+		}
 	}
 
 	constructor() {}
 
-	get options() {
-		return {};
-	}
-
 	debug(...messages) {
-		if (this.options.debug) {
-			console.log('Accordion Debug:', ...messages);
+		try {
+			if (this.options.debug) {
+				console.log('Accordion Debug:', ...messages);
+			}
+		}
+		catch(error) {
+			// suppress
 		}
 	}
 
