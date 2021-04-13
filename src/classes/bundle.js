@@ -8,11 +8,7 @@ module.exports = class Bundle extends Base {
 		super();
 		this.accordion = parameters.accordion;
 		this.element = parameters.element;
-		if (this.constructor.isElementInitialized(this.element)) {
-			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
-		}
-		this.initializeElement();
-		this.initializeItems();
+		this.addItems(this.options.elements.item);
 		return this;
 	}
 
@@ -40,13 +36,13 @@ module.exports = class Bundle extends Base {
 		if (!this.constructor.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
+		if (this.constructor.isElementInitialized(element)) {
+			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		element[this.constructor.elementProperty] = this;
+		element.setAttribute(this.constructor.elementDataAttribute, 'bundle');
 		this._element = element;
 		return this._element;
-	}
-
-	initializeElement() {
-		this.element[this.constructor.elementProperty] = this;
-		this.element.setAttribute(this.constructor.elementDataAttribute, 'bundle');
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -98,10 +94,6 @@ module.exports = class Bundle extends Base {
 		for (const element of elements) {
 			this.addItem(element);
 		}
-	}
-
-	initializeItems() {
-		this.addItems(this.options.elements.item);
 	}
 
 };

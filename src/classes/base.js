@@ -138,7 +138,7 @@ module.exports = class Base {
 	}
 
 	static get elementDataAttribute() {
-		return 'accordion';
+		return 'data-accordion';
 	}
 
 	static isElementInitialized(element) {
@@ -153,6 +153,17 @@ module.exports = class Base {
 		try {
 			if (this.options.debug) {
 				console.log('Accordion Debug:', ...messages);
+			}
+		}
+		catch(error) {
+			// suppress
+		}
+	}
+
+	accessibilityWarn(...messages) {
+		try {
+			if (this.options.accessibilityWarnings) {
+				console.warn('Accordion Accessibility Warning:', ...messages);
 			}
 		}
 		catch(error) {

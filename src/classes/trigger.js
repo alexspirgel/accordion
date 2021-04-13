@@ -7,10 +7,6 @@ module.exports = class Trigger extends Base {
 		super();
 		this.item = parameters.item;
 		this.element = parameters.element;
-		if (this.constructor.isElementInitialized(this.element)) {
-			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
-		}
-		this.initializeElement();
 		return this;
 	}
 
@@ -37,13 +33,22 @@ module.exports = class Trigger extends Base {
 		if (!this.constructor.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
+		if (this.constructor.isElementInitialized(element)) {
+			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		if (!(element instanceof HTMLButtonElement)) {
+			this.accessibilityWarn(`Accordion trigger should be a <button> element.`);
+		}
+		element[this.constructor.elementProperty] = this;
+		element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
+		element.setAttribute('aria-controls', this.item.content.element.id);
+		element.addEventListener('click', this.triggerHandler.bind(this));
 		this._element = element;
 		return this._element;
 	}
 
-	initializeElement() {
-		this.element[this.constructor.elementProperty] = this;
-		this.element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
+	triggerHandler(event) {
+		this.item.toggle();
 	}
 
 };

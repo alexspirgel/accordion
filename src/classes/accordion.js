@@ -12,7 +12,7 @@ module.exports = class Accordion extends Base {
 				item: '.accordion__item',
 				trigger: '.accordion__trigger',
 				content: '.accordion__content',
-				container: '.accordion__container'
+				contentInner: '.accordion__content-inner'
 			},
 			accessibilityWarnings: true,
 			closeNestedItems: false,
@@ -58,7 +58,7 @@ module.exports = class Accordion extends Base {
 						item: elementsModel,
 						trigger: elementsModel,
 						content: elementsModel,
-						container: elementsModel
+						contentInner: elementsModel
 					}
 				},
 				accessibilityWarnings: {
@@ -67,37 +67,7 @@ module.exports = class Accordion extends Base {
 				closeNestedItems: {
 					type: 'boolean'
 				},
-				defaultOpenItems: [
-					{
-						type: 'string'
-					},
-					{
-						type: 'number',
-						greaterThanOrEqualTo: 0,
-						divisibleBy: 1
-					},
-					{
-						type: 'object',
-						instanceOf: [Element, NodeList]
-					},
-					{
-						type: 'array',
-						allPropertySchema: [
-							{
-								type: 'string'
-							},
-							{
-								type: 'number',
-								greaterThanOrEqualTo: 0,
-								divisibleBy: 1
-							},
-							{
-								type: 'object',
-								instanceOf: [Element, NodeList]
-							}
-						]
-					}
-				],
+				defaultOpenItems: elementsModel,
 				inlineStyles: {
 					type: 'boolean'
 				},
@@ -118,7 +88,7 @@ module.exports = class Accordion extends Base {
 	constructor(options) {
 		super();
 		this.options = options;
-		this.initializeBundles();
+		this.addBundles(this.options.elements.bundle);
 		this.debug(this);
 		return this;
 	}
@@ -180,10 +150,6 @@ module.exports = class Accordion extends Base {
 		for (const element of elements) {
 			this.addBundle(element);
 		}
-	}
-
-	initializeBundles() {
-		this.addBundles(this.options.elements.bundle);
 	}
 
 };

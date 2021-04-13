@@ -2,8 +2,22 @@ const Base = require('./base.js');
 const CodedError = require('./coded-error.js');
 const Trigger = require('./trigger.js');
 const Content = require('./content.js');
+const transitionAuto = require('@alexspirgel/transition-auto');
 
 module.exports = class Item extends Base {
+
+	static get itemStateDataAttribute() {
+		return 'data-accordion-item-state';
+	}
+
+	static get availableStates() {
+		return [
+			'closed',
+			'closing',
+			'opened',
+			'opening'
+		];
+	}
 
 	static get instanceCount() {
 		if (typeof this._instanceCount !== 'number') {
@@ -29,13 +43,8 @@ module.exports = class Item extends Base {
 		super();
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
-		if (this.constructor.isElementInitialized(this.element)) {
-			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
-		}
-		this.id = this.constructor.instanceCountIncrement();
-		this.initializeElement();
-		this.initializeTriggers();
-		this.initializeContent();
+		this.addContent(this.options.elements.content);
+		this.addTriggers(this.options.elements.trigger);
 		return this;
 	}
 
@@ -57,18 +66,42 @@ module.exports = class Item extends Base {
 	get element() {
 		return this._element;
 	}
-
+	
 	set element(element) {
 		if (!this.constructor.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
+		if (this.constructor.isElementInitialized(element)) {
+			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		element[this.constructor.elementProperty] = this;
+		element.setAttribute(this.constructor.elementDataAttribute, 'item');
 		this._element = element;
+		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
+		let state = 'closed';
+		if (defaultOpenItemElements.includes(element)) {
+			state = 'opened'
+		}
+		this.state = state;
 		return this._element;
 	}
 
-	initializeElement() {
-		this.element[this.constructor.elementProperty] = this;
-		this.element.setAttribute(this.constructor.elementDataAttribute, 'item');
+	get count() {
+		if (typeof this._count !== 'number') {
+			this._count = this.constructor.instanceCountIncrement();
+		}
+		return this._count;
+	}
+
+	get state() {
+		return this.element.getAttribute(this.constructor.itemStateDataAttribute);
+	}
+
+	set state(state) {
+		if (!this.constructor.availableStates.includes(state)) {
+			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
+		}
+		return this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -122,10 +155,6 @@ module.exports = class Item extends Base {
 		}
 	}
 
-	initializeTriggers() {
-		this.addTriggers(this.options.elements.trigger);
-	}
-
 	get content() {
 		return this._content;
 	}
@@ -161,8 +190,39 @@ module.exports = class Item extends Base {
 
 	}
 
-	initializeContent() {
-		this.addContent(this.options.elements.content);
+	open() {
+		transitionAuto({
+			element: this.content.element,
+			innerElement: this.content.contentInner.element,
+			property: 'height',
+			value: 'auto',
+			onComplete: () => {
+				this.state = 'opened';
+			}
+		});
+		this.state = 'opening';
+	}
+	
+	close() {
+		transitionAuto({
+			element: this.content.element,
+			innerElement: this.content.contentInner.element,
+			property: 'height',
+			value: 0,
+			onComplete: () => {
+				this.state = 'closed';
+			}
+		});
+		this.state = 'closing';
+	}
+
+	toggle() {
+		if (this.state === 'closed' || this.state === 'closing') {
+			this.open();
+		}
+		else {
+			this.close();
+		}
 	}
 
 };

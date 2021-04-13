@@ -1,6 +1,6 @@
 const Base = require('./base.js');
 const CodedError = require('./coded-error.js');
-const Container = require('./container.js');
+const ContentInner = require('./content-inner.js');
 
 module.exports = class Content extends Base {
 
@@ -8,11 +8,7 @@ module.exports = class Content extends Base {
 		super();
 		this.item = parameters.item;
 		this.element = parameters.element;
-		if (this.constructor.isElementInitialized(this.element)) {
-			throw new CodedError('already-initialized', 'This element already exists as part of an accordion.');
-		}
-		this.initializeElement();
-		this.initializeContainer();
+		this.addContentInner(this.options.elements.contentInner);
 		return this;
 	}
 
@@ -39,13 +35,14 @@ module.exports = class Content extends Base {
 		if (!this.constructor.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
+		if (this.constructor.isElementInitialized(element)) {
+			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		element[this.constructor.elementProperty] = this;
+		element.setAttribute(this.constructor.elementDataAttribute, 'content');
+		element.id = 'accordion-content-' + this.item.count;
 		this._element = element;
 		return this._element;
-	}
-
-	initializeElement() {
-		this.element[this.constructor.elementProperty] = this;
-		this.element.setAttribute(this.constructor.elementDataAttribute, 'content');
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -54,27 +51,27 @@ module.exports = class Content extends Base {
 		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
 	}
 
-	get container() {
-		return this._container;
+	get contentInner() {
+		return this._contentInner;
 	}
 
-	set container(container) {
-		if (!(container instanceof Container)) {
-			throw new Error(`'container' must be a Container class instance.`);
+	set contentInner(contentInner) {
+		if (!(contentInner instanceof ContentInner)) {
+			throw new Error(`'contentInner' must be a ContentInner class instance.`);
 		}
-		this._container = container;
-		return this._container;
+		this._contentInner = contentInner;
+		return this._contentInner;
 	}
 
-	addContainer(elementsInput) {
+	addContentInner(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
 		const element = elements[0];
 		try {
-			const container = new Container({
+			const contentInner = new ContentInner({
 				content: this,
 				element: element
 			});
-			this.container = container;
+			this.contentInner = contentInner;
 			return true;
 		}
 		catch (error) {
@@ -87,10 +84,6 @@ module.exports = class Content extends Base {
 			}
 		}
 
-	}
-
-	initializeContainer() {
-		this.addContainer(this.options.elements.container);
 	}
 
 };

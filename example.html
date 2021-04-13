@@ -9,7 +9,7 @@
 			/* Prevent the content from overflowing the parent. */
 			overflow: hidden;
 		}
-		.accordion__container {
+		.accordion__content-inner {
 			/* Vertical margins will cause incorrect height calculations. */
 			margin-top: 0;
 			margin-bottom: 0;
@@ -35,17 +35,17 @@
 
 	<ul class="accordion">
 		<li class="accordion__item">
-			<div class="accordion__trigger">Basic Content</div>
+			<button class="accordion__trigger">Basic Content</button>
 			<div class="accordion__content">
-				<div class="accordion__container">
+				<div class="accordion__content-inner">
 					<p>Lorem ipsum dolor sit amet</p>
 				</div>
 			</div>
 		</li>
 		<li class="accordion__item">
-			<div class="accordion__trigger">Longer Basic Content</div>
+			<button class="accordion__trigger">Longer Basic Content</button>
 			<div class="accordion__content">
-				<div class="accordion__container">
+				<div class="accordion__content-inner">
 					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in magna eu turpis semper rhoncus eu at elit. Maecenas malesuada dictum massa in tristique. Nulla a semper dui. Vivamus dapibus sem vitae elit malesuada tempor. Suspendisse sed urna ut nisi malesuada vulputate. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc scelerisque ante a libero vulputate, ac molestie diam fringilla. Integer et nisl ac mauris dapibus congue at vel tortor. In consectetur, dui in aliquam viverra, risus dolor placerat nibh, pharetra semper ex massa in dolor. Vestibulum iaculis, sapien quis auctor feugiat, augue dui scelerisque magna, vitae pretium magna eros eu nulla. Nulla euismod neque quis lacus congue molestie.</p>
 					<p>Aliquam varius gravida pharetra. Quisque tristique finibus malesuada. Nulla eleifend rhoncus neque rutrum dapibus. Sed commodo enim nec placerat placerat. Ut rhoncus semper rutrum. Praesent a elit a quam accumsan convallis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas dictum, nisl at scelerisque posuere, felis lorem interdum lacus, ut malesuada ex dui vitae enim. Praesent placerat id diam id dapibus. Ut ultrices interdum maximus. Donec venenatis arcu nec magna rutrum imperdiet. Aliquam erat volutpat. Etiam convallis urna non mollis luctus.</p>
 					<p>Duis congue est id egestas eleifend. Vestibulum neque mauris, mattis nec pharetra egestas, consectetur eu ante. Mauris ultricies id lacus eget finibus. Phasellus interdum viverra sem in tristique. Praesent porttitor auctor auctor. Fusce lacinia vehicula consequat. Ut faucibus nisi ut risus porta commodo. Ut eu auctor justo, et accumsan arcu. Phasellus ultricies pellentesque purus id pulvinar. Aliquam tempus lacinia massa sed dictum.</p>
@@ -55,22 +55,22 @@
 			</div>
 		</li>
 		<li class="accordion__item">
-			<div class="accordion__trigger">Nested Accordion</div>
+			<button class="accordion__trigger">Nested Accordion</button>
 			<div class="accordion__content">
-				<div class="accordion__container">
+				<div class="accordion__content-inner">
 					<ul class="accordion">
 						<li class="accordion__item">
-							<div class="accordion__trigger">Basic Content (depth 2)</div>
+							<button class="accordion__trigger">Basic Content (depth 2)</button>
 							<div class="accordion__content">
-								<div class="accordion__container">
+								<div class="accordion__content-inner">
 									<p>Lorem ipsum dolor sit amet</p>
 								</div>
 							</div>
 						</li>
 						<li class="accordion__item">
-							<div class="accordion__trigger">Longer Basic Content (depth 2)</div>
+							<button class="accordion__trigger">Longer Basic Content (depth 2)</button>
 							<div class="accordion__content">
-								<div class="accordion__container">
+								<div class="accordion__content-inner">
 									<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in magna eu turpis semper rhoncus eu at elit. Maecenas malesuada dictum massa in tristique. Nulla a semper dui. Vivamus dapibus sem vitae elit malesuada tempor. Suspendisse sed urna ut nisi malesuada vulputate. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc scelerisque ante a libero vulputate, ac molestie diam fringilla. Integer et nisl ac mauris dapibus congue at vel tortor. In consectetur, dui in aliquam viverra, risus dolor placerat nibh, pharetra semper ex massa in dolor. Vestibulum iaculis, sapien quis auctor feugiat, augue dui scelerisque magna, vitae pretium magna eros eu nulla. Nulla euismod neque quis lacus congue molestie.</p>
 									<p>Aliquam varius gravida pharetra. Quisque tristique finibus malesuada. Nulla eleifend rhoncus neque rutrum dapibus. Sed commodo enim nec placerat placerat. Ut rhoncus semper rutrum. Praesent a elit a quam accumsan convallis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas dictum, nisl at scelerisque posuere, felis lorem interdum lacus, ut malesuada ex dui vitae enim. Praesent placerat id diam id dapibus. Ut ultrices interdum maximus. Donec venenatis arcu nec magna rutrum imperdiet. Aliquam erat volutpat. Etiam convallis urna non mollis luctus.</p>
 									<p>Duis congue est id egestas eleifend. Vestibulum neque mauris, mattis nec pharetra egestas, consectetur eu ante. Mauris ultricies id lacus eget finibus. Phasellus interdum viverra sem in tristique. Praesent porttitor auctor auctor. Fusce lacinia vehicula consequat. Ut faucibus nisi ut risus porta commodo. Ut eu auctor justo, et accumsan arcu. Phasellus ultricies pellentesque purus id pulvinar. Aliquam tempus lacinia massa sed dictum.</p>
@@ -80,22 +80,22 @@
 							</div>
 						</li>
 						<li class="accordion__item">
-							<div class="accordion__trigger">Nested Accordion (depth 2)</div>
+							<button class="accordion__trigger">Nested Accordion (depth 2)</button>
 							<div class="accordion__content">
-								<div class="accordion__container">
+								<div class="accordion__content-inner">
 									<ul class="accordion">
 										<li class="accordion__item">
-											<div class="accordion__trigger">Basic Content (depth 3)</div>
+											<button class="accordion__trigger">Basic Content (depth 3)</button>
 											<div class="accordion__content">
-												<div class="accordion__container">
+												<div class="accordion__content-inner">
 													<p>Lorem ipsum dolor sit amet</p>
 												</div>
 											</div>
 										</li>
 										<li class="accordion__item">
-											<div class="accordion__trigger">Longer Basic Content (depth 3)</div>
+											<button class="accordion__trigger">Longer Basic Content (depth 3)</button>
 											<div class="accordion__content">
-												<div class="accordion__container">
+												<div class="accordion__content-inner">
 													<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in magna eu turpis semper rhoncus eu at elit. Maecenas malesuada dictum massa in tristique. Nulla a semper dui. Vivamus dapibus sem vitae elit malesuada tempor. Suspendisse sed urna ut nisi malesuada vulputate. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc scelerisque ante a libero vulputate, ac molestie diam fringilla. Integer et nisl ac mauris dapibus congue at vel tortor. In consectetur, dui in aliquam viverra, risus dolor placerat nibh, pharetra semper ex massa in dolor. Vestibulum iaculis, sapien quis auctor feugiat, augue dui scelerisque magna, vitae pretium magna eros eu nulla. Nulla euismod neque quis lacus congue molestie.</p>
 													<p>Aliquam varius gravida pharetra. Quisque tristique finibus malesuada. Nulla eleifend rhoncus neque rutrum dapibus. Sed commodo enim nec placerat placerat. Ut rhoncus semper rutrum. Praesent a elit a quam accumsan convallis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas dictum, nisl at scelerisque posuere, felis lorem interdum lacus, ut malesuada ex dui vitae enim. Praesent placerat id diam id dapibus. Ut ultrices interdum maximus. Donec venenatis arcu nec magna rutrum imperdiet. Aliquam erat volutpat. Etiam convallis urna non mollis luctus.</p>
 													<p>Duis congue est id egestas eleifend. Vestibulum neque mauris, mattis nec pharetra egestas, consectetur eu ante. Mauris ultricies id lacus eget finibus. Phasellus interdum viverra sem in tristique. Praesent porttitor auctor auctor. Fusce lacinia vehicula consequat. Ut faucibus nisi ut risus porta commodo. Ut eu auctor justo, et accumsan arcu. Phasellus ultricies pellentesque purus id pulvinar. Aliquam tempus lacinia massa sed dictum.</p>

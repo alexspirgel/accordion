@@ -8,27 +8,27 @@ https://www.w3.org/TR/wai-aria-practices-1.1/examples/accordion/accordion.html
 #### `bundle`
 Default value: `'.accordion'`
 
-Custom bundle element. Can be a selector, element reference, or an array containing selectors and/or element references.
+Custom bundle element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned.
 
 #### `item`
 Default value: `'.accordion__item'`
 
-Custom item element. Can be a selector, element reference, or an array containing selectors and/or element references. Item elements must be located within bundle elements.
+Custom item element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Item elements must be located within bundle elements.
 
 #### `trigger`
 Default value: `'.accordion__trigger'`
 
-Custom item trigger element. Triggers the opening and closing of its item. Can be a selector, element reference, or an array containing selectors and/or element references. Trigger elements, must be located within item elements.
+Custom item trigger element. Triggers the opening and closing of its item. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Trigger elements, must be located within item elements.
 
 #### `content`
 Default value: `'.accordion__content'`
 
-Custom item content element. Can be a selector, element reference, or an array containing selectors and/or element references. Content elements must be located within item elements.
+Custom item content element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Content elements must be located within item elements.
 
-#### `container`
-Default value: `'.accordion__container'`
+#### `contentInner`
+Default value: `'.accordion__content-inner'`
 
-Custom item content inner element. Can be a selector, element reference, or an array containing selectors and/or element references. Container elements must be located within content elements. It is recommended that this element is not styled and is the first and only child of the `content` element.
+Custom item content inner element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Content inner elements must be located within content elements. It is recommended that this element is not styled and is the only child of the `content` element.
 
 ### `accessibilityWarnings`
 Default value: `true`
@@ -47,7 +47,7 @@ When set to `false` closing an item will not close the nested items.
 ### `defaultOpenItems`
 Default value: `null`
 
-Set which item(s) should default to open. Can be a selector (string), an element reference (object), an item index (number), or an array including any combination of the previously stated. When set to `null`, no items will default to open.
+Set which item(s) should default to open. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. When set to `null`, no items will default to open.
 
 ### `inlineStyles`
 Default value: `true`
