@@ -1,5 +1,13 @@
 module.exports = class Base {
 
+	static get elementProperty() {
+		return 'accordionElement';
+	}
+
+	static get elementDataAttribute() {
+		return 'data-accordion';
+	}
+
 	static isInstanceOfThis(instance) {
 		return instance instanceof this;
 	}
@@ -10,6 +18,12 @@ module.exports = class Base {
 		}
 		else {
 			return false;
+		}
+	}
+
+	static isElementInitialized(element) {
+		if (element[this.elementProperty] !== undefined && element.hasAttribute(this.elementDataAttribute)) {
+			return true;
 		}
 	}
 
@@ -37,18 +51,16 @@ module.exports = class Base {
 		if (!elements.every(this.isElement)) {
 			throw new Error(`'elements' array must only contain elements.`);
 		}
-		if (order !== 'asc' && order !== 'ASC' && order !== 'desc' && order !== 'DESC') {
+		order = order.toLowerCase();
+		if (order !== 'asc' && order !== 'desc') {
 			throw new Error(`'order' must be 'asc' or 'desc'.`);
 		}
-		order = order.toLowerCase();
 	
 		const elementsMap = elements.map((mapElement, mapIndex) => {
 			const contains = new Set();
 			elements.forEach((element, index) => {
-				if (mapIndex !== index) {
-					if (mapElement.contains(element)) {
-						contains.add(element);
-					}
+				if (mapIndex !== index && mapElement.contains(element)) {
+					contains.add(element);
 				}
 			});
 			return {
@@ -58,21 +70,12 @@ module.exports = class Base {
 		});
 	
 		elementsMap.sort((a, b) => {
+			const modifier = (order === 'asc') ? 1 : -1;
 			if (a.contains.size < b.contains.size) {
-				if (order === 'asc') {
-					return -1;
-				}
-				else {
-					return 1;
-				}
+				return -1 * modifier;
 			}
 			else if (a.contains.size > b.contains.size) {
-				if (order === 'asc') {
-					return 1;
-				}
-				else {
-					return -1;
-				}
+				return 1 * modifier;
 			}
 			else {
 				return 0;
@@ -131,20 +134,6 @@ module.exports = class Base {
 			return flag;
 		});
 		return filteredElements;
-	}
-
-	static get elementProperty() {
-		return 'accordionElement';
-	}
-
-	static get elementDataAttribute() {
-		return 'data-accordion';
-	}
-
-	static isElementInitialized(element) {
-		if (element[this.elementProperty] !== undefined && element.hasAttribute(this.elementDataAttribute)) {
-			return true;
-		}
 	}
 
 	constructor() {}

@@ -36,13 +36,13 @@ module.exports = class Trigger extends Base {
 		if (this.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
-		if (!(element instanceof HTMLButtonElement)) {
-			this.accessibilityWarn(`Accordion trigger should be a <button> element.`);
-		}
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
 		element.setAttribute('aria-controls', this.item.content.element.id);
 		element.addEventListener('click', this.triggerHandler.bind(this));
+		if (!(element instanceof HTMLButtonElement)) {
+			this.accessibilityWarn(`Accordion trigger should be a <button> element.`);
+		}
 		this._element = element;
 		return this._element;
 	}

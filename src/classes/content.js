@@ -41,6 +41,9 @@ module.exports = class Content extends Base {
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'content');
 		element.id = 'accordion-content-' + this.item.count;
+		if (this.item.state === 'closed') {
+			element.style.height = 0;
+		}
 		this._element = element;
 		return this._element;
 	}

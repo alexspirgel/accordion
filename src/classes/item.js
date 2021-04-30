@@ -43,6 +43,11 @@ module.exports = class Item extends Base {
 		super();
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
+		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
+		this.state = 'closed';
+		if (defaultOpenItemElements.includes(this.element)) {
+			this.state = 'opened'
+		}
 		this.addContent(this.options.elements.content);
 		this.addTriggers(this.options.elements.trigger);
 		return this;
@@ -77,12 +82,6 @@ module.exports = class Item extends Base {
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'item');
 		this._element = element;
-		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
-		let state = 'closed';
-		if (defaultOpenItemElements.includes(element)) {
-			state = 'opened'
-		}
-		this.state = state;
 		return this._element;
 	}
 
@@ -190,7 +189,12 @@ module.exports = class Item extends Base {
 
 	}
 
-	open() {
+	open(skipTransition = false) {
+		let existingStyleTransition = '';
+		if (skipTransition) {
+			existingStyleTransition = this.content.element.style.transition;
+			this.content.element.style.transition = 'none';
+		}
 		transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
@@ -198,12 +202,21 @@ module.exports = class Item extends Base {
 			value: 'auto',
 			onComplete: () => {
 				this.state = 'opened';
+				if (skipTransition) {
+					this.content.element.offsetWidth;
+					this.content.element.style.transition = existingStyleTransition;
+				}
 			}
 		});
 		this.state = 'opening';
 	}
 	
-	close() {
+	close(skipTransition = false) {
+		let existingStyleTransition = '';
+		if (skipTransition) {
+			existingStyleTransition = this.content.element.style.transition;
+			this.content.element.style.transition = 'none';
+		}
 		transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
@@ -211,17 +224,24 @@ module.exports = class Item extends Base {
 			value: 0,
 			onComplete: () => {
 				this.state = 'closed';
+				if (skipTransition) {
+					this.content.element.offsetWidth;
+					this.content.element.style.transition = existingStyleTransition;
+				}
+				if (this.options.closeNestedItems) {
+					//
+				}
 			}
 		});
 		this.state = 'closing';
 	}
 
-	toggle() {
+	toggle(skipTransition = false) {
 		if (this.state === 'closed' || this.state === 'closing') {
-			this.open();
+			this.open(skipTransition);
 		}
 		else {
-			this.close();
+			this.close(skipTransition);
 		}
 	}
 
