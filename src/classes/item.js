@@ -200,6 +200,7 @@ module.exports = class Item extends Base {
 			innerElement: this.content.contentInner.element,
 			property: 'height',
 			value: 'auto',
+			debug: this.options.debug,
 			onComplete: () => {
 				this.state = 'opened';
 				if (skipTransition) {
@@ -222,6 +223,7 @@ module.exports = class Item extends Base {
 			innerElement: this.content.contentInner.element,
 			property: 'height',
 			value: 0,
+			debug: this.options.debug,
 			onComplete: () => {
 				this.state = 'closed';
 				if (skipTransition) {
@@ -229,7 +231,8 @@ module.exports = class Item extends Base {
 					this.content.element.style.transition = existingStyleTransition;
 				}
 				if (this.options.closeNestedItems) {
-					//
+					// get next level accordion items only
+					// close those items
 				}
 			}
 		});
@@ -243,6 +246,11 @@ module.exports = class Item extends Base {
 		else {
 			this.close(skipTransition);
 		}
+	}
+
+	get nestedAccordions() {
+		let nestedAccordions = [];
+		return nestedAccordions;
 	}
 
 };

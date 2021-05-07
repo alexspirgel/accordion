@@ -515,6 +515,7 @@ module.exports = class Item extends Base {
 			innerElement: this.content.contentInner.element,
 			property: 'height',
 			value: 'auto',
+			debug: this.options.debug,
 			onComplete: () => {
 				this.state = 'opened';
 				if (skipTransition) {
@@ -537,6 +538,7 @@ module.exports = class Item extends Base {
 			innerElement: this.content.contentInner.element,
 			property: 'height',
 			value: 0,
+			debug: this.options.debug,
 			onComplete: () => {
 				this.state = 'closed';
 				if (skipTransition) {
