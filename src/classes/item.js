@@ -189,6 +189,16 @@ module.exports = class Item extends Base {
 
 	}
 
+	get nestedBundleElements() {
+		let nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
+		return Array.from(nestedBundleElements);
+	}
+
+	get nextLevelNestedBundleElements() {
+		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(this.nestedBundleElements, null, this.nestedBundleElements);
+		return nextLevelNestedBundleElements;
+	}
+
 	open(skipTransition = false) {
 		let existingStyleTransition = '';
 		if (skipTransition) {
@@ -231,8 +241,14 @@ module.exports = class Item extends Base {
 					this.content.element.style.transition = existingStyleTransition;
 				}
 				if (this.options.closeNestedItems) {
-					// get next level accordion items only
-					// close those items
+					if (this.nextLevelNestedBundleElements) {
+						for (const bundleElement of this.nextLevelNestedBundleElements) {
+							const bundle = bundleElement[this.constructor.elementProperty]
+							for (const item of bundle.items) {
+								item.close(true);
+							}
+						}
+					}
 				}
 			}
 		});
@@ -246,11 +262,6 @@ module.exports = class Item extends Base {
 		else {
 			this.close(skipTransition);
 		}
-	}
-
-	get nestedAccordions() {
-		let nestedAccordions = [];
-		return nestedAccordions;
 	}
 
 };

@@ -183,33 +183,53 @@ module.exports = class Base {
 		return orderedElements;
 	}
 
-	static isElementContainedBy(element, containedBy = []) {
+	static isElementContainedBy(element, containedByElementsInput = [], operator = 'and') {
 		if (!this.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
-		containedBy = this.normalizeElements(containedBy);
-		for (let containedByElement of containedBy) {
-			if (!containedByElement.contains(element)) {
-				return false;
+		const containedByElements = this.normalizeElements(containedByElementsInput);
+		if (typeof operator !== 'string') {
+			throw new Error(`'operator' must be a string.`);
+		}
+		operator = operator.toLowerCase();
+		if (operator !== 'and' && operator !== 'or') {
+			throw new Error(`'operator' must be 'and' or 'or'.`);
+		}
+		let flag = false;
+		for (const containedByElement of containedByElements) {
+			if (containedByElement.contains(element) && containedByElement !== element) {
+				flag = true;
+				if (operator === 'or') {
+					break;
+				}
+			}
+			else {
+				flag = false;
+				if (operator === 'and') {
+					break;
+				}
 			}
 		}
-		return true;
+		return flag;
 	}
 
-	static isElementNotContainedBy(element, notContainedBy = []) {
-		if (!this.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
+	static isElementNotContainedBy(element, notContainedByElementsInput = [], operator = 'and') {
+		if (typeof operator !== 'string') {
+			throw new Error(`'operator' must be a string.`);
 		}
-		notContainedBy = this.normalizeElements(notContainedBy);
-		for (let notContainedByElement of notContainedBy) {
-			if (notContainedByElement.contains(element)) {
-				return false;
-			}
+		operator = operator.toLowerCase();
+		if (operator === 'and') {
+			return !this.isElementContainedBy(element, notContainedByElementsInput, 'or');
 		}
-		return true;
+		else if (operator === 'or') {
+			return !this.isElementContainedBy(element, notContainedByElementsInput, 'and');
+		}
+		else {
+			throw new Error(`'operator' must be 'and' or 'or'.`);
+		}
 	}
 
-	static filterElementsByContainer(elements, containedBy = [], notContainedBy = []) {
+	static filterElementsByContainer(elements, containedBy = [], notContainedBy = [], operator = 'and') {
 		if (!Array.isArray(elements)) {
 			throw new Error(`'elements' must be an array.`);
 		}
@@ -218,12 +238,16 @@ module.exports = class Base {
 		}
 		const filteredElements = elements.filter((element) => {
 			let flag = true;
-			if (!this.isElementContainedBy(element, containedBy)) {
-				flag = false;
-			}
-			if (flag) {
-				if (!this.isElementNotContainedBy(element, notContainedBy)) {
+			if (containedBy) {
+				if (!this.isElementContainedBy(element, containedBy, operator)) {
 					flag = false;
+				}
+			}
+			if (notContainedBy) {
+				if (flag) {
+					if (!this.isElementNotContainedBy(element, notContainedBy, operator)) {
+						flag = false;
+					}
 				}
 			}
 			return flag;
@@ -504,6 +528,16 @@ module.exports = class Item extends Base {
 
 	}
 
+	get nestedBundleElements() {
+		let nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
+		return Array.from(nestedBundleElements);
+	}
+
+	get nextLevelNestedBundleElements() {
+		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(this.nestedBundleElements, null, this.nestedBundleElements);
+		return nextLevelNestedBundleElements;
+	}
+
 	open(skipTransition = false) {
 		let existingStyleTransition = '';
 		if (skipTransition) {
@@ -546,7 +580,14 @@ module.exports = class Item extends Base {
 					this.content.element.style.transition = existingStyleTransition;
 				}
 				if (this.options.closeNestedItems) {
-					//
+					if (this.nextLevelNestedBundleElements) {
+						for (const bundleElement of this.nextLevelNestedBundleElements) {
+							const bundle = bundleElement[this.constructor.elementProperty]
+							for (const item of bundle.items) {
+								item.close(true);
+							}
+						}
+					}
 				}
 			}
 		});
