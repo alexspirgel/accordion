@@ -39,8 +39,26 @@ module.exports = class Item extends Base {
 		return this.instanceCount = this.instanceCount + 1;
 	}
 
+	static get accordionItemAddTriggerEventName() {
+		return 'accordionItemAddTrigger';
+	}
+
+	static get accordionItemAddTriggerEvent() {
+		return new Event(this.accordionItemAddTriggerEventName);
+	}
+
+	static get accordionItemAddContentEventName() {
+		return 'accordionItemAddContent';
+	}
+
+	static get accordionItemAddContentEvent() {
+		return new Event(this.accordionItemAddContentEventName);
+	}
+
 	constructor(parameters) {
 		super();
+		this.accordionItemAddTriggerEvent = this.constructor.accordionItemAddTriggerEvent;
+		this.accordionItemAddContentEvent = this.constructor.accordionItemAddContentEvent;
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
 		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
@@ -49,7 +67,7 @@ module.exports = class Item extends Base {
 			this.state = 'opened'
 		}
 		this.addContent(this.options.elements.content);
-		this.addTriggers(this.options.elements.trigger);
+		this.addTrigger(this.options.elements.trigger);
 		return this;
 	}
 
@@ -100,7 +118,11 @@ module.exports = class Item extends Base {
 		if (!this.constructor.availableStates.includes(state)) {
 			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
 		}
-		return this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
+		this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
+
+		if (this.trigger) {
+			this.trigger.updateAriaExpanded();
+		}
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -109,31 +131,28 @@ module.exports = class Item extends Base {
 		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
 	}
 
-	get triggers() {
-		if (!this._triggers) {
-			this._triggers = [];
-		}
-		return this._triggers;
+	get trigger() {
+		return this._trigger;
 	}
 
-	set triggers(triggers) {
-		if (!Array.isArray(triggers)) {
-			throw new Error(`'triggers' must be an array.`);
+	set trigger(trigger) {
+		if (!(trigger instanceof Trigger) && trigger !== undefined && trigger !== null) {
+			throw new Error(`'trigger' must be a Trigger class instance, undefined, or null.`);
 		}
-		if (!triggers.every(Trigger.isInstanceOfThis)) {
-			throw new Error(`'triggers' must only contain Trigger class instances.`);
-		}
-		this._triggers = triggers;
-		return this._triggers;
+		this._trigger = trigger;
+		return this._trigger;
 	}
 
-	addTrigger(element) {
+	addTrigger(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		const element = elements[0];
 		try {
 			const trigger = new Trigger({
 				item: this,
 				element: element
 			});
-			this.triggers.push(trigger);
+			this.trigger = trigger;
+			this.element.dispatchEvent(this.accordionItemAddTriggerEvent);
 			return true;
 		}
 		catch (error) {
@@ -147,11 +166,11 @@ module.exports = class Item extends Base {
 		}
 	}
 
-	addTriggers(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		for (const element of elements) {
-			this.addTrigger(element);
+	removeTrigger() {
+		if (this.trigger) {
+			this.trigger.destroy();
 		}
+		this.trigger = undefined;
 	}
 
 	get content() {
@@ -159,8 +178,8 @@ module.exports = class Item extends Base {
 	}
 
 	set content(content) {
-		if (!(content instanceof Content)) {
-			throw new Error(`'content' must be a Content class instance.`);
+		if (!(content instanceof Content) && content !== undefined && content !== null) {
+			throw new Error(`'content' must be a Content class instance, undefined, or null.`);
 		}
 		this._content = content;
 		return this._content;
@@ -175,6 +194,7 @@ module.exports = class Item extends Base {
 				element: element
 			});
 			this.content = content;
+			this.element.dispatchEvent(this.accordionItemAddContentEvent);
 			return true;
 		}
 		catch (error) {
@@ -186,7 +206,13 @@ module.exports = class Item extends Base {
 				throw error;
 			}
 		}
+	}
 
+	removeContent() {
+		if (this.content) {
+			this.content.destroy();
+		}
+		this.content = undefined;
 	}
 
 	get nestedBundleElements() {
@@ -205,6 +231,7 @@ module.exports = class Item extends Base {
 			existingStyleTransition = this.content.element.style.transition;
 			this.content.element.style.transition = 'none';
 		}
+		this.state = 'opening';
 		transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
@@ -219,7 +246,15 @@ module.exports = class Item extends Base {
 				}
 			}
 		});
-		this.state = 'opening';
+		if (!this.options.multipleOpenItems) {
+			if (this.bundle) {
+				for (const bundleItem of this.bundle.items) {
+					if (bundleItem !== this) {
+						bundleItem.close(skipTransition);
+					}
+				}
+			}
+		}
 	}
 	
 	close(skipTransition = false) {
@@ -228,6 +263,7 @@ module.exports = class Item extends Base {
 			existingStyleTransition = this.content.element.style.transition;
 			this.content.element.style.transition = 'none';
 		}
+		this.state = 'closing';
 		transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
@@ -252,7 +288,6 @@ module.exports = class Item extends Base {
 				}
 			}
 		});
-		this.state = 'closing';
 	}
 
 	toggle(skipTransition = false) {
@@ -262,6 +297,19 @@ module.exports = class Item extends Base {
 		else {
 			this.close(skipTransition);
 		}
+	}
+
+	destroy() {
+		if (this.trigger) {
+			this.trigger.destroy();
+		}
+		if (this.content) {
+			this.content.destroy();
+		}
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		this.element.removeAttribute(this.constructor.itemStateDataAttribute);
+		this.bundle.removeItem(this);
 	}
 
 };

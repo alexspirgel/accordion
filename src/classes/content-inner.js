@@ -36,10 +36,15 @@ module.exports = class ContentInner extends Base {
 		if (this.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
+		this._element = element;
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'content-inner');
-		this._element = element;
 		return this._element;
+	}
+
+	destroy() {
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
 	}
 
 };

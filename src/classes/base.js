@@ -1,7 +1,7 @@
 module.exports = class Base {
 
 	static get elementProperty() {
-		return 'accordionElement';
+		return 'accordion';
 	}
 
 	static get elementDataAttribute() {

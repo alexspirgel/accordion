@@ -25,7 +25,7 @@
   "dependencies": {
     "@alexspirgel/extend": "^3.0.0",
     "@alexspirgel/schema": "^1.1.5",
-    "@alexspirgel/transition-auto": "^2.0.1"
+    "@alexspirgel/transition-auto": "^2.0.5"
   },
   "devDependencies": {
     "terser-webpack-plugin": "^3.1.0",

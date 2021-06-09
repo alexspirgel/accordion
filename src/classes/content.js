@@ -6,6 +6,7 @@ module.exports = class Content extends Base {
 
 	constructor(parameters) {
 		super();
+		this.boundUpdateAriaLabelledBy = this.updateAriaLabelledBy.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;
 		this.addContentInner(this.options.elements.contentInner);
@@ -38,14 +39,33 @@ module.exports = class Content extends Base {
 		if (this.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
+		
+		this._element = element;
+	
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'content');
-		element.id = 'accordion-content-' + this.item.count;
+		
+		this.usingExistingId = true;
+		if (!element.getAttribute('id')) {
+			element.setAttribute('id', 'accordion-content-' + this.item.count);
+			this.usingExistingId = false;
+		}
+
+		this.updateAriaLabelledBy();
+		this.item.element.addEventListener(this.item.constructor.accordionItemAddTriggerEventName, this.boundUpdateAriaLabelledBy);
+		
+		this.existingStyleHeight = 	element.style.height;
 		if (this.item.state === 'closed') {
 			element.style.height = 0;
 		}
-		this._element = element;
+		
 		return this._element;
+	}
+
+	updateAriaLabelledBy() {
+		if (this.item.trigger) {
+			this.element.setAttribute('aria-labelledby', this.item.trigger.element.getAttribute('id'));
+		}
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -67,8 +87,14 @@ module.exports = class Content extends Base {
 	}
 
 	addContentInner(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		const element = elements[0];
+		let element;
+		if (elementsInput === undefined || elementsInput === null) {
+			element = this.element.children[0];
+		}
+		else {
+			const elements = this.filterElementsByScope(elementsInput);
+			element = elements[0];
+		}
 		try {
 			const contentInner = new ContentInner({
 				content: this,
@@ -87,6 +113,20 @@ module.exports = class Content extends Base {
 			}
 		}
 
+	}
+
+	destroy() {
+		if (this.contentInner) {
+			this.contentInner.destroy();
+		}
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		if (!this.usingExistingId) {
+			this.element.removeAttribute('id');
+		}
+		this.element.removeAttribute('aria-labelledby');
+		this.item.element.removeEventListener(this.item.constructor.accordionItemAddTriggerEventName, this.boundUpdateAriaLabelledBy);
+		this.element.style.height = this.existingStyleHeight;
 	}
 
 };

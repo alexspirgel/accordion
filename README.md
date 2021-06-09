@@ -18,17 +18,17 @@ Custom item element. Can be a selector, element reference, node list, or an arra
 #### `trigger`
 Default value: `'.accordion__trigger'`
 
-Custom item trigger element. Triggers the opening and closing of its item. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Trigger elements, must be located within item elements.
+Custom item trigger element. Triggers the opening and closing of its item. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Trigger elements, must be located within item elements. Only one trigger element per accordion item. If more than one trigger element is passed or matches the selector for an accordion item, the fist element will be used.
 
 #### `content`
 Default value: `'.accordion__content'`
 
-Custom item content element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Content elements must be located within item elements.
+Custom item content element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Content elements must be located within item elements. Only one content element per accordion item. If more than one content element is passed or matches the selector for an accordion item, the fist element will be used.
 
 #### `contentInner`
-Default value: `'.accordion__content-inner'`
+Default value: `undefined`
 
-Custom item content inner element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Content inner elements must be located within content elements. It is recommended that this element is not styled and is the only child of the `content` element.
+Custom item content inner element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Only one content inner element per accordion item. If more than one content inner element is passed or matches the selector for an accordion item, the fist element will be used. Can also be left undefined. When left undefined, the fist child element of the content element. Content inner elements must be located within content elements. It is recommended that this element is not styled and is the only child of the content element.
 
 ### `accessibilityWarnings`
 Default value: `true`
@@ -49,13 +49,6 @@ Default value: `null`
 
 Set which item(s) should default to open. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. When set to `null`, no items will default to open.
 
-### `inlineStyles`
-Default value: `true`
-
-When set to `true`, necessary styles will be automatically added inline on the elements.
-
-When set to `false`, inline styles will not be added. These styles are necessary to ensure the accordion works as intended, so it's important to add them yourself. The styles you should add can be found in the _____ file. Make sure to update the selectors if they have changed from the default.
-
 ### `multipleOpenItems`
 Default value: `true`
 
@@ -74,22 +67,3 @@ When set to `false`, items will not open when anchored to.
 Default value: `false`
 
 When set to `true`, helpful messages for debugging will be logged to the console.
-
-## API
-### `open`
-open by index or element reference
-
-open all
-
-### `close`
-close by index or element reference
-
-close all
-
-### `options`
-update options
-
-### `destroy`
-destroy
-
-## Events

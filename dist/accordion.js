@@ -96,7 +96,7 @@ var Accordion =
 module.exports = class Base {
 
 	static get elementProperty() {
-		return 'accordionElement';
+		return 'accordion';
 	}
 
 	static get elementDataAttribute() {
@@ -299,7 +299,7 @@ module.exports = class CodedError extends Error {
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const DataPathManager = __webpack_require__(6);
+const DataPathManager = __webpack_require__(7);
 
 class ValidationError extends Error {
 	
@@ -378,8 +378,26 @@ module.exports = class Item extends Base {
 		return this.instanceCount = this.instanceCount + 1;
 	}
 
+	static get accordionItemAddTriggerEventName() {
+		return 'accordionItemAddTrigger';
+	}
+
+	static get accordionItemAddTriggerEvent() {
+		return new Event(this.accordionItemAddTriggerEventName);
+	}
+
+	static get accordionItemAddContentEventName() {
+		return 'accordionItemAddContent';
+	}
+
+	static get accordionItemAddContentEvent() {
+		return new Event(this.accordionItemAddContentEventName);
+	}
+
 	constructor(parameters) {
 		super();
+		this.accordionItemAddTriggerEvent = this.constructor.accordionItemAddTriggerEvent;
+		this.accordionItemAddContentEvent = this.constructor.accordionItemAddContentEvent;
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
 		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
@@ -388,7 +406,7 @@ module.exports = class Item extends Base {
 			this.state = 'opened'
 		}
 		this.addContent(this.options.elements.content);
-		this.addTriggers(this.options.elements.trigger);
+		this.addTrigger(this.options.elements.trigger);
 		return this;
 	}
 
@@ -439,7 +457,11 @@ module.exports = class Item extends Base {
 		if (!this.constructor.availableStates.includes(state)) {
 			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
 		}
-		return this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
+		this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
+
+		if (this.trigger) {
+			this.trigger.updateAriaExpanded();
+		}
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -448,31 +470,28 @@ module.exports = class Item extends Base {
 		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
 	}
 
-	get triggers() {
-		if (!this._triggers) {
-			this._triggers = [];
-		}
-		return this._triggers;
+	get trigger() {
+		return this._trigger;
 	}
 
-	set triggers(triggers) {
-		if (!Array.isArray(triggers)) {
-			throw new Error(`'triggers' must be an array.`);
+	set trigger(trigger) {
+		if (!(trigger instanceof Trigger) && trigger !== undefined && trigger !== null) {
+			throw new Error(`'trigger' must be a Trigger class instance, undefined, or null.`);
 		}
-		if (!triggers.every(Trigger.isInstanceOfThis)) {
-			throw new Error(`'triggers' must only contain Trigger class instances.`);
-		}
-		this._triggers = triggers;
-		return this._triggers;
+		this._trigger = trigger;
+		return this._trigger;
 	}
 
-	addTrigger(element) {
+	addTrigger(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		const element = elements[0];
 		try {
 			const trigger = new Trigger({
 				item: this,
 				element: element
 			});
-			this.triggers.push(trigger);
+			this.trigger = trigger;
+			this.element.dispatchEvent(this.accordionItemAddTriggerEvent);
 			return true;
 		}
 		catch (error) {
@@ -486,11 +505,11 @@ module.exports = class Item extends Base {
 		}
 	}
 
-	addTriggers(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		for (const element of elements) {
-			this.addTrigger(element);
+	removeTrigger() {
+		if (this.trigger) {
+			this.trigger.destroy();
 		}
+		this.trigger = undefined;
 	}
 
 	get content() {
@@ -498,8 +517,8 @@ module.exports = class Item extends Base {
 	}
 
 	set content(content) {
-		if (!(content instanceof Content)) {
-			throw new Error(`'content' must be a Content class instance.`);
+		if (!(content instanceof Content) && content !== undefined && content !== null) {
+			throw new Error(`'content' must be a Content class instance, undefined, or null.`);
 		}
 		this._content = content;
 		return this._content;
@@ -514,6 +533,7 @@ module.exports = class Item extends Base {
 				element: element
 			});
 			this.content = content;
+			this.element.dispatchEvent(this.accordionItemAddContentEvent);
 			return true;
 		}
 		catch (error) {
@@ -525,7 +545,13 @@ module.exports = class Item extends Base {
 				throw error;
 			}
 		}
+	}
 
+	removeContent() {
+		if (this.content) {
+			this.content.destroy();
+		}
+		this.content = undefined;
 	}
 
 	get nestedBundleElements() {
@@ -544,6 +570,7 @@ module.exports = class Item extends Base {
 			existingStyleTransition = this.content.element.style.transition;
 			this.content.element.style.transition = 'none';
 		}
+		this.state = 'opening';
 		transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
@@ -558,7 +585,15 @@ module.exports = class Item extends Base {
 				}
 			}
 		});
-		this.state = 'opening';
+		if (!this.options.multipleOpenItems) {
+			if (this.bundle) {
+				for (const bundleItem of this.bundle.items) {
+					if (bundleItem !== this) {
+						bundleItem.close(skipTransition);
+					}
+				}
+			}
+		}
 	}
 	
 	close(skipTransition = false) {
@@ -567,6 +602,7 @@ module.exports = class Item extends Base {
 			existingStyleTransition = this.content.element.style.transition;
 			this.content.element.style.transition = 'none';
 		}
+		this.state = 'closing';
 		transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
@@ -591,7 +627,6 @@ module.exports = class Item extends Base {
 				}
 			}
 		});
-		this.state = 'closing';
 	}
 
 	toggle(skipTransition = false) {
@@ -603,6 +638,19 @@ module.exports = class Item extends Base {
 		}
 	}
 
+	destroy() {
+		if (this.trigger) {
+			this.trigger.destroy();
+		}
+		if (this.content) {
+			this.content.destroy();
+		}
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		this.element.removeAttribute(this.constructor.itemStateDataAttribute);
+		this.bundle.removeItem(this);
+	}
+
 };
 
 /***/ }),
@@ -610,8 +658,8 @@ module.exports = class Item extends Base {
 /***/ (function(module, exports, __webpack_require__) {
 
 const Base = __webpack_require__(0);
-const extend = __webpack_require__(12);
-const Schema = __webpack_require__(5);
+const extend = __webpack_require__(5);
+const Schema = __webpack_require__(6);
 const Bundle = __webpack_require__(9);
 
 module.exports = class Accordion extends Base {
@@ -623,19 +671,18 @@ module.exports = class Accordion extends Base {
 				item: '.accordion__item',
 				trigger: '.accordion__trigger',
 				content: '.accordion__content',
-				contentInner: '.accordion__content-inner'
+				contentInner: undefined
 			},
 			accessibilityWarnings: true,
 			closeNestedItems: false,
 			defaultOpenItems: null,
-			inlineStyles: true,
 			multipleOpenItems: true,
 			openAnchoredItems: true,
 			debug: false
 		};
 	}
 
-	static get optionsSchema () {
+	static get optionsSchema() {
 		const elementsModel = [
 			{
 				type: 'string'
@@ -679,9 +726,6 @@ module.exports = class Accordion extends Base {
 					type: 'boolean'
 				},
 				defaultOpenItems: elementsModel,
-				inlineStyles: {
-					type: 'boolean'
-				},
 				multipleOpenItems: {
 					type: 'boolean'
 				},
@@ -695,17 +739,88 @@ module.exports = class Accordion extends Base {
 		};
 		return new Schema(optionsModel);
 	}
+
+	static get accordions() {
+		if (!this._accordions) {
+			this._accordions = new Set();
+		}
+		return this._accordions;
+	}
+
+	static set accordions(accordions) {
+		if (!(accordions instanceof Set)) {
+			throw new Error(`'accordions' must be a Set.`);
+		}
+		if (!Array.from(accordions).every(this.isInstanceOfThis)) {
+			throw new Error(`'accordions' must only contain Accordion class instances.`);
+		}
+		this._accordions = accordions;
+		return this._accordions;
+	}
+
+	static addAccordion(accordion) {
+		if (!this.isInstanceOfThis(accordion)) {
+			throw new Error(`'accordion' must be an Accordion class instance.`);
+		}
+		if (this.accordions.has(accordion)) {
+			throw new Error(`'accordion' has already been added.`);
+		}
+		this._accordions.add(accordion);
+		return true;
+	}
+
+	static removeAccordion(accordion) {
+		if (this.accordions.has(accordion)) {
+			this._accordions.delete(accordion);
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	static hashHandler() {
+		const hash = location.hash;
+		let hashElement;
+		if (hash) {
+			hashElement = document.querySelector(hash);
+		}
+		if (hashElement) {
+			for (const accordion of Array.from(this.accordions)) {
+				if (accordion.options.openAnchoredItems) {
+					for (const bundle of Array.from(accordion.bundles)) {
+						for (const item of Array.from(bundle.items)) {
+							if (item.element.contains(hashElement)) {
+								item.open(true);
+							}
+						}
+					}
+				}
+			}
+			hashElement.scrollIntoView();
+		}
+	}
 	
+	static initializeHashListener() {
+		if (!this.initializedHashListener) {
+			window.addEventListener('hashchange', this.hashHandler.bind(this));
+			this.initializedHashListener = true;
+		}
+	}
+
 	constructor(options) {
 		super();
 		this.options = options;
+		this.constructor.initializeHashListener();
+		this.constructor.addAccordion(this);
 		this.addBundles(this.options.elements.bundle);
+		this.constructor.hashHandler();
 		this.debug(this);
 		return this;
 	}
 
 	get options() {
-		if (this._options === undefined || this._options === null) {
+		if (!this._options) {
 			this._options = extend({}, this.constructor.optionsDefault);
 		}
 		return this._options;
@@ -719,16 +834,16 @@ module.exports = class Accordion extends Base {
 
 	get bundles() {
 		if (!this._bundles) {
-			this._bundles = [];
+			this._bundles = new Set();
 		}
 		return this._bundles;
 	}
 
 	set bundles(bundles) {
-		if (!Array.isArray(bundles)) {
-			throw new Error(`'bundles' must be an array.`);
+		if (!(bundles instanceof Set)) {
+			throw new Error(`'bundles' must be a Set.`);
 		}
-		if (!bundles.every(Bundle.isInstanceOfThis)) {
+		if (!Array.from(bundles).every(Bundle.isInstanceOfThis)) {
 			throw new Error(`'bundles' must only contain Bundle class instances.`);
 		}
 		this._bundles = bundles;
@@ -741,7 +856,7 @@ module.exports = class Accordion extends Base {
 				accordion: this,
 				element: element
 			});
-			this.bundles.push(bundle);
+			this.bundles.add(bundle);
 			return true;
 		}
 		catch (error) {
@@ -763,13 +878,101 @@ module.exports = class Accordion extends Base {
 		}
 	}
 
+	removeBundle(bundle) {
+		if (this.bundles.has(bundle)) {
+			this._bundles.delete(bundle);
+			bundle.destroy();
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	destroy() {
+		for (const bundle of Array.from(this.bundles)) {
+			bundle.destroy();
+		}
+		this.constructor.removeAccordion(this);
+	}
+
 };
 
 /***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const DataPathManager = __webpack_require__(6);
+/**
+ * Extend v3.0.0
+ * https://github.com/alexspirgel/extend
+ */
+
+const extend = (...arguments) => {
+
+	let target = arguments[0];
+	let argumentIndex, merge, mergeIsArray;
+	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
+		merge = arguments[argumentIndex];
+		if (merge === target) {
+			continue;
+		}
+		mergeIsArray = Array.isArray(merge);
+		if (mergeIsArray || extend.isPlainObject(merge)) {
+			if (mergeIsArray && !Array.isArray(target)) {
+				target = [];
+			}
+			else if (!mergeIsArray && !extend.isPlainObject(target)) {
+				target = {};
+			}
+			for (const property in merge) {
+				if (property === "__proto__") {
+					continue;
+				}
+				target[property] = extend(target[property], merge[property]);
+			}
+		}
+		else {
+			if (merge !== undefined) {
+				target = merge;
+			}
+		}
+	}
+
+	return target;
+
+};
+
+extend.isPlainObject = (object) => {
+	const baseObject = {};
+	const toString = baseObject.toString;
+	const hasOwnProperty = baseObject.hasOwnProperty;
+	const functionToString = hasOwnProperty.toString;
+	const objectFunctionString = functionToString.call(Object);
+	if (toString.call(object) !== '[object Object]') {
+		return false;
+	}
+	const prototype = Object.getPrototypeOf(object);
+	if (prototype) {
+		if (hasOwnProperty.call(prototype, 'constructor')) {
+			if (typeof prototype.constructor === 'function') {
+				if (functionToString.call(prototype.constructor) !== objectFunctionString) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+};
+
+if ( true && module.exports) {
+	module.exports = extend;
+}
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const DataPathManager = __webpack_require__(7);
 const ValidationError = __webpack_require__(2);
 const ValidationErrors = __webpack_require__(13);
 const modelModel = __webpack_require__(14);
@@ -1181,10 +1384,10 @@ Schema.ValidationError = ValidationError;
 module.exports = Schema;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(7);
+const extend = __webpack_require__(8);
 
 class DataPathManager {
 	
@@ -1261,10 +1464,10 @@ class DataPathManager {
 module.exports = DataPathManager;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const isPlainObject = __webpack_require__(8);
+const isPlainObject = __webpack_require__(12);
 
 const extend = (...arguments) => {
 	let target = arguments[0];
@@ -1299,35 +1502,6 @@ const extend = (...arguments) => {
 };
 
 module.exports = extend;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * isPlainObject v1.0.1
- * https://github.com/alexspirgel/isPlainObject
- */
-
-const isPlainObject = (object) => {
-	if (Object.prototype.toString.call(object) !== '[object Object]') {
-		return false;
-	}
-  if (object.constructor === undefined) {
-		return true;
-	}
-  if (Object.prototype.toString.call(object.constructor.prototype) !== '[object Object]') {
-		return false;
-	}
-  if (!object.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
-    return false;
-  }
-  return true;
-};
-
-if ( true && module.exports) {
-	module.exports = isPlainObject;
-}
 
 /***/ }),
 /* 9 */
@@ -1374,9 +1548,9 @@ module.exports = class Bundle extends Base {
 		if (this.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
+		this._element = element;
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'bundle');
-		this._element = element;
 		return this._element;
 	}
 
@@ -1388,16 +1562,16 @@ module.exports = class Bundle extends Base {
 
 	get items() {
 		if (!this._items) {
-			this._items = [];
+			this._items = new Set();
 		}
 		return this._items;
 	}
 
 	set items(items) {
-		if (!Array.isArray(items)) {
-			throw new Error(`'items' must be an array.`);
+		if (!(items instanceof Set)) {
+			throw new Error(`'items' must be a Set.`);
 		}
-		if (!items.every(Item.isInstanceOfThis)) {
+		if (!Array.from(items).every(Item.isInstanceOfThis)) {
 			throw new Error(`'items' must only contain Item class instances.`);
 		}
 		this._items = items;
@@ -1410,7 +1584,7 @@ module.exports = class Bundle extends Base {
 				bundle: this,
 				element: element
 			});
-			this.items.push(item);
+			this.items.add(item);
 			return true;
 		}
 		catch (error) {
@@ -1431,6 +1605,26 @@ module.exports = class Bundle extends Base {
 		}
 	}
 
+	removeItem(item) {
+		if (this.items.has(item)) {
+			this._items.delete(item);
+			item.destroy();
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	destroy() {
+		for (const item of Array.from(this.items)) {
+			item.destroy();
+		}
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		this.accordion.removeBundle(this);
+	}
+
 };
 
 /***/ }),
@@ -1445,6 +1639,7 @@ module.exports = class Content extends Base {
 
 	constructor(parameters) {
 		super();
+		this.boundUpdateAriaLabelledBy = this.updateAriaLabelledBy.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;
 		this.addContentInner(this.options.elements.contentInner);
@@ -1477,14 +1672,33 @@ module.exports = class Content extends Base {
 		if (this.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
+		
+		this._element = element;
+	
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'content');
-		element.id = 'accordion-content-' + this.item.count;
+		
+		this.usingExistingId = true;
+		if (!element.getAttribute('id')) {
+			element.setAttribute('id', 'accordion-content-' + this.item.count);
+			this.usingExistingId = false;
+		}
+
+		this.updateAriaLabelledBy();
+		this.item.element.addEventListener(this.item.constructor.accordionItemAddTriggerEventName, this.boundUpdateAriaLabelledBy);
+		
+		this.existingStyleHeight = 	element.style.height;
 		if (this.item.state === 'closed') {
 			element.style.height = 0;
 		}
-		this._element = element;
+		
 		return this._element;
+	}
+
+	updateAriaLabelledBy() {
+		if (this.item.trigger) {
+			this.element.setAttribute('aria-labelledby', this.item.trigger.element.getAttribute('id'));
+		}
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -1506,8 +1720,14 @@ module.exports = class Content extends Base {
 	}
 
 	addContentInner(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		const element = elements[0];
+		let element;
+		if (elementsInput === undefined || elementsInput === null) {
+			element = this.element.children[0];
+		}
+		else {
+			const elements = this.filterElementsByScope(elementsInput);
+			element = elements[0];
+		}
 		try {
 			const contentInner = new ContentInner({
 				content: this,
@@ -1528,6 +1748,20 @@ module.exports = class Content extends Base {
 
 	}
 
+	destroy() {
+		if (this.contentInner) {
+			this.contentInner.destroy();
+		}
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		if (!this.usingExistingId) {
+			this.element.removeAttribute('id');
+		}
+		this.element.removeAttribute('aria-labelledby');
+		this.item.element.removeEventListener(this.item.constructor.accordionItemAddTriggerEventName, this.boundUpdateAriaLabelledBy);
+		this.element.style.height = this.existingStyleHeight;
+	}
+
 };
 
 /***/ }),
@@ -1541,69 +1775,28 @@ module.exports = __webpack_require__(4);
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
- * Extend v3.0.0
- * https://github.com/alexspirgel/extend
+ * isPlainObject v1.0.1
+ * https://github.com/alexspirgel/isPlainObject
  */
 
-const extend = (...arguments) => {
-
-	let target = arguments[0];
-	let argumentIndex, merge, mergeIsArray;
-	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
-		merge = arguments[argumentIndex];
-		if (merge === target) {
-			continue;
-		}
-		mergeIsArray = Array.isArray(merge);
-		if (mergeIsArray || extend.isPlainObject(merge)) {
-			if (mergeIsArray && !Array.isArray(target)) {
-				target = [];
-			}
-			else if (!mergeIsArray && !extend.isPlainObject(target)) {
-				target = {};
-			}
-			for (const property in merge) {
-				if (property === "__proto__") {
-					continue;
-				}
-				target[property] = extend(target[property], merge[property]);
-			}
-		}
-		else {
-			if (merge !== undefined) {
-				target = merge;
-			}
-		}
-	}
-
-	return target;
-
-};
-
-extend.isPlainObject = (object) => {
-	const baseObject = {};
-	const toString = baseObject.toString;
-	const hasOwnProperty = baseObject.hasOwnProperty;
-	const functionToString = hasOwnProperty.toString;
-	const objectFunctionString = functionToString.call(Object);
-	if (toString.call(object) !== '[object Object]') {
+const isPlainObject = (object) => {
+	if (Object.prototype.toString.call(object) !== '[object Object]') {
 		return false;
 	}
-	const prototype = Object.getPrototypeOf(object);
-	if (prototype) {
-		if (hasOwnProperty.call(prototype, 'constructor')) {
-			if (typeof prototype.constructor === 'function') {
-				if (functionToString.call(prototype.constructor) !== objectFunctionString) {
-					return false;
-				}
-			}
-		}
+  if (object.constructor === undefined) {
+		return true;
 	}
-	return true;
+  if (Object.prototype.toString.call(object.constructor.prototype) !== '[object Object]') {
+		return false;
+	}
+  if (!object.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
+    return false;
+  }
+  return true;
 };
 
 if ( true && module.exports) {
-	module.exports = extend;
+	module.exports = isPlainObject;
 }
 
 /***/ }),
@@ -1664,7 +1857,7 @@ module.exports = ValidationErrors;
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(7);
+const extend = __webpack_require__(8);
 const ValidationError = __webpack_require__(2);
 
 const typeRestriction = (types) => {
@@ -1811,6 +2004,8 @@ module.exports = class Trigger extends Base {
 
 	constructor(parameters) {
 		super();
+		this.boundTriggerHandler = this.triggerHandler.bind(this);
+		this.boundUpdateAriaControls = this.updateAriaControls.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;
 		return this;
@@ -1842,19 +2037,62 @@ module.exports = class Trigger extends Base {
 		if (this.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
+
+		this._element = element;
+
 		element[this.constructor.elementProperty] = this;
+		
+		element.addEventListener('click', this.boundTriggerHandler);
+
 		element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
-		element.setAttribute('aria-controls', this.item.content.element.id);
-		element.addEventListener('click', this.triggerHandler.bind(this));
+
+		this.usingExistingId = true;
+		if (!element.getAttribute('id')) {
+			element.setAttribute('id', 'accordion-trigger-' + this.item.count);
+			this.usingExistingId = false;
+		}
+
+		this.updateAriaControls();
+		this.item.element.addEventListener(this.item.constructor.accordionItemAddContentEventName, this.boundUpdateAriaControls);
+
+		this.updateAriaExpanded();
+
 		if (!(element instanceof HTMLButtonElement)) {
 			this.accessibilityWarn(`Accordion trigger should be a <button> element.`);
 		}
-		this._element = element;
-		return this._element;
+
+		return element;
 	}
 
-	triggerHandler(event) {
+	updateAriaControls() {
+		if (this.item.content) {
+			this.element.setAttribute('aria-controls', this.item.content.element.getAttribute('id'));
+		}
+	}
+
+	updateAriaExpanded() {
+		if (this.item.state === 'closing' || this.item.state === 'closed') {
+			this.element.setAttribute('aria-expanded', 'false');
+		}
+		else if (this.item.state === 'opening' || this.item.state === 'opened') {
+			this.element.setAttribute('aria-expanded', 'true');
+		}
+	}
+
+	triggerHandler() {
 		this.item.toggle();
+	}
+
+	destroy() {
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		this.element.removeEventListener('click', this.boundTriggerHandler);
+		if (!this.usingExistingId) {
+			this.element.removeAttribute('id');
+		}
+		this.element.removeAttribute('aria-expanded');
+		this.element.removeAttribute('aria-controls');
+		this.item.element.removeEventListener(this.item.constructor.accordionItemAddContentEventName, this.boundUpdateAriaControls);
 	}
 
 };
@@ -1901,10 +2139,15 @@ module.exports = class ContentInner extends Base {
 		if (this.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
+		this._element = element;
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'content-inner');
-		this._element = element;
 		return this._element;
+	}
+
+	destroy() {
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
 	}
 
 };
@@ -1914,20 +2157,17 @@ module.exports = class ContentInner extends Base {
 /***/ (function(module, exports, __webpack_require__) {
 
 const optionsSchema = __webpack_require__(18);
-const extend = __webpack_require__(19);
+const extend = __webpack_require__(5);
 
 const transitionAuto = (function () {
 
-	const errorPrefix = 'transitionAuto error: ';
-	const debugPrefix = 'transitionAuto debug: ';
-
 	function prefixedError(message) {
-		throw new Error(errorPrefix + message);
+		throw new Error('transitionAuto error: ' + message);
 	}
 
 	function debug(options, ...messages) {
 		if (options.debug) {
-			console.log(debugPrefix, ...messages);
+			console.log('debugPrefix', ...messages);
 		}
 	}
 
@@ -1939,7 +2179,7 @@ const transitionAuto = (function () {
 				options.innerElement = options.element.children[0];
 			}
 			else {
-				error(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
+				prefixedError(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
 			}
 		}
 
@@ -1951,6 +2191,10 @@ const transitionAuto = (function () {
 			options.suppressDuplicates = true;
 		}
 
+		if (options.debug === undefined) {
+			options.debug = false;
+		}
+
 		return options;
 	}
 
@@ -1959,12 +2203,14 @@ const transitionAuto = (function () {
 		const computedStyle = getComputedStyle(options.element);
 		options.element.style[options.property] = computedStyle[options.property];
 		options.element.offsetHeight; // This line does nothing but force the element to repaint so transitions work properly.
-
+		
 		let hasTransition = false;
-		for (let transitionValue of computedStyle.transition.split(', ')) {
-			const transitionValueParts = transitionValue.split(' ');
-			if (transitionValueParts[0] === 'all' || transitionValueParts[0] === options.property) {
-				if (transitionValueParts[1] !== '0s') {
+		const transitionPropertyValues = computedStyle.transitionProperty.split(', ');
+		const transitionDurationValues = computedStyle.transitionDuration.split(', ');
+		for (let i = 0; i < transitionPropertyValues.length; i++) {
+			if (transitionPropertyValues[i] === 'all' || transitionPropertyValues[i] === options.property) {
+				const transitionDuration = transitionDurationValues[i] ? transitionDurationValues[i] : transitionDurationValues[0];
+				if (transitionDuration !== '0s') {
 					hasTransition = true;
 					break;
 				}
@@ -2050,11 +2296,12 @@ module.exports = transitionAuto;
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Schema = __webpack_require__(5);
+const Schema = __webpack_require__(6);
 
 const optionsModel = {
 	required: true,
 	type: 'object',
+	allowUnvalidatedProperties: false,
 	propertySchema: {
 		element: {
 			required: true,
@@ -2124,46 +2371,6 @@ const optionsModel = {
 const optionsSchema = new Schema(optionsModel);
 
 module.exports = optionsSchema;
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const isPlainObject = __webpack_require__(8);
-
-const extend = (...arguments) => {
-	let target = arguments[0];
-	let argumentIndex, merge, mergeIsArray;
-	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
-		merge = arguments[argumentIndex];
-		if (merge === target) {
-			continue;
-		}
-		mergeIsArray = Array.isArray(merge);
-		if (mergeIsArray || isPlainObject(merge)) {
-			if (mergeIsArray && !Array.isArray(target)) {
-				target = [];
-			}
-			else if (!mergeIsArray && !isPlainObject(target)) {
-				target = {};
-			}
-			for (const property in merge) {
-				if (property === "__proto__") {
-					continue;
-				}
-				target[property] = extend(target[property], merge[property]);
-			}
-		}
-		else {
-			if (merge !== undefined) {
-				target = merge;
-			}
-		}
-	}
-	return target;
-};
-
-module.exports = extend;
 
 /***/ })
 /******/ ]);

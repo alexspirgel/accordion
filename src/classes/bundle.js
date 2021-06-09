@@ -39,9 +39,9 @@ module.exports = class Bundle extends Base {
 		if (this.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
+		this._element = element;
 		element[this.constructor.elementProperty] = this;
 		element.setAttribute(this.constructor.elementDataAttribute, 'bundle');
-		this._element = element;
 		return this._element;
 	}
 
@@ -53,16 +53,16 @@ module.exports = class Bundle extends Base {
 
 	get items() {
 		if (!this._items) {
-			this._items = [];
+			this._items = new Set();
 		}
 		return this._items;
 	}
 
 	set items(items) {
-		if (!Array.isArray(items)) {
-			throw new Error(`'items' must be an array.`);
+		if (!(items instanceof Set)) {
+			throw new Error(`'items' must be a Set.`);
 		}
-		if (!items.every(Item.isInstanceOfThis)) {
+		if (!Array.from(items).every(Item.isInstanceOfThis)) {
 			throw new Error(`'items' must only contain Item class instances.`);
 		}
 		this._items = items;
@@ -75,7 +75,7 @@ module.exports = class Bundle extends Base {
 				bundle: this,
 				element: element
 			});
-			this.items.push(item);
+			this.items.add(item);
 			return true;
 		}
 		catch (error) {
@@ -94,6 +94,26 @@ module.exports = class Bundle extends Base {
 		for (const element of elements) {
 			this.addItem(element);
 		}
+	}
+
+	removeItem(item) {
+		if (this.items.has(item)) {
+			this._items.delete(item);
+			item.destroy();
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	destroy() {
+		for (const item of Array.from(this.items)) {
+			item.destroy();
+		}
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		this.accordion.removeBundle(this);
 	}
 
 };
