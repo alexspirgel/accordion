@@ -1,27 +1,109 @@
 # accordion
+
+Accordion is a JavaScript based, ADA compliant, general use accordion script. An accordion enables showing/hiding certain content via collapsable areas.
+
+<a href="http://alexanderspirgel.com/accordion/demo" target="_blank">View the demo →</a>
+
+## Installation
+
+### Using NPM:
+
+```js
+npm install @alexspirgel/accordion
+```
+
+```js
+const Accordion = require('@alexspirgel/accordion');
+```
+
+### Using a script tag:
+
+Download the normal or minified script from the `/dist` folder.
+
+```html
+<script src="path/to/accordion.js"></script>
+```
+
+## Usage
+
+HTML:
+```html
+<ul class="bundle">
+	<li class="item">
+		<button class="trigger">Trigger</button>
+		<div class="content">
+			<div class="content-inner">
+				<p>Content</p>
+			</div>
+		</div>
+	</li>
+	<li class="item">
+		<button class="trigger">Trigger</button>
+		<div class="content">
+			<div class="content-inner">
+				<p>Content</p>
+			</div>
+		</div>
+	</li>
+</ul>
+```
+
+CSS:
+```css
+[data-accordion-item-state="closed"] [data-accordion="content"] {
+	/* Hide content when the item is closed. */
+	visibility: hidden
+}
+[data-accordion="content"] {
+	/* Prevent the content from overflowing the parent. */
+	overflow: hidden;
+}
+[data-accordion="content-inner"] {
+	/* Margins will cause incorrect dimension calculations. */
+	margin-top: 0;
+	margin-bottom: 0;
+	margin-left: 0;
+	margin-right: 0;
+	/* Force element to account for children margins in dimensions. */
+	overflow: auto;
+}
+```
+
+JS:
+```js
+const accordion = new Accordion({
+	elements: {
+		bundle: '.bundle',
+		item: '.item',
+		trigger: '.trigger',
+		content: '.content'
+	}
+});
+```
+
 ## Options
 ### `elements`
-#### `bundle`
+#### `elements.bundle`
 Default value: `'.accordion'`
 
 Custom bundle element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned.
 
-#### `item`
+#### `elements.item`
 Default value: `'.accordion__item'`
 
 Custom item element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Item elements must be located within bundle elements.
 
-#### `trigger`
+#### `elements.trigger`
 Default value: `'.accordion__trigger'`
 
 Custom item trigger element. Triggers the opening and closing of its item. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Trigger elements, must be located within item elements. Only one trigger element per accordion item. If more than one trigger element is passed or matches the selector for an accordion item, the fist element will be used.
 
-#### `content`
+#### `elements.content`
 Default value: `'.accordion__content'`
 
 Custom item content element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Content elements must be located within item elements. Only one content element per accordion item. If more than one content element is passed or matches the selector for an accordion item, the fist element will be used.
 
-#### `contentInner`
+#### `elements.contentInner`
 Default value: `undefined`
 
 Custom item content inner element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Only one content inner element per accordion item. If more than one content inner element is passed or matches the selector for an accordion item, the fist element will be used. Can also be left undefined. When left undefined, the fist child element of the content element. Content inner elements must be located within content elements. It is recommended that this element is not styled and is the only child of the content element.
@@ -66,3 +148,4 @@ When set to `true`, helpful messages for debugging will be logged to the console
 
 ## Notes
 * Adheres to ADA requirements outline here: [https://www.w3.org/TR/wai-aria-practices-1.1/#accordion](https://www.w3.org/TR/wai-aria-practices-1.1/#accordion)
+* Opening and closing transition is handled by: [https://github.com/alexspirgel/transition-auto](https://github.com/alexspirgel/transition-auto)
