@@ -5,7 +5,8 @@ module.exports = class Trigger extends Base {
 
 	constructor(parameters) {
 		super();
-		this.boundTriggerHandler = this.triggerHandler.bind(this);
+		this.boundClickHandler = this.clickHandler.bind(this);
+		this.boundKeydownHandler = this.keydownHandler.bind(this);
 		this.boundUpdateAriaControls = this.updateAriaControls.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;
@@ -43,7 +44,9 @@ module.exports = class Trigger extends Base {
 
 		element[this.constructor.elementProperty] = this;
 		
-		element.addEventListener('click', this.boundTriggerHandler);
+		element.addEventListener('click', this.boundClickHandler);
+		
+		element.addEventListener('keydown', this.boundKeydownHandler);
 
 		element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
 
@@ -80,14 +83,38 @@ module.exports = class Trigger extends Base {
 		}
 	}
 
-	triggerHandler() {
+	clickHandler() {
 		this.item.toggle();
+	}
+
+	keydownHandler(event) {
+		if (event.keyCode === 40) { // arrow down
+			event.preventDefault();
+			event.stopPropagation();
+			this.item.nextItem.trigger.element.focus();
+		}
+		else if (event.keyCode === 38) { // arrow up
+			event.preventDefault();
+  		event.stopPropagation();
+			this.item.previousItem.trigger.element.focus();
+		}
+		else if (event.keyCode === 36) { // home
+			event.preventDefault();
+  		event.stopPropagation();
+			this.item.bundle.firstItem.trigger.element.focus();
+		}
+		else if (event.keyCode === 35) { // end
+			event.preventDefault();
+  		event.stopPropagation();
+			this.item.bundle.lastItem.trigger.element.focus();
+		}
 	}
 
 	destroy() {
 		delete this.element[this.constructor.elementProperty];
 		this.element.removeAttribute(this.constructor.elementDataAttribute);
-		this.element.removeEventListener('click', this.boundTriggerHandler);
+		this.element.removeEventListener('click', this.boundClickHandler);
+		this.element.removeEventListener('keydown', this.boundKeydownHandler);
 		if (!this.usingExistingId) {
 			this.element.removeAttribute('id');
 		}

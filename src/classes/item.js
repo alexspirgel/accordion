@@ -225,6 +225,38 @@ module.exports = class Item extends Base {
 		return nextLevelNestedBundleElements;
 	}
 
+	getNextPreviousItem(nextPrevious) {
+		if (nextPrevious !== 'next' && nextPrevious !== 'previous') {
+			throw new Error(`'nextPrevious' must be 'next' or 'previous'.`);
+		}
+		let returnItem;
+		const items = Array.from(this.bundle.items);
+		const itemElements = items.map(item => item.element);
+		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
+		const indexModifier = (nextPrevious === 'next') ? 1 : -1;
+		const indexWrapValue = (nextPrevious === 'next') ? 0 : (orderedItems.length - 1);
+		const thisIndex = orderedItems.indexOf(this);
+		if (thisIndex >= 0) {
+			let returnItemIndex = thisIndex + indexModifier;
+			if (returnItemIndex < 0 || returnItemIndex >= orderedItems.length) {
+				returnItemIndex = indexWrapValue
+			}
+			if (orderedItems[returnItemIndex]) {
+				returnItem = orderedItems[returnItemIndex]
+			}
+		}
+		return returnItem;
+	}
+
+	get nextItem() {
+		return this.getNextPreviousItem('next');
+	}
+
+	get previousItem() {
+		return this.getNextPreviousItem('previous');
+	}
+
 	open(skipTransition = false) {
 		let existingStyleTransition = '';
 		if (skipTransition) {

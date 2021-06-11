@@ -55,36 +55,17 @@ module.exports = class Base {
 		if (order !== 'asc' && order !== 'desc') {
 			throw new Error(`'order' must be 'asc' or 'desc'.`);
 		}
-	
-		const elementsMap = elements.map((mapElement, mapIndex) => {
-			const contains = new Set();
-			elements.forEach((element, index) => {
-				if (mapIndex !== index && mapElement.contains(element)) {
-					contains.add(element);
-				}
-			});
-			return {
-				'element': mapElement,
-				'contains': contains
-			};
-		});
-	
-		elementsMap.sort((a, b) => {
-			const modifier = (order === 'asc') ? 1 : -1;
-			if (a.contains.size < b.contains.size) {
-				return -1 * modifier;
-			}
-			else if (a.contains.size > b.contains.size) {
-				return 1 * modifier;
-			}
-			else {
-				return 0;
-			}
-		});
-		const orderedElements = elementsMap.map((mapElement) => {
-			return mapElement.element;
-		});
-	
+		const temporaryClass = 'orderElementsByDOMTree-' + Date.now().toString();
+		for (const element of elements) {
+			element.classList.add(temporaryClass);
+		}
+		const orderedElements = Array.from(document.querySelectorAll('.' + temporaryClass));
+		for (const element of elements) {
+			element.classList.remove(temporaryClass);
+		}
+		if (order === 'asc') {
+			orderedElements.reverse();
+		}
 		return orderedElements;
 	}
 

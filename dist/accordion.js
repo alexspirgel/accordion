@@ -150,36 +150,17 @@ module.exports = class Base {
 		if (order !== 'asc' && order !== 'desc') {
 			throw new Error(`'order' must be 'asc' or 'desc'.`);
 		}
-	
-		const elementsMap = elements.map((mapElement, mapIndex) => {
-			const contains = new Set();
-			elements.forEach((element, index) => {
-				if (mapIndex !== index && mapElement.contains(element)) {
-					contains.add(element);
-				}
-			});
-			return {
-				'element': mapElement,
-				'contains': contains
-			};
-		});
-	
-		elementsMap.sort((a, b) => {
-			const modifier = (order === 'asc') ? 1 : -1;
-			if (a.contains.size < b.contains.size) {
-				return -1 * modifier;
-			}
-			else if (a.contains.size > b.contains.size) {
-				return 1 * modifier;
-			}
-			else {
-				return 0;
-			}
-		});
-		const orderedElements = elementsMap.map((mapElement) => {
-			return mapElement.element;
-		});
-	
+		const temporaryClass = 'orderElementsByDOMTree-' + Date.now().toString();
+		for (const element of elements) {
+			element.classList.add(temporaryClass);
+		}
+		const orderedElements = Array.from(document.querySelectorAll('.' + temporaryClass));
+		for (const element of elements) {
+			element.classList.remove(temporaryClass);
+		}
+		if (order === 'asc') {
+			orderedElements.reverse();
+		}
 		return orderedElements;
 	}
 
@@ -562,6 +543,38 @@ module.exports = class Item extends Base {
 	get nextLevelNestedBundleElements() {
 		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(this.nestedBundleElements, null, this.nestedBundleElements);
 		return nextLevelNestedBundleElements;
+	}
+
+	getNextPreviousItem(nextPrevious) {
+		if (nextPrevious !== 'next' && nextPrevious !== 'previous') {
+			throw new Error(`'nextPrevious' must be 'next' or 'previous'.`);
+		}
+		let returnItem;
+		const items = Array.from(this.bundle.items);
+		const itemElements = items.map(item => item.element);
+		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
+		const indexModifier = (nextPrevious === 'next') ? 1 : -1;
+		const indexWrapValue = (nextPrevious === 'next') ? 0 : (orderedItems.length - 1);
+		const thisIndex = orderedItems.indexOf(this);
+		if (thisIndex >= 0) {
+			let returnItemIndex = thisIndex + indexModifier;
+			if (returnItemIndex < 0 || returnItemIndex >= orderedItems.length) {
+				returnItemIndex = indexWrapValue
+			}
+			if (orderedItems[returnItemIndex]) {
+				returnItem = orderedItems[returnItemIndex]
+			}
+		}
+		return returnItem;
+	}
+
+	get nextItem() {
+		return this.getNextPreviousItem('next');
+	}
+
+	get previousItem() {
+		return this.getNextPreviousItem('previous');
 	}
 
 	open(skipTransition = false) {
@@ -1615,6 +1628,27 @@ module.exports = class Bundle extends Base {
 			return false;
 		}
 	}
+
+	getFirstLastItem(firstLast) {
+		if (firstLast !== 'first' && firstLast !== 'last') {
+			throw new Error(`'firstLast' must be 'first' or 'last'.`);
+		}
+		const items = Array.from(this.items);
+		const itemElements = items.map(item => item.element);
+		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
+		const returnItemIndex = (firstLast === 'first') ? 0 : orderedItems.length - 1;
+		const returnItem = orderedItems[returnItemIndex];
+		return returnItem;
+	}
+
+	get firstItem() {
+		return this.getFirstLastItem('first');
+	}
+
+	get lastItem() {
+		return this.getFirstLastItem('last');
+	}
 	
 	destroy() {
 		for (const item of Array.from(this.items)) {
@@ -2004,7 +2038,8 @@ module.exports = class Trigger extends Base {
 
 	constructor(parameters) {
 		super();
-		this.boundTriggerHandler = this.triggerHandler.bind(this);
+		this.boundClickHandler = this.clickHandler.bind(this);
+		this.boundKeydownHandler = this.keydownHandler.bind(this);
 		this.boundUpdateAriaControls = this.updateAriaControls.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;
@@ -2042,7 +2077,9 @@ module.exports = class Trigger extends Base {
 
 		element[this.constructor.elementProperty] = this;
 		
-		element.addEventListener('click', this.boundTriggerHandler);
+		element.addEventListener('click', this.boundClickHandler);
+		
+		element.addEventListener('keydown', this.boundKeydownHandler);
 
 		element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
 
@@ -2079,14 +2116,38 @@ module.exports = class Trigger extends Base {
 		}
 	}
 
-	triggerHandler() {
+	clickHandler() {
 		this.item.toggle();
+	}
+
+	keydownHandler(event) {
+		if (event.keyCode === 40) { // arrow down
+			event.preventDefault();
+			event.stopPropagation();
+			this.item.nextItem.trigger.element.focus();
+		}
+		else if (event.keyCode === 38) { // arrow up
+			event.preventDefault();
+  		event.stopPropagation();
+			this.item.previousItem.trigger.element.focus();
+		}
+		else if (event.keyCode === 36) { // home
+			event.preventDefault();
+  		event.stopPropagation();
+			this.item.bundle.firstItem.trigger.element.focus();
+		}
+		else if (event.keyCode === 35) { // end
+			event.preventDefault();
+  		event.stopPropagation();
+			this.item.bundle.lastItem.trigger.element.focus();
+		}
 	}
 
 	destroy() {
 		delete this.element[this.constructor.elementProperty];
 		this.element.removeAttribute(this.constructor.elementDataAttribute);
-		this.element.removeEventListener('click', this.boundTriggerHandler);
+		this.element.removeEventListener('click', this.boundClickHandler);
+		this.element.removeEventListener('keydown', this.boundKeydownHandler);
 		if (!this.usingExistingId) {
 			this.element.removeAttribute('id');
 		}

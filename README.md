@@ -1,8 +1,4 @@
 # accordion
-https://www.w3.org/TR/wai-aria-practices-1.1/#accordion
-
-https://www.w3.org/TR/wai-aria-practices-1.1/examples/accordion/accordion.html
-
 ## Options
 ### `elements`
 #### `bundle`
@@ -67,3 +63,6 @@ When set to `false`, items will not open when anchored to.
 Default value: `false`
 
 When set to `true`, helpful messages for debugging will be logged to the console.
+
+## Notes
+* Adheres to ADA requirements outline here: [https://www.w3.org/TR/wai-aria-practices-1.1/#accordion](https://www.w3.org/TR/wai-aria-practices-1.1/#accordion)

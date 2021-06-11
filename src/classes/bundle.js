@@ -106,6 +106,27 @@ module.exports = class Bundle extends Base {
 			return false;
 		}
 	}
+
+	getFirstLastItem(firstLast) {
+		if (firstLast !== 'first' && firstLast !== 'last') {
+			throw new Error(`'firstLast' must be 'first' or 'last'.`);
+		}
+		const items = Array.from(this.items);
+		const itemElements = items.map(item => item.element);
+		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
+		const returnItemIndex = (firstLast === 'first') ? 0 : orderedItems.length - 1;
+		const returnItem = orderedItems[returnItemIndex];
+		return returnItem;
+	}
+
+	get firstItem() {
+		return this.getFirstLastItem('first');
+	}
+
+	get lastItem() {
+		return this.getFirstLastItem('last');
+	}
 	
 	destroy() {
 		for (const item of Array.from(this.items)) {
