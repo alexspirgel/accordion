@@ -84,68 +84,106 @@ const accordion = new Accordion({
 ## Options
 ### `elements`
 #### `elements.bundle`
-Default value: `'.accordion'`
+Default value: `null`
 
-Custom bundle element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned.
+Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed.
+
+Defines the elements to be used as bundles during the script initialization.
 
 #### `elements.item`
-Default value: `'.accordion__item'`
+Default value: `null`
 
-Custom item element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Item elements must be located within bundle elements.
+Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed.
+
+Defines the elements to be used as items during the script initialization. Item elements must be located within bundle elements.
 
 #### `elements.trigger`
-Default value: `'.accordion__trigger'`
+Default value: `null`
 
-Custom item trigger element. Triggers the opening and closing of its item. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Trigger elements, must be located within item elements. Only one trigger element per accordion item. If more than one trigger element is passed or matches the selector for an accordion item, the fist element will be used.
+Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed.
+
+Defines the elements to be used as triggers during the script initialization. Trigger elements toggle the opening and closing of the related item. Trigger elements must be located within an item element. A maximum of one trigger element is allowed per item. If more than one trigger element is found for a single item, the fist element will be used.
+
+Items are restricted to a single trigger to adhere to ADA guidelines for tag structure, attributes, and keyboard navigation. However, adding additional elements to act as secondary triggers can be done manually by using the API.
 
 #### `elements.content`
-Default value: `'.accordion__content'`
+Default value: `null`
 
-Custom item content element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Content elements must be located within item elements. Only one content element per accordion item. If more than one content element is passed or matches the selector for an accordion item, the fist element will be used.
+Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed.
+
+Defines the elements to be used as content during the script initialization. Content elements must be located within an item element. A maximum of one content element is allowed per item. If more than one content element is found for a single item, the fist element will be used.
 
 #### `elements.contentInner`
-Default value: `undefined`
+Default value: `null`
 
-Custom item content inner element. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. Only one content inner element per accordion item. If more than one content inner element is passed or matches the selector for an accordion item, the fist element will be used. Can also be left undefined. When left undefined, the fist child element of the content element. Content inner elements must be located within content elements. It is recommended that this element is not styled and is the only child of the content element.
+Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed. When undefined or null, the fist child element of the content element will be used.
+
+Defines the elements to be used as content inner elements during the script initialization. A maximum of one content inner element is allowed per item. If more than one content element is found for a single item, the fist element will be used. Content inner elements must be located within content elements. It is recommended that this element is not styled and is the only immediate child of the content element.
 
 ### `accessibilityWarnings`
 Default value: `true`
 
-When set to `true`, warnings about potential accessibility concerns will be logged to the console.
+Allowed values: boolean
 
-When set to `false`, accessibility warnings will be suppressed.
+If `true`, warnings about potential accessibility concerns will be logged to the console.
+
+If `false`, accessibility warnings will be suppressed.
 
 ### `closeNestedItems`
 Default value: `false`
 
-When set to `true` closing an item will also close the immediately nested items. Can chain down further depending on nested options.
+Allowed values: boolean
 
-When set to `false` closing an item will not close the nested items.
+If `true` closing an item will also close the immediately nested items. Can chain to nested accordions depending on value of nested accordion options.
+
+If `false` closing an item will not close the nested items.
 
 ### `defaultOpenItems`
 Default value: `null`
 
-Set which item(s) should default to open. Can be a selector, element reference, node list, or an array containing any of the previously mentioned. When set to `null`, no items will default to open.
+Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed.
+
+Set which item(s) should default to open. When set to `null` or `undefined`, no items will default to open.
 
 ### `multipleOpenItems`
 Default value: `true`
 
-When set to `true`, there's no limit to how many items can be open at once.
+Allowed values: boolean
 
-When set to `false`, only one item can be open at a time per bundle. When an item is opened all other items in that bundle will close. **Note that this can cause odd behavior:** If you open an item while there's another open item above it, the closing of the above item will cause the viewport to shift based on the height of the above item. If the above item is large enough, it's possible that the item you just opened has been scrolled out of view due to the closing of the item above.
+If `true`, unlimited items can be open at once.
+
+If `false`, only one item can be open at a time. When an item is opened, all other items in that bundle will close.
+
+**Note that this can cause odd behavior.** If an item is opened while another item is open above it, the closing of the above item will cause the content to shift based on the height of the above item. If the above item is large enough, it's possible that newly opened item has been positioned out of view due to the closing of the item above.
 
 ### `openAnchoredItems`
 Default value: `true`
 
-When set to `true`, items will open when the item or content within the item is anchored to.
+Allowed values: boolean
 
-When set to `false`, items will not open when anchored to.
+If `true`, items will open when the item element or any element within the item is anchored to.
+
+If `false`, items will not open when anchored to.
 
 ### `debug`
 Default value: `false`
 
-When set to `true`, helpful messages for debugging will be logged to the console.
+Allowed values: boolean
+
+If `true`, helpful messages for debugging will be logged to the console.
 
 ## Notes
 * Adheres to ADA requirements outline here: [https://www.w3.org/TR/wai-aria-practices-1.1/#accordion](https://www.w3.org/TR/wai-aria-practices-1.1/#accordion)
 * Opening and closing transition is handled by: [https://github.com/alexspirgel/transition-auto](https://github.com/alexspirgel/transition-auto)
+
+## Goals
+* Changes for web component implementation:
+	* Remove the need to initialize with existing elements.
+	* Review each class to update the code to accommodate this change:
+		* ~~accordion.js~~
+		* ~~bundle.js~~
+		* ~~item.js~~
+		* trigger.js
+		* content.js
+		* content-inner.js
+* Remove adding data directly to the element in favor of using the new `dataFromElement()` method.

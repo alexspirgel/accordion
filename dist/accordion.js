@@ -280,7 +280,7 @@ module.exports = class CodedError extends Error {
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const DataPathManager = __webpack_require__(7);
+const DataPathManager = __webpack_require__(6);
 
 class ValidationError extends Error {
 	
@@ -363,22 +363,14 @@ module.exports = class Item extends Base {
 		return 'accordionItemAddTrigger';
 	}
 
-	static get accordionItemAddTriggerEvent() {
-		return new Event(this.accordionItemAddTriggerEventName);
-	}
-
 	static get accordionItemAddContentEventName() {
 		return 'accordionItemAddContent';
 	}
 
-	static get accordionItemAddContentEvent() {
-		return new Event(this.accordionItemAddContentEventName);
-	}
-
 	constructor(parameters) {
 		super();
-		this.accordionItemAddTriggerEvent = this.constructor.accordionItemAddTriggerEvent;
-		this.accordionItemAddContentEvent = this.constructor.accordionItemAddContentEvent;
+		this.accordionItemAddTriggerEvent = new Event(this.constructor.accordionItemAddTriggerEventName);
+		this.accordionItemAddContentEvent = new Event(this.constructor.accordionItemAddContentEventName);
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
 		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
@@ -439,7 +431,6 @@ module.exports = class Item extends Base {
 			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
 		}
 		this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
-
 		if (this.trigger) {
 			this.trigger.updateAriaExpanded();
 		}
@@ -465,24 +456,29 @@ module.exports = class Item extends Base {
 
 	addTrigger(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
-		const element = elements[0];
-		try {
-			const trigger = new Trigger({
-				item: this,
-				element: element
-			});
-			this.trigger = trigger;
-			this.element.dispatchEvent(this.accordionItemAddTriggerEvent);
-			return true;
+		if (elements.length > 0) {
+			const element = elements[0];
+			try {
+				const trigger = new Trigger({
+					item: this,
+					element: element
+				});
+				this.trigger = trigger;
+				this.element.dispatchEvent(this.accordionItemAddTriggerEvent);
+				return true;
+			}
+			catch (error) {
+				if (error.code === 'already-initialized') {
+					this.debug(error, element);
+					return false;
+				}
+				else {
+					throw error;
+				}
+			}
 		}
-		catch (error) {
-			if (error.code === 'already-initialized') {
-				this.debug(error, element);
-				return false;
-			}
-			else {
-				throw error;
-			}
+		else {
+			this.debug(`No element was found when trying to add trigger.`);
 		}
 	}
 
@@ -507,24 +503,29 @@ module.exports = class Item extends Base {
 
 	addContent(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
-		const element = elements[0];
-		try {
-			const content = new Content({
-				item: this,
-				element: element
-			});
-			this.content = content;
-			this.element.dispatchEvent(this.accordionItemAddContentEvent);
-			return true;
+		if (elements.length > 0) {
+			const element = elements[0];
+			try {
+				const content = new Content({
+					item: this,
+					element: element
+				});
+				this.content = content;
+				this.element.dispatchEvent(this.accordionItemAddContentEvent);
+				return true;
+			}
+			catch (error) {
+				if (error.code = 'already-initialized') {
+					this.debug(error, element);
+					return false;
+				}
+				else {
+					throw error;
+				}
+			}
 		}
-		catch (error) {
-			if (error.code = 'already-initialized') {
-				this.debug(error, element);
-				return false;
-			}
-			else {
-				throw error;
-			}
+		else {
+			this.debug(`No element was found when trying to add content.`);
 		}
 	}
 
@@ -541,11 +542,16 @@ module.exports = class Item extends Base {
 	}
 
 	get nextLevelNestedBundleElements() {
-		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(this.nestedBundleElements, null, this.nestedBundleElements);
+		const nestedBundleElements = this.nestedBundleElements;
+		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(nestedBundleElements, null, nestedBundleElements);
 		return nextLevelNestedBundleElements;
 	}
 
 	getNextPreviousItem(nextPrevious) {
+		if (typeof nextPrevious !== 'string') {
+			throw new Error(`'nextPrevious' must be a string.`);
+		}
+		nextPrevious = nextPrevious.toLowerCase();
 		if (nextPrevious !== 'next' && nextPrevious !== 'previous') {
 			throw new Error(`'nextPrevious' must be 'next' or 'previous'.`);
 		}
@@ -578,6 +584,14 @@ module.exports = class Item extends Base {
 	}
 
 	open(skipTransition = false) {
+		if (!this.content.element) {
+			this.debug(`Item cannot open, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner.element) {
+			this.debug(`Item cannot open, missing content inner element.`);
+			return false;
+		}
 		let existingStyleTransition = '';
 		if (skipTransition) {
 			existingStyleTransition = this.content.element.style.transition;
@@ -593,7 +607,7 @@ module.exports = class Item extends Base {
 			onComplete: () => {
 				this.state = 'opened';
 				if (skipTransition) {
-					this.content.element.offsetWidth;
+					this.content.element.offsetWidth; // force update
 					this.content.element.style.transition = existingStyleTransition;
 				}
 			}
@@ -610,6 +624,14 @@ module.exports = class Item extends Base {
 	}
 	
 	close(skipTransition = false) {
+		if (!this.content.element) {
+			this.debug(`Item cannot close, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner.element) {
+			this.debug(`Item cannot close, missing content inner element.`);
+			return false;
+		}
 		let existingStyleTransition = '';
 		if (skipTransition) {
 			existingStyleTransition = this.content.element.style.transition;
@@ -625,7 +647,7 @@ module.exports = class Item extends Base {
 			onComplete: () => {
 				this.state = 'closed';
 				if (skipTransition) {
-					this.content.element.offsetWidth;
+					this.content.element.offsetWidth; // force update
 					this.content.element.style.transition = existingStyleTransition;
 				}
 				if (this.options.closeNestedItems) {
@@ -671,8 +693,8 @@ module.exports = class Item extends Base {
 /***/ (function(module, exports, __webpack_require__) {
 
 const Base = __webpack_require__(0);
-const extend = __webpack_require__(5);
-const Schema = __webpack_require__(6);
+const extend = __webpack_require__(12);
+const Schema = __webpack_require__(5);
 const Bundle = __webpack_require__(9);
 
 module.exports = class Accordion extends Base {
@@ -680,11 +702,11 @@ module.exports = class Accordion extends Base {
 	static get optionsDefault() {
 		return {
 			elements: {
-				bundle: '.accordion',
-				item: '.accordion__item',
-				trigger: '.accordion__trigger',
-				content: '.accordion__content',
-				contentInner: undefined
+				bundle: null,
+				item: null,
+				trigger: null,
+				content: null,
+				contentInner: null
 			},
 			accessibilityWarnings: true,
 			closeNestedItems: false,
@@ -779,55 +801,93 @@ module.exports = class Accordion extends Base {
 			throw new Error(`'accordion' has already been added.`);
 		}
 		this._accordions.add(accordion);
-		return true;
+		return accordion;
 	}
 
 	static removeAccordion(accordion) {
 		if (this.accordions.has(accordion)) {
 			this._accordions.delete(accordion);
-			return true;
+			return accordion;
 		}
 		else {
+			this.debug(`Accordion to be removed was not found in the set.`);
 			return false;
 		}
 	}
+	
+	static initializeHashChangeListener() {
+		if (!this.initializedHashListener) {
+			window.addEventListener('hashchange', this.hashChangeHandler.bind(this));
+			this.initializedHashListener = true;
+		}
+	}
 
-	static hashHandler() {
-		const hash = location.hash;
+	static hashChangeHandler(event) {
+		this.openAnchoredItem(event.target.location.hash);
+	}
+
+	static openAnchoredItem(hash = location.hash) {
 		let hashElement;
 		if (hash) {
 			hashElement = document.querySelector(hash);
+			if (hashElement) {
+				for (const accordion of Array.from(this.accordions)) {
+					if (accordion.options.openAnchoredItems) {
+						for (const bundle of Array.from(accordion.bundles)) {
+							for (const item of Array.from(bundle.items)) {
+								if (item.element.contains(hashElement)) {
+									item.open(true);
+								}
+							}
+						}
+					}
+				}
+				hashElement.scrollIntoView();
+			}
 		}
-		if (hashElement) {
-			for (const accordion of Array.from(this.accordions)) {
-				if (accordion.options.openAnchoredItems) {
-					for (const bundle of Array.from(accordion.bundles)) {
-						for (const item of Array.from(bundle.items)) {
-							if (item.element.contains(hashElement)) {
-								item.open(true);
+	}
+
+	static dataFromElement(element) {
+		if (!this.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		for (const accordion of Array.from(this.accordions)) {
+			for (const bundle of Array.from(accordion.bundles)) {
+				if (element === bundle.element) {
+					return bundle;
+				}
+				for (const item of Array.from(bundle.items)) {
+					if (element === item.element) {
+						return item;
+					}
+					if (item.trigger) {
+						if (element === item.trigger.element) {
+							return item.trigger;
+						}
+					}
+					if (item.content) {
+						if (element === item.content.element) {
+							return item.content;
+						}
+						if (item.content.contentInner) {
+							if (element === item.content.contentInner.element) {
+								return item.content.contentInner;
 							}
 						}
 					}
 				}
 			}
-			hashElement.scrollIntoView();
 		}
-	}
-	
-	static initializeHashListener() {
-		if (!this.initializedHashListener) {
-			window.addEventListener('hashchange', this.hashHandler.bind(this));
-			this.initializedHashListener = true;
-		}
+		return false;
 	}
 
 	constructor(options) {
 		super();
 		this.options = options;
-		this.constructor.initializeHashListener();
+		this.constructor.initializeHashChangeListener();
 		this.constructor.addAccordion(this);
 		this.addBundles(this.options.elements.bundle);
-		this.constructor.hashHandler();
+		this.constructor.openAnchoredItem();
 		this.debug(this);
 		return this;
 	}
@@ -885,19 +945,25 @@ module.exports = class Accordion extends Base {
 
 	addBundles(elementsInput) {
 		let elements = this.constructor.normalizeElements(elementsInput);
-		elements = this.constructor.orderElementsByDOMTree(elements, 'asc');
-		for (const element of elements) {
-			this.addBundle(element);
+		if (elements.length > 0) {
+			elements = this.constructor.orderElementsByDOMTree(elements, 'asc');
+			for (const element of elements) {
+				this.addBundle(element);
+			}
+		}
+		else {
+			this.debug(`No elements were found when trying to add bundles.`);
 		}
 	}
 
 	removeBundle(bundle) {
 		if (this.bundles.has(bundle)) {
-			this._bundles.delete(bundle);
+			this.bundles.delete(bundle);
 			bundle.destroy();
-			return true;
+			return bundle;
 		}
 		else {
+			this.debug(`Bundle to be removed was not found in the set.`);
 			return false;
 		}
 	}
@@ -915,77 +981,7 @@ module.exports = class Accordion extends Base {
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/**
- * Extend v3.0.0
- * https://github.com/alexspirgel/extend
- */
-
-const extend = (...arguments) => {
-
-	let target = arguments[0];
-	let argumentIndex, merge, mergeIsArray;
-	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
-		merge = arguments[argumentIndex];
-		if (merge === target) {
-			continue;
-		}
-		mergeIsArray = Array.isArray(merge);
-		if (mergeIsArray || extend.isPlainObject(merge)) {
-			if (mergeIsArray && !Array.isArray(target)) {
-				target = [];
-			}
-			else if (!mergeIsArray && !extend.isPlainObject(target)) {
-				target = {};
-			}
-			for (const property in merge) {
-				if (property === "__proto__") {
-					continue;
-				}
-				target[property] = extend(target[property], merge[property]);
-			}
-		}
-		else {
-			if (merge !== undefined) {
-				target = merge;
-			}
-		}
-	}
-
-	return target;
-
-};
-
-extend.isPlainObject = (object) => {
-	const baseObject = {};
-	const toString = baseObject.toString;
-	const hasOwnProperty = baseObject.hasOwnProperty;
-	const functionToString = hasOwnProperty.toString;
-	const objectFunctionString = functionToString.call(Object);
-	if (toString.call(object) !== '[object Object]') {
-		return false;
-	}
-	const prototype = Object.getPrototypeOf(object);
-	if (prototype) {
-		if (hasOwnProperty.call(prototype, 'constructor')) {
-			if (typeof prototype.constructor === 'function') {
-				if (functionToString.call(prototype.constructor) !== objectFunctionString) {
-					return false;
-				}
-			}
-		}
-	}
-	return true;
-};
-
-if ( true && module.exports) {
-	module.exports = extend;
-}
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const DataPathManager = __webpack_require__(7);
+const DataPathManager = __webpack_require__(6);
 const ValidationError = __webpack_require__(2);
 const ValidationErrors = __webpack_require__(13);
 const modelModel = __webpack_require__(14);
@@ -1397,10 +1393,10 @@ Schema.ValidationError = ValidationError;
 module.exports = Schema;
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(8);
+const extend = __webpack_require__(7);
 
 class DataPathManager {
 	
@@ -1477,10 +1473,10 @@ class DataPathManager {
 module.exports = DataPathManager;
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const isPlainObject = __webpack_require__(12);
+const isPlainObject = __webpack_require__(8);
 
 const extend = (...arguments) => {
 	let target = arguments[0];
@@ -1515,6 +1511,35 @@ const extend = (...arguments) => {
 };
 
 module.exports = extend;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * isPlainObject v1.0.1
+ * https://github.com/alexspirgel/isPlainObject
+ */
+
+const isPlainObject = (object) => {
+	if (Object.prototype.toString.call(object) !== '[object Object]') {
+		return false;
+	}
+  if (object.constructor === undefined) {
+		return true;
+	}
+  if (Object.prototype.toString.call(object.constructor.prototype) !== '[object Object]') {
+		return false;
+	}
+  if (!object.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
+    return false;
+  }
+  return true;
+};
+
+if ( true && module.exports) {
+	module.exports = isPlainObject;
+}
 
 /***/ }),
 /* 9 */
@@ -1613,8 +1638,13 @@ module.exports = class Bundle extends Base {
 	
 	addItems(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
-		for (const element of elements) {
-			this.addItem(element);
+		if (elements.length > 0) {
+			for (const element of elements) {
+				this.addItem(element);
+			}
+		}
+		else {
+			this.debug(`No elements were found when trying to add items.`);
 		}
 	}
 
@@ -1625,6 +1655,7 @@ module.exports = class Bundle extends Base {
 			return true;
 		}
 		else {
+			this.debug(`Item to be removed was not found in the set.`);
 			return false;
 		}
 	}
@@ -1809,28 +1840,69 @@ module.exports = __webpack_require__(4);
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
- * isPlainObject v1.0.1
- * https://github.com/alexspirgel/isPlainObject
+ * Extend v3.0.0
+ * https://github.com/alexspirgel/extend
  */
 
-const isPlainObject = (object) => {
-	if (Object.prototype.toString.call(object) !== '[object Object]') {
+const extend = (...arguments) => {
+
+	let target = arguments[0];
+	let argumentIndex, merge, mergeIsArray;
+	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
+		merge = arguments[argumentIndex];
+		if (merge === target) {
+			continue;
+		}
+		mergeIsArray = Array.isArray(merge);
+		if (mergeIsArray || extend.isPlainObject(merge)) {
+			if (mergeIsArray && !Array.isArray(target)) {
+				target = [];
+			}
+			else if (!mergeIsArray && !extend.isPlainObject(target)) {
+				target = {};
+			}
+			for (const property in merge) {
+				if (property === "__proto__") {
+					continue;
+				}
+				target[property] = extend(target[property], merge[property]);
+			}
+		}
+		else {
+			if (merge !== undefined) {
+				target = merge;
+			}
+		}
+	}
+
+	return target;
+
+};
+
+extend.isPlainObject = (object) => {
+	const baseObject = {};
+	const toString = baseObject.toString;
+	const hasOwnProperty = baseObject.hasOwnProperty;
+	const functionToString = hasOwnProperty.toString;
+	const objectFunctionString = functionToString.call(Object);
+	if (toString.call(object) !== '[object Object]') {
 		return false;
 	}
-  if (object.constructor === undefined) {
-		return true;
+	const prototype = Object.getPrototypeOf(object);
+	if (prototype) {
+		if (hasOwnProperty.call(prototype, 'constructor')) {
+			if (typeof prototype.constructor === 'function') {
+				if (functionToString.call(prototype.constructor) !== objectFunctionString) {
+					return false;
+				}
+			}
+		}
 	}
-  if (Object.prototype.toString.call(object.constructor.prototype) !== '[object Object]') {
-		return false;
-	}
-  if (!object.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
-    return false;
-  }
-  return true;
+	return true;
 };
 
 if ( true && module.exports) {
-	module.exports = isPlainObject;
+	module.exports = extend;
 }
 
 /***/ }),
@@ -1891,7 +1963,7 @@ module.exports = ValidationErrors;
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(8);
+const extend = __webpack_require__(7);
 const ValidationError = __webpack_require__(2);
 
 const typeRestriction = (types) => {
@@ -2218,7 +2290,7 @@ module.exports = class ContentInner extends Base {
 /***/ (function(module, exports, __webpack_require__) {
 
 const optionsSchema = __webpack_require__(18);
-const extend = __webpack_require__(5);
+const extend = __webpack_require__(19);
 
 const transitionAuto = (function () {
 
@@ -2228,7 +2300,7 @@ const transitionAuto = (function () {
 
 	function debug(options, ...messages) {
 		if (options.debug) {
-			console.log('debugPrefix', ...messages);
+			console.log('transitionAuto debug: ', ...messages);
 		}
 	}
 
@@ -2357,7 +2429,7 @@ module.exports = transitionAuto;
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Schema = __webpack_require__(6);
+const Schema = __webpack_require__(5);
 
 const optionsModel = {
 	required: true,
@@ -2432,6 +2504,46 @@ const optionsModel = {
 const optionsSchema = new Schema(optionsModel);
 
 module.exports = optionsSchema;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const isPlainObject = __webpack_require__(8);
+
+const extend = (...arguments) => {
+	let target = arguments[0];
+	let argumentIndex, merge, mergeIsArray;
+	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
+		merge = arguments[argumentIndex];
+		if (merge === target) {
+			continue;
+		}
+		mergeIsArray = Array.isArray(merge);
+		if (mergeIsArray || isPlainObject(merge)) {
+			if (mergeIsArray && !Array.isArray(target)) {
+				target = [];
+			}
+			else if (!mergeIsArray && !isPlainObject(target)) {
+				target = {};
+			}
+			for (const property in merge) {
+				if (property === "__proto__") {
+					continue;
+				}
+				target[property] = extend(target[property], merge[property]);
+			}
+		}
+		else {
+			if (merge !== undefined) {
+				target = merge;
+			}
+		}
+	}
+	return target;
+};
+
+module.exports = extend;
 
 /***/ })
 /******/ ]);

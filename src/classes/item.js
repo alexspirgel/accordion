@@ -43,22 +43,14 @@ module.exports = class Item extends Base {
 		return 'accordionItemAddTrigger';
 	}
 
-	static get accordionItemAddTriggerEvent() {
-		return new Event(this.accordionItemAddTriggerEventName);
-	}
-
 	static get accordionItemAddContentEventName() {
 		return 'accordionItemAddContent';
 	}
 
-	static get accordionItemAddContentEvent() {
-		return new Event(this.accordionItemAddContentEventName);
-	}
-
 	constructor(parameters) {
 		super();
-		this.accordionItemAddTriggerEvent = this.constructor.accordionItemAddTriggerEvent;
-		this.accordionItemAddContentEvent = this.constructor.accordionItemAddContentEvent;
+		this.accordionItemAddTriggerEvent = new Event(this.constructor.accordionItemAddTriggerEventName);
+		this.accordionItemAddContentEvent = new Event(this.constructor.accordionItemAddContentEventName);
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
 		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
@@ -119,7 +111,6 @@ module.exports = class Item extends Base {
 			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
 		}
 		this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
-
 		if (this.trigger) {
 			this.trigger.updateAriaExpanded();
 		}
@@ -145,24 +136,29 @@ module.exports = class Item extends Base {
 
 	addTrigger(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
-		const element = elements[0];
-		try {
-			const trigger = new Trigger({
-				item: this,
-				element: element
-			});
-			this.trigger = trigger;
-			this.element.dispatchEvent(this.accordionItemAddTriggerEvent);
-			return true;
+		if (elements.length > 0) {
+			const element = elements[0];
+			try {
+				const trigger = new Trigger({
+					item: this,
+					element: element
+				});
+				this.trigger = trigger;
+				this.element.dispatchEvent(this.accordionItemAddTriggerEvent);
+				return true;
+			}
+			catch (error) {
+				if (error.code === 'already-initialized') {
+					this.debug(error, element);
+					return false;
+				}
+				else {
+					throw error;
+				}
+			}
 		}
-		catch (error) {
-			if (error.code === 'already-initialized') {
-				this.debug(error, element);
-				return false;
-			}
-			else {
-				throw error;
-			}
+		else {
+			this.debug(`No element was found when trying to add trigger.`);
 		}
 	}
 
@@ -187,24 +183,29 @@ module.exports = class Item extends Base {
 
 	addContent(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
-		const element = elements[0];
-		try {
-			const content = new Content({
-				item: this,
-				element: element
-			});
-			this.content = content;
-			this.element.dispatchEvent(this.accordionItemAddContentEvent);
-			return true;
+		if (elements.length > 0) {
+			const element = elements[0];
+			try {
+				const content = new Content({
+					item: this,
+					element: element
+				});
+				this.content = content;
+				this.element.dispatchEvent(this.accordionItemAddContentEvent);
+				return true;
+			}
+			catch (error) {
+				if (error.code = 'already-initialized') {
+					this.debug(error, element);
+					return false;
+				}
+				else {
+					throw error;
+				}
+			}
 		}
-		catch (error) {
-			if (error.code = 'already-initialized') {
-				this.debug(error, element);
-				return false;
-			}
-			else {
-				throw error;
-			}
+		else {
+			this.debug(`No element was found when trying to add content.`);
 		}
 	}
 
@@ -221,11 +222,16 @@ module.exports = class Item extends Base {
 	}
 
 	get nextLevelNestedBundleElements() {
-		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(this.nestedBundleElements, null, this.nestedBundleElements);
+		const nestedBundleElements = this.nestedBundleElements;
+		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(nestedBundleElements, null, nestedBundleElements);
 		return nextLevelNestedBundleElements;
 	}
 
 	getNextPreviousItem(nextPrevious) {
+		if (typeof nextPrevious !== 'string') {
+			throw new Error(`'nextPrevious' must be a string.`);
+		}
+		nextPrevious = nextPrevious.toLowerCase();
 		if (nextPrevious !== 'next' && nextPrevious !== 'previous') {
 			throw new Error(`'nextPrevious' must be 'next' or 'previous'.`);
 		}
@@ -258,6 +264,14 @@ module.exports = class Item extends Base {
 	}
 
 	open(skipTransition = false) {
+		if (!this.content.element) {
+			this.debug(`Item cannot open, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner.element) {
+			this.debug(`Item cannot open, missing content inner element.`);
+			return false;
+		}
 		let existingStyleTransition = '';
 		if (skipTransition) {
 			existingStyleTransition = this.content.element.style.transition;
@@ -273,7 +287,7 @@ module.exports = class Item extends Base {
 			onComplete: () => {
 				this.state = 'opened';
 				if (skipTransition) {
-					this.content.element.offsetWidth;
+					this.content.element.offsetWidth; // force update
 					this.content.element.style.transition = existingStyleTransition;
 				}
 			}
@@ -290,6 +304,14 @@ module.exports = class Item extends Base {
 	}
 	
 	close(skipTransition = false) {
+		if (!this.content.element) {
+			this.debug(`Item cannot close, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner.element) {
+			this.debug(`Item cannot close, missing content inner element.`);
+			return false;
+		}
 		let existingStyleTransition = '';
 		if (skipTransition) {
 			existingStyleTransition = this.content.element.style.transition;
@@ -305,7 +327,7 @@ module.exports = class Item extends Base {
 			onComplete: () => {
 				this.state = 'closed';
 				if (skipTransition) {
-					this.content.element.offsetWidth;
+					this.content.element.offsetWidth; // force update
 					this.content.element.style.transition = existingStyleTransition;
 				}
 				if (this.options.closeNestedItems) {

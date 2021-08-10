@@ -8,11 +8,11 @@ module.exports = class Accordion extends Base {
 	static get optionsDefault() {
 		return {
 			elements: {
-				bundle: '.accordion',
-				item: '.accordion__item',
-				trigger: '.accordion__trigger',
-				content: '.accordion__content',
-				contentInner: undefined
+				bundle: null,
+				item: null,
+				trigger: null,
+				content: null,
+				contentInner: null
 			},
 			accessibilityWarnings: true,
 			closeNestedItems: false,
@@ -107,55 +107,93 @@ module.exports = class Accordion extends Base {
 			throw new Error(`'accordion' has already been added.`);
 		}
 		this._accordions.add(accordion);
-		return true;
+		return accordion;
 	}
 
 	static removeAccordion(accordion) {
 		if (this.accordions.has(accordion)) {
 			this._accordions.delete(accordion);
-			return true;
+			return accordion;
 		}
 		else {
+			this.debug(`Accordion to be removed was not found in the set.`);
 			return false;
 		}
 	}
+	
+	static initializeHashChangeListener() {
+		if (!this.initializedHashListener) {
+			window.addEventListener('hashchange', this.hashChangeHandler.bind(this));
+			this.initializedHashListener = true;
+		}
+	}
 
-	static hashHandler() {
-		const hash = location.hash;
+	static hashChangeHandler(event) {
+		this.openAnchoredItem(event.target.location.hash);
+	}
+
+	static openAnchoredItem(hash = location.hash) {
 		let hashElement;
 		if (hash) {
 			hashElement = document.querySelector(hash);
+			if (hashElement) {
+				for (const accordion of Array.from(this.accordions)) {
+					if (accordion.options.openAnchoredItems) {
+						for (const bundle of Array.from(accordion.bundles)) {
+							for (const item of Array.from(bundle.items)) {
+								if (item.element.contains(hashElement)) {
+									item.open(true);
+								}
+							}
+						}
+					}
+				}
+				hashElement.scrollIntoView();
+			}
 		}
-		if (hashElement) {
-			for (const accordion of Array.from(this.accordions)) {
-				if (accordion.options.openAnchoredItems) {
-					for (const bundle of Array.from(accordion.bundles)) {
-						for (const item of Array.from(bundle.items)) {
-							if (item.element.contains(hashElement)) {
-								item.open(true);
+	}
+
+	static dataFromElement(element) {
+		if (!this.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		for (const accordion of Array.from(this.accordions)) {
+			for (const bundle of Array.from(accordion.bundles)) {
+				if (element === bundle.element) {
+					return bundle;
+				}
+				for (const item of Array.from(bundle.items)) {
+					if (element === item.element) {
+						return item;
+					}
+					if (item.trigger) {
+						if (element === item.trigger.element) {
+							return item.trigger;
+						}
+					}
+					if (item.content) {
+						if (element === item.content.element) {
+							return item.content;
+						}
+						if (item.content.contentInner) {
+							if (element === item.content.contentInner.element) {
+								return item.content.contentInner;
 							}
 						}
 					}
 				}
 			}
-			hashElement.scrollIntoView();
 		}
-	}
-	
-	static initializeHashListener() {
-		if (!this.initializedHashListener) {
-			window.addEventListener('hashchange', this.hashHandler.bind(this));
-			this.initializedHashListener = true;
-		}
+		return false;
 	}
 
 	constructor(options) {
 		super();
 		this.options = options;
-		this.constructor.initializeHashListener();
+		this.constructor.initializeHashChangeListener();
 		this.constructor.addAccordion(this);
 		this.addBundles(this.options.elements.bundle);
-		this.constructor.hashHandler();
+		this.constructor.openAnchoredItem();
 		this.debug(this);
 		return this;
 	}
@@ -213,19 +251,25 @@ module.exports = class Accordion extends Base {
 
 	addBundles(elementsInput) {
 		let elements = this.constructor.normalizeElements(elementsInput);
-		elements = this.constructor.orderElementsByDOMTree(elements, 'asc');
-		for (const element of elements) {
-			this.addBundle(element);
+		if (elements.length > 0) {
+			elements = this.constructor.orderElementsByDOMTree(elements, 'asc');
+			for (const element of elements) {
+				this.addBundle(element);
+			}
+		}
+		else {
+			this.debug(`No elements were found when trying to add bundles.`);
 		}
 	}
 
 	removeBundle(bundle) {
 		if (this.bundles.has(bundle)) {
-			this._bundles.delete(bundle);
+			this.bundles.delete(bundle);
 			bundle.destroy();
-			return true;
+			return bundle;
 		}
 		else {
+			this.debug(`Bundle to be removed was not found in the set.`);
 			return false;
 		}
 	}

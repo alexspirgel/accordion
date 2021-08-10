@@ -91,8 +91,13 @@ module.exports = class Bundle extends Base {
 	
 	addItems(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
-		for (const element of elements) {
-			this.addItem(element);
+		if (elements.length > 0) {
+			for (const element of elements) {
+				this.addItem(element);
+			}
+		}
+		else {
+			this.debug(`No elements were found when trying to add items.`);
 		}
 	}
 
@@ -103,6 +108,7 @@ module.exports = class Bundle extends Base {
 			return true;
 		}
 		else {
+			this.debug(`Item to be removed was not found in the set.`);
 			return false;
 		}
 	}
