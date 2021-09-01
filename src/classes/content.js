@@ -9,7 +9,9 @@ module.exports = class Content extends Base {
 		this.boundUpdateAriaLabelledBy = this.updateAriaLabelledBy.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;
-		this.addContentInner(this.options.elements.contentInner);
+		if (this.options.elements.contentInner) {
+			this.addContentInner(this.options.elements.contentInner);
+		}
 		return this;
 	}
 
@@ -63,7 +65,7 @@ module.exports = class Content extends Base {
 	}
 
 	updateAriaLabelledBy() {
-		if (this.item.trigger) {
+		if (this.element && this.item.trigger) {
 			this.element.setAttribute('aria-labelledby', this.item.trigger.element.getAttribute('id'));
 		}
 	}
@@ -87,14 +89,8 @@ module.exports = class Content extends Base {
 	}
 
 	addContentInner(elementsInput) {
-		let element;
-		if (elementsInput === undefined || elementsInput === null) {
-			element = this.element.children[0];
-		}
-		else {
-			const elements = this.filterElementsByScope(elementsInput);
-			element = elements[0];
-		}
+		const elements = this.filterElementsByScope(elementsInput);
+		const element = elements[0];
 		try {
 			const contentInner = new ContentInner({
 				content: this,

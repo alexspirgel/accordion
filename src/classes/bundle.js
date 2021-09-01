@@ -8,7 +8,9 @@ module.exports = class Bundle extends Base {
 		super();
 		this.accordion = parameters.accordion;
 		this.element = parameters.element;
-		this.addItems(this.options.elements.item);
+		if (this.options.elements.item) {
+			this.addItems(this.options.elements.item);
+		}
 		return this;
 	}
 
@@ -46,6 +48,9 @@ module.exports = class Bundle extends Base {
 	}
 
 	filterElementsByScope(elementsInput) {
+		if (!this.element) {
+			throw new Error(`Cannot filter elements by scope without a defined 'this.element'.`);
+		}
 		let elements = this.constructor.normalizeElements(elementsInput);
 		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
 		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
@@ -113,25 +118,29 @@ module.exports = class Bundle extends Base {
 		}
 	}
 
-	getFirstLastItem(firstLast) {
-		if (firstLast !== 'first' && firstLast !== 'last') {
-			throw new Error(`'firstLast' must be 'first' or 'last'.`);
-		}
+	getItemsOrderedByDOMTree() {
 		const items = Array.from(this.items);
-		const itemElements = items.map(item => item.element);
+		let itemElements = items.map(item => item.element);
+		if (!itemElements.every(this.constructor.isElement)) {
+			this.debug(`When ordering items by DOM tree, some items do not have elements, those without elements will be omitted from the ordered list.`);
+			itemElements = itemElements.filter(this.constructor.isElement);
+		}
+		if (itemElements.length < 1) {
+			throw new Error(`No items have an element to order by DOM tree.`);
+		}
 		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
 		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
-		const returnItemIndex = (firstLast === 'first') ? 0 : orderedItems.length - 1;
-		const returnItem = orderedItems[returnItemIndex];
-		return returnItem;
+		return orderedItems;
 	}
 
 	get firstItem() {
-		return this.getFirstLastItem('first');
+		const items = this.getItemsOrderedByDOMTree();
+		return items[0];
 	}
 
 	get lastItem() {
-		return this.getFirstLastItem('last');
+		const items = this.getItemsOrderedByDOMTree();
+		return items[items.length - 1];
 	}
 	
 	destroy() {

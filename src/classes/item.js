@@ -58,8 +58,12 @@ module.exports = class Item extends Base {
 		if (defaultOpenItemElements.includes(this.element)) {
 			this.state = 'opened'
 		}
-		this.addContent(this.options.elements.content);
-		this.addTrigger(this.options.elements.trigger);
+		if (this.options.elements.content) {
+			this.addContent(this.options.elements.content);
+		}
+		if (this.options.elements.trigger) {
+			this.addTrigger(this.options.elements.trigger);
+		}
 		return this;
 	}
 

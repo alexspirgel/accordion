@@ -102,7 +102,7 @@ Default value: `null`
 
 Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed.
 
-Defines the elements to be used as triggers during the script initialization. Trigger elements toggle the opening and closing of the related item. Trigger elements must be located within an item element. A maximum of one trigger element is allowed per item. If more than one trigger element is found for a single item, the fist element will be used.
+Defines the elements to be used as triggers during the script initialization. Trigger elements toggle the opening and closing of the related item. Trigger elements must be located within an item element. A maximum of one trigger element is allowed per item. If more than one trigger element is found for a single item, the first element will be used.
 
 Items are restricted to a single trigger to adhere to ADA guidelines for tag structure, attributes, and keyboard navigation. However, adding additional elements to act as secondary triggers can be done manually by using the API.
 
@@ -111,14 +111,14 @@ Default value: `null`
 
 Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed.
 
-Defines the elements to be used as content during the script initialization. Content elements must be located within an item element. A maximum of one content element is allowed per item. If more than one content element is found for a single item, the fist element will be used.
+Defines the elements to be used as content during the script initialization. Content elements must be located within an item element. A maximum of one content element is allowed per item. If more than one content element is found for a single item, the first element will be used.
 
 #### `elements.contentInner`
 Default value: `null`
 
-Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed. When undefined or null, the fist child element of the content element will be used.
+Allowed values: Can be a selector string, element reference, node list, or an array containing any of the previously mentioned. Null and undefined are also allowed.
 
-Defines the elements to be used as content inner elements during the script initialization. A maximum of one content inner element is allowed per item. If more than one content element is found for a single item, the fist element will be used. Content inner elements must be located within content elements. It is recommended that this element is not styled and is the only immediate child of the content element.
+Defines the elements to be used as content inner elements during the script initialization. A maximum of one content inner element is allowed per item. If more than one content inner element is found for a single item, the first element will be used. Content inner elements must be located within content elements. It is recommended that this element is not styled and is the only immediate child of the content element.
 
 ### `accessibilityWarnings`
 Default value: `true`

@@ -378,8 +378,12 @@ module.exports = class Item extends Base {
 		if (defaultOpenItemElements.includes(this.element)) {
 			this.state = 'opened'
 		}
-		this.addContent(this.options.elements.content);
-		this.addTrigger(this.options.elements.trigger);
+		if (this.options.elements.content) {
+			this.addContent(this.options.elements.content);
+		}
+		if (this.options.elements.trigger) {
+			this.addTrigger(this.options.elements.trigger);
+		}
 		return this;
 	}
 
@@ -827,22 +831,25 @@ module.exports = class Accordion extends Base {
 	}
 
 	static openAnchoredItem(hash = location.hash) {
-		let hashElement;
 		if (hash) {
-			hashElement = document.querySelector(hash);
+			const hashElement = document.querySelector(hash);
 			if (hashElement) {
-				for (const accordion of Array.from(this.accordions)) {
+				let itemOpened = false;
+				for (const accordion of this.accordions) {
 					if (accordion.options.openAnchoredItems) {
-						for (const bundle of Array.from(accordion.bundles)) {
-							for (const item of Array.from(bundle.items)) {
+						for (const bundle of accordion.bundles) {
+							for (const item of bundle.items) {
 								if (item.element.contains(hashElement)) {
 									item.open(true);
+									itemOpened = true;
 								}
 							}
 						}
 					}
 				}
-				hashElement.scrollIntoView();
+				if (itemOpened) {
+					hashElement.scrollIntoView();
+				}
 			}
 		}
 	}
@@ -886,8 +893,10 @@ module.exports = class Accordion extends Base {
 		this.options = options;
 		this.constructor.initializeHashChangeListener();
 		this.constructor.addAccordion(this);
-		this.addBundles(this.options.elements.bundle);
-		this.constructor.openAnchoredItem();
+		if (this.options.elements.bundle) {
+			this.addBundles(this.options.elements.bundle);
+			this.constructor.openAnchoredItem();
+		}
 		this.debug(this);
 		return this;
 	}
@@ -1555,7 +1564,9 @@ module.exports = class Bundle extends Base {
 		super();
 		this.accordion = parameters.accordion;
 		this.element = parameters.element;
-		this.addItems(this.options.elements.item);
+		if (this.options.elements.item) {
+			this.addItems(this.options.elements.item);
+		}
 		return this;
 	}
 
@@ -1593,6 +1604,9 @@ module.exports = class Bundle extends Base {
 	}
 
 	filterElementsByScope(elementsInput) {
+		if (!this.element) {
+			throw new Error(`Cannot filter elements by scope without a defined 'this.element'.`);
+		}
 		let elements = this.constructor.normalizeElements(elementsInput);
 		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
 		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
@@ -1660,25 +1674,29 @@ module.exports = class Bundle extends Base {
 		}
 	}
 
-	getFirstLastItem(firstLast) {
-		if (firstLast !== 'first' && firstLast !== 'last') {
-			throw new Error(`'firstLast' must be 'first' or 'last'.`);
-		}
+	getItemsOrderedByDOMTree() {
 		const items = Array.from(this.items);
-		const itemElements = items.map(item => item.element);
+		let itemElements = items.map(item => item.element);
+		if (!itemElements.every(this.constructor.isElement)) {
+			this.debug(`When ordering items by DOM tree, some items do not have elements, those without elements will be omitted from the ordered list.`);
+			itemElements = itemElements.filter(this.constructor.isElement);
+		}
+		if (itemElements.length < 1) {
+			throw new Error(`No items have an element to order by DOM tree.`);
+		}
 		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
 		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
-		const returnItemIndex = (firstLast === 'first') ? 0 : orderedItems.length - 1;
-		const returnItem = orderedItems[returnItemIndex];
-		return returnItem;
+		return orderedItems;
 	}
 
 	get firstItem() {
-		return this.getFirstLastItem('first');
+		const items = this.getItemsOrderedByDOMTree();
+		return items[0];
 	}
 
 	get lastItem() {
-		return this.getFirstLastItem('last');
+		const items = this.getItemsOrderedByDOMTree();
+		return items[items.length - 1];
 	}
 	
 	destroy() {
@@ -1707,7 +1725,9 @@ module.exports = class Content extends Base {
 		this.boundUpdateAriaLabelledBy = this.updateAriaLabelledBy.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;
-		this.addContentInner(this.options.elements.contentInner);
+		if (this.options.elements.contentInner) {
+			this.addContentInner(this.options.elements.contentInner);
+		}
 		return this;
 	}
 
@@ -1761,7 +1781,7 @@ module.exports = class Content extends Base {
 	}
 
 	updateAriaLabelledBy() {
-		if (this.item.trigger) {
+		if (this.element && this.item.trigger) {
 			this.element.setAttribute('aria-labelledby', this.item.trigger.element.getAttribute('id'));
 		}
 	}
@@ -1785,14 +1805,8 @@ module.exports = class Content extends Base {
 	}
 
 	addContentInner(elementsInput) {
-		let element;
-		if (elementsInput === undefined || elementsInput === null) {
-			element = this.element.children[0];
-		}
-		else {
-			const elements = this.filterElementsByScope(elementsInput);
-			element = elements[0];
-		}
+		const elements = this.filterElementsByScope(elementsInput);
+		const element = elements[0];
 		try {
 			const contentInner = new ContentInner({
 				content: this,
@@ -2174,17 +2188,19 @@ module.exports = class Trigger extends Base {
 	}
 
 	updateAriaControls() {
-		if (this.item.content) {
+		if (this.element && this.item.content.element) {
 			this.element.setAttribute('aria-controls', this.item.content.element.getAttribute('id'));
 		}
 	}
 
 	updateAriaExpanded() {
-		if (this.item.state === 'closing' || this.item.state === 'closed') {
-			this.element.setAttribute('aria-expanded', 'false');
-		}
-		else if (this.item.state === 'opening' || this.item.state === 'opened') {
-			this.element.setAttribute('aria-expanded', 'true');
+		if (this.element) {
+			if (this.item.state === 'closing' || this.item.state === 'closed') {
+				this.element.setAttribute('aria-expanded', 'false');
+			}
+			else if (this.item.state === 'opening' || this.item.state === 'opened') {
+				this.element.setAttribute('aria-expanded', 'true');
+			}
 		}
 	}
 

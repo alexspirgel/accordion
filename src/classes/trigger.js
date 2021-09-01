@@ -69,17 +69,19 @@ module.exports = class Trigger extends Base {
 	}
 
 	updateAriaControls() {
-		if (this.item.content) {
+		if (this.element && this.item.content.element) {
 			this.element.setAttribute('aria-controls', this.item.content.element.getAttribute('id'));
 		}
 	}
 
 	updateAriaExpanded() {
-		if (this.item.state === 'closing' || this.item.state === 'closed') {
-			this.element.setAttribute('aria-expanded', 'false');
-		}
-		else if (this.item.state === 'opening' || this.item.state === 'opened') {
-			this.element.setAttribute('aria-expanded', 'true');
+		if (this.element) {
+			if (this.item.state === 'closing' || this.item.state === 'closed') {
+				this.element.setAttribute('aria-expanded', 'false');
+			}
+			else if (this.item.state === 'opening' || this.item.state === 'opened') {
+				this.element.setAttribute('aria-expanded', 'true');
+			}
 		}
 	}
 

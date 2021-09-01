@@ -133,22 +133,25 @@ module.exports = class Accordion extends Base {
 	}
 
 	static openAnchoredItem(hash = location.hash) {
-		let hashElement;
 		if (hash) {
-			hashElement = document.querySelector(hash);
+			const hashElement = document.querySelector(hash);
 			if (hashElement) {
-				for (const accordion of Array.from(this.accordions)) {
+				let itemOpened = false;
+				for (const accordion of this.accordions) {
 					if (accordion.options.openAnchoredItems) {
-						for (const bundle of Array.from(accordion.bundles)) {
-							for (const item of Array.from(bundle.items)) {
+						for (const bundle of accordion.bundles) {
+							for (const item of bundle.items) {
 								if (item.element.contains(hashElement)) {
 									item.open(true);
+									itemOpened = true;
 								}
 							}
 						}
 					}
 				}
-				hashElement.scrollIntoView();
+				if (itemOpened) {
+					hashElement.scrollIntoView();
+				}
 			}
 		}
 	}
@@ -192,8 +195,10 @@ module.exports = class Accordion extends Base {
 		this.options = options;
 		this.constructor.initializeHashChangeListener();
 		this.constructor.addAccordion(this);
-		this.addBundles(this.options.elements.bundle);
-		this.constructor.openAnchoredItem();
+		if (this.options.elements.bundle) {
+			this.addBundles(this.options.elements.bundle);
+			this.constructor.openAnchoredItem();
+		}
 		this.debug(this);
 		return this;
 	}
