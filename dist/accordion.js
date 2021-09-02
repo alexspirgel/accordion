@@ -724,13 +724,6 @@ module.exports = class Accordion extends Base {
 		};
 	}
 
-	static get eventNames() {
-		return {
-			addBundle: 'addBundle',
-			removeBundle: 'removeBundle'
-		}
-	}
-
 	static get optionsSchema() {
 		const elementsModel = [
 			{
@@ -793,17 +786,6 @@ module.exports = class Accordion extends Base {
 		if (!this._accordions) {
 			this._accordions = new Set();
 		}
-		return this._accordions;
-	}
-
-	static set accordions(accordions) {
-		if (!(accordions instanceof Set)) {
-			throw new Error(`'accordions' must be a Set.`);
-		}
-		if (!Array.from(accordions).every(this.isAccordion)) {
-			throw new Error(`'accordions' must only contain Accordion class instances.`);
-		}
-		this._accordions = accordions;
 		return this._accordions;
 	}
 
@@ -870,19 +852,14 @@ module.exports = class Accordion extends Base {
 		if (!this.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
-		for (const accordion of Array.from(this.accordions)) {
-			for (const bundle of Array.from(accordion.bundles)) {
+		for (const accordion of this.accordions) {
+			for (const bundle of accordion.bundles) {
 				if (element === bundle.element) {
 					return bundle;
 				}
-				for (const item of Array.from(bundle.items)) {
+				for (const item of bundle.items) {
 					if (element === item.element) {
 						return item;
-					}
-					if (item.trigger) {
-						if (element === item.trigger.element) {
-							return item.trigger;
-						}
 					}
 					if (item.content) {
 						if (element === item.content.element) {
@@ -894,10 +871,24 @@ module.exports = class Accordion extends Base {
 							}
 						}
 					}
+					if (item.trigger) {
+						if (element === item.trigger.element) {
+							return item.trigger;
+						}
+					}
 				}
 			}
 		}
 		return false;
+	}
+
+	static isElement(element) {
+		if (element instanceof Element) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	static isAccordion(instance) {
@@ -1037,6 +1028,9 @@ module.exports = class Accordion extends Base {
 		if (typeof eventName !== 'string') {
 			throw new Error(`'eventName' must be a string.`);
 		}
+		if (!Array.isArray(parameters)) {
+			throw new Error(`'parameters' must be an array.`);
+		}
 		const thisEventListeners = this.eventListeners[eventName];
 		if (Array.isArray(thisEventListeners)) {
 			for (const listener of thisEventListeners) {
@@ -1046,7 +1040,7 @@ module.exports = class Accordion extends Base {
 	}
 
 	destroy() {
-		for (const bundle of Array.from(this.bundles)) {
+		for (const bundle of this.bundles) {
 			bundle.destroy();
 		}
 		this.constructor.removeAccordion(this);
