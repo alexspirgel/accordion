@@ -175,15 +175,3 @@ If `true`, helpful messages for debugging will be logged to the console.
 ## Notes
 * Adheres to ADA requirements outline here: [https://www.w3.org/TR/wai-aria-practices-1.1/#accordion](https://www.w3.org/TR/wai-aria-practices-1.1/#accordion)
 * Opening and closing transition is handled by: [https://github.com/alexspirgel/transition-auto](https://github.com/alexspirgel/transition-auto)
-
-## Goals
-* Changes for web component implementation:
-	* Remove the need to initialize with existing elements.
-	* Review each class to update the code to accommodate this change:
-		* ~~accordion.js~~
-		* ~~bundle.js~~
-		* ~~item.js~~
-		* trigger.js
-		* content.js
-		* content-inner.js
-* Remove adding data directly to the element in favor of using the new `dataFromElement()` method.

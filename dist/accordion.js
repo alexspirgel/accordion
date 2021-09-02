@@ -699,9 +699,12 @@ module.exports = class Item extends Base {
 const Base = __webpack_require__(0);
 const extend = __webpack_require__(12);
 const Schema = __webpack_require__(5);
-const Bundle = __webpack_require__(9);
 
 module.exports = class Accordion extends Base {
+
+	static get Bundle() {
+		return __webpack_require__(9);
+	}
 
 	static get optionsDefault() {
 		return {
@@ -719,6 +722,13 @@ module.exports = class Accordion extends Base {
 			openAnchoredItems: true,
 			debug: false
 		};
+	}
+
+	static get eventNames() {
+		return {
+			addBundle: 'addBundle',
+			removeBundle: 'removeBundle'
+		}
 	}
 
 	static get optionsSchema() {
@@ -790,7 +800,7 @@ module.exports = class Accordion extends Base {
 		if (!(accordions instanceof Set)) {
 			throw new Error(`'accordions' must be a Set.`);
 		}
-		if (!Array.from(accordions).every(this.isInstanceOfThis)) {
+		if (!Array.from(accordions).every(this.isAccordion)) {
 			throw new Error(`'accordions' must only contain Accordion class instances.`);
 		}
 		this._accordions = accordions;
@@ -798,7 +808,7 @@ module.exports = class Accordion extends Base {
 	}
 
 	static addAccordion(accordion) {
-		if (!this.isInstanceOfThis(accordion)) {
+		if (!this.isAccordion(accordion)) {
 			throw new Error(`'accordion' must be an Accordion class instance.`);
 		}
 		if (this.accordions.has(accordion)) {
@@ -818,7 +828,7 @@ module.exports = class Accordion extends Base {
 			return false;
 		}
 	}
-	
+
 	static initializeHashChangeListener() {
 		if (!this.initializedHashListener) {
 			window.addEventListener('hashchange', this.hashChangeHandler.bind(this));
@@ -839,9 +849,11 @@ module.exports = class Accordion extends Base {
 					if (accordion.options.openAnchoredItems) {
 						for (const bundle of accordion.bundles) {
 							for (const item of bundle.items) {
-								if (item.element.contains(hashElement)) {
-									item.open(true);
-									itemOpened = true;
+								if (item.element) {
+									if (item.element.contains(hashElement)) {
+										item.open(true);
+										itemOpened = true;
+									}
 								}
 							}
 						}
@@ -888,6 +900,10 @@ module.exports = class Accordion extends Base {
 		return false;
 	}
 
+	static isAccordion(instance) {
+		return instance instanceof this;
+	}
+
 	constructor(options) {
 		super();
 		this.options = options;
@@ -925,7 +941,7 @@ module.exports = class Accordion extends Base {
 		if (!(bundles instanceof Set)) {
 			throw new Error(`'bundles' must be a Set.`);
 		}
-		if (!Array.from(bundles).every(Bundle.isInstanceOfThis)) {
+		if (!Array.from(bundles).every(this.constructor.Bundle.isInstanceOfThis)) {
 			throw new Error(`'bundles' must only contain Bundle class instances.`);
 		}
 		this._bundles = bundles;
@@ -934,11 +950,12 @@ module.exports = class Accordion extends Base {
 
 	addBundle(element) {
 		try {
-			const bundle = new Bundle({
+			const bundle = new this.constructor.Bundle({
 				accordion: this,
 				element: element
 			});
 			this.bundles.add(bundle);
+			this.dispatchEvent('addBundle', [bundle]);
 			return true;
 		}
 		catch (error) {
@@ -969,11 +986,62 @@ module.exports = class Accordion extends Base {
 		if (this.bundles.has(bundle)) {
 			this.bundles.delete(bundle);
 			bundle.destroy();
+			this.dispatchEvent('removeBundle', [bundle]);
 			return bundle;
 		}
 		else {
 			this.debug(`Bundle to be removed was not found in the set.`);
 			return false;
+		}
+	}
+
+	get eventListeners() {
+		if (!this._eventListeners) {
+			this._eventListeners = {};
+		}
+		return this._eventListeners;
+	}
+
+	addEventListener(eventName, listener) {
+		if (typeof eventName !== 'string') {
+			throw new Error(`'eventName' must be a string.`);
+		}
+		if (typeof listener !== 'function') {
+			throw new Error(`'listener' must be a function.`);
+		}
+		if (!Array.isArray(this.eventListeners[eventName])) {
+			this.eventListeners[eventName] = [];
+		}
+		if (!this.eventListeners[eventName].includes(listener)) {
+			this.eventListeners[eventName].push(listener);
+		}
+	}
+
+	removeEventListener(eventName, listener) {
+		if (typeof eventName !== 'string') {
+			throw new Error(`'eventName' must be a string.`);
+		}
+		if (typeof listener !== 'function') {
+			throw new Error(`'listener' must be a function.`);
+		}
+		const thisEventListeners = this.eventListeners[eventName];
+		if (Array.isArray(thisEventListeners)) {
+			const listenerIndex = thisEventListeners.indexOf(listener);
+			if (listenerIndex >= 0) {
+				thisEventListeners.splice(listenerIndex, 1);
+			}
+		}
+	}
+
+	dispatchEvent(eventName, parameters) {
+		if (typeof eventName !== 'string') {
+			throw new Error(`'eventName' must be a string.`);
+		}
+		const thisEventListeners = this.eventListeners[eventName];
+		if (Array.isArray(thisEventListeners)) {
+			for (const listener of thisEventListeners) {
+				listener.apply(this, parameters);
+			}
 		}
 	}
 
