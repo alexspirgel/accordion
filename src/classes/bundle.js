@@ -1,11 +1,10 @@
-const Base = require('./base.js');
-const CodedError = require('./coded-error.js');
-const Item = require('./item.js');
+module.exports = class Bundle {
 
-module.exports = class Bundle extends Base {
-
+	static isBundle(instance) {
+		return instance instanceof this;
+	}
+	
 	constructor(parameters) {
-		super();
 		this.accordion = parameters.accordion;
 		this.element = parameters.element;
 		if (this.options.elements.item) {
@@ -19,11 +18,15 @@ module.exports = class Bundle extends Base {
 	}
 
 	set accordion(accordion) {
-		if (!(accordion instanceof require('./accordion.js'))) {
+		if (typeof accordion.constructor?.isAccordion !== 'function' || !accordion.constructor.isAccordion(accordion)) {
 			throw new Error(`'accordion' must be an instance of the Accordion class.`);
 		}
 		this._accordion = accordion;
-		return this._accordion;
+		return accordion;
+	}
+
+	get Accordion() {
+		return this.accordion.Accordion;
 	}
 
 	get options() {
@@ -35,15 +38,14 @@ module.exports = class Bundle extends Base {
 	}
 
 	set element(element) {
-		if (!this.constructor.isElement(element)) {
+		if (!this.Accordion.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
-		if (this.constructor.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		if (this.Accordion.isElementInitialized(element)) {
+			throw new this.Accordion.CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
 		this._element = element;
-		element[this.constructor.elementProperty] = this;
-		element.setAttribute(this.constructor.elementDataAttribute, 'bundle');
+		element.setAttribute(this.Accordion.dataAttributes.elementType, 'bundle');
 		return this._element;
 	}
 
@@ -51,9 +53,9 @@ module.exports = class Bundle extends Base {
 		if (!this.element) {
 			throw new Error(`Cannot filter elements by scope without a defined 'this.element'.`);
 		}
-		let elements = this.constructor.normalizeElements(elementsInput);
-		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
-		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
+		let elements = this.Accordion.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
+		return this.Accordion.filterElementsByContainer(elements, this.element, nestedBundleElements);
 	}
 
 	get items() {
@@ -67,7 +69,7 @@ module.exports = class Bundle extends Base {
 		if (!(items instanceof Set)) {
 			throw new Error(`'items' must be a Set.`);
 		}
-		if (!Array.from(items).every(Item.isInstanceOfThis)) {
+		if (!Array.from(items).every(this.Accordion.Item.isItem)) {
 			throw new Error(`'items' must only contain Item class instances.`);
 		}
 		this._items = items;
@@ -75,17 +77,19 @@ module.exports = class Bundle extends Base {
 	}
 
 	addItem(element) {
+		this.accordion.dispatchEvent('beforeAddItem', [element]);
 		try {
-			const item = new Item({
+			const item = new this.Accordion.Item({
 				bundle: this,
 				element: element
 			});
 			this.items.add(item);
+			this.accordion.dispatchEvent('afterAddItem', [item]);
 			return true;
 		}
 		catch (error) {
 			if (error.code === 'already-initialized') {
-				this.debug(error, element);
+				this.accordion.debug(error, element);
 				return false;
 			}
 			else {
@@ -102,18 +106,20 @@ module.exports = class Bundle extends Base {
 			}
 		}
 		else {
-			this.debug(`No elements were found when trying to add items.`);
+			this.accordion.debug(`No elements were found when trying to add items.`);
 		}
 	}
 
 	removeItem(item) {
 		if (this.items.has(item)) {
+			this.accordion.dispatchEvent('beforeRemoveItem', [item]);
 			this._items.delete(item);
 			item.destroy();
-			return true;
+			this.accordion.dispatchEvent('afterRemoveItem', [item.element]);
+			return item;
 		}
 		else {
-			this.debug(`Item to be removed was not found in the set.`);
+			this.accordion.debug(`Item to be removed was not found in the set.`);
 			return false;
 		}
 	}
@@ -121,15 +127,15 @@ module.exports = class Bundle extends Base {
 	getItemsOrderedByDOMTree() {
 		const items = Array.from(this.items);
 		let itemElements = items.map(item => item.element);
-		if (!itemElements.every(this.constructor.isElement)) {
+		if (!itemElements.every(this.Accordion.isElement)) {
 			this.debug(`When ordering items by DOM tree, some items do not have elements, those without elements will be omitted from the ordered list.`);
-			itemElements = itemElements.filter(this.constructor.isElement);
+			itemElements = itemElements.filter(this.Accordion.isElement);
 		}
 		if (itemElements.length < 1) {
 			throw new Error(`No items have an element to order by DOM tree.`);
 		}
-		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
-		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
+		const orderedItemElements = this.Accordion.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => this.Accordion.dataFromElement(itemElement));
 		return orderedItems;
 	}
 
@@ -147,8 +153,7 @@ module.exports = class Bundle extends Base {
 		for (const item of Array.from(this.items)) {
 			item.destroy();
 		}
-		delete this.element[this.constructor.elementProperty];
-		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		this.element.removeAttribute(this.Accordion.dataAttributes.elementType);
 		this.accordion.removeBundle(this);
 	}
 

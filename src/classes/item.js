@@ -1,13 +1,7 @@
-const Base = require('./base.js');
-const CodedError = require('./coded-error.js');
-const Trigger = require('./trigger.js');
-const Content = require('./content.js');
-const transitionAuto = require('@alexspirgel/transition-auto');
+module.exports = class Item {
 
-module.exports = class Item extends Base {
-
-	static get itemStateDataAttribute() {
-		return 'data-accordion-item-state';
+	static isItem(instance) {
+		return instance instanceof this;
 	}
 
 	static get availableStates() {
@@ -39,14 +33,6 @@ module.exports = class Item extends Base {
 		return this.instanceCount = this.instanceCount + 1;
 	}
 
-	static get accordionItemAddTriggerEventName() {
-		return 'accordionItemAddTrigger';
-	}
-
-	static get accordionItemAddContentEventName() {
-		return 'accordionItemAddContent';
-	}
-
 	constructor(parameters) {
 		super();
 		this.accordionItemAddTriggerEvent = new Event(this.constructor.accordionItemAddTriggerEventName);
@@ -72,14 +58,23 @@ module.exports = class Item extends Base {
 	}
 
 	set bundle(bundle) {
-		if (!(bundle instanceof require('./bundle.js'))) {
+		if (typeof bundle.constructor?.isBundle !== 'function' || !bundle.constructor.isBundle(bundle)) {
 			throw new Error(`'bundle' must be an instance of the Bundle class.`);
 		}
 		this._bundle = bundle;
+		return bundle;
+	}
+
+	get accordion() {
+		return this.bundle.accordion;
+	}
+
+	get Accordion() {
+		return this.bundle.Accordion;
 	}
 
 	get options() {
-		return this.bundle.accordion.options;
+		return this.accordion.options;
 	}
 
 	get element() {
@@ -107,14 +102,14 @@ module.exports = class Item extends Base {
 	}
 
 	get state() {
-		return this.element.getAttribute(this.constructor.itemStateDataAttribute);
+		return this.element.getAttribute(this.Accordion.dataAttributes.itemState);
 	}
 
 	set state(state) {
 		if (!this.constructor.availableStates.includes(state)) {
 			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
 		}
-		this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
+		this.element.setAttribute(this.Accordion.dataAttributes.itemState, state);
 		if (this.trigger) {
 			this.trigger.updateAriaExpanded();
 		}
@@ -282,7 +277,7 @@ module.exports = class Item extends Base {
 			this.content.element.style.transition = 'none';
 		}
 		this.state = 'opening';
-		transitionAuto({
+		this.Accordion.transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
 			property: 'height',
@@ -322,7 +317,7 @@ module.exports = class Item extends Base {
 			this.content.element.style.transition = 'none';
 		}
 		this.state = 'closing';
-		transitionAuto({
+		this.Accordion.transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
 			property: 'height',
@@ -365,8 +360,8 @@ module.exports = class Item extends Base {
 			this.content.destroy();
 		}
 		delete this.element[this.constructor.elementProperty];
-		this.element.removeAttribute(this.constructor.elementDataAttribute);
-		this.element.removeAttribute(this.constructor.itemStateDataAttribute);
+		this.element.removeAttribute(this.Accordion.dataAttributes.elementType);
+		this.element.removeAttribute(this.Accordion.dataAttributes.itemState);
 		this.bundle.removeItem(this);
 	}
 

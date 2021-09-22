@@ -706,6 +706,10 @@ module.exports = class Accordion extends Base {
 		return __webpack_require__(9);
 	}
 
+	static get Item() {
+		return __webpack_require__(3);
+	}
+
 	static get optionsDefault() {
 		return {
 			elements: {
@@ -811,6 +815,10 @@ module.exports = class Accordion extends Base {
 		}
 	}
 
+	static get elementDataAttribute() {
+		return 'data-accordion';
+	}
+
 	static initializeHashChangeListener() {
 		if (!this.initializedHashListener) {
 			window.addEventListener('hashchange', this.hashChangeHandler.bind(this));
@@ -884,6 +892,15 @@ module.exports = class Accordion extends Base {
 
 	static isElement(element) {
 		if (element instanceof Element) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	static isElementInitialized(element) {
+		if (this.dataFromElement(element)) {
 			return true;
 		}
 		else {
@@ -1637,7 +1654,7 @@ module.exports = class Bundle extends Base {
 	}
 
 	set accordion(accordion) {
-		if (!(accordion instanceof __webpack_require__(4))) {
+		if (typeof accordion.constructor.isAccordion !== 'function' || !accordion.constructor.isAccordion(accordion)) {
 			throw new Error(`'accordion' must be an instance of the Accordion class.`);
 		}
 		this._accordion = accordion;
@@ -1653,15 +1670,14 @@ module.exports = class Bundle extends Base {
 	}
 
 	set element(element) {
-		if (!this.constructor.isElement(element)) {
+		if (!this.accordion.constructor.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
-		if (this.constructor.isElementInitialized(element)) {
+		if (this.accordion.constructor.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
 		this._element = element;
-		element[this.constructor.elementProperty] = this;
-		element.setAttribute(this.constructor.elementDataAttribute, 'bundle');
+		element.setAttribute(this.accordion.constructor.elementDataAttribute, 'bundle');
 		return this._element;
 	}
 
