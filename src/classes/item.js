@@ -35,11 +35,9 @@ module.exports = class Item {
 
 	constructor(parameters) {
 		super();
-		this.accordionItemAddTriggerEvent = new Event(this.constructor.accordionItemAddTriggerEventName);
-		this.accordionItemAddContentEvent = new Event(this.constructor.accordionItemAddContentEventName);
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
-		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
+		const defaultOpenItemElements = this.Accordion.normalizeElements(this.options.defaultOpenItems);
 		this.state = 'closed';
 		if (defaultOpenItemElements.includes(this.element)) {
 			this.state = 'opened'
@@ -82,16 +80,15 @@ module.exports = class Item {
 	}
 	
 	set element(element) {
-		if (!this.constructor.isElement(element)) {
+		if (!this.Accordion.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
-		if (this.constructor.isElementInitialized(element)) {
+		if (this.Accordion.isElementInitialized(element)) {
 			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
-		element[this.constructor.elementProperty] = this;
-		element.setAttribute(this.constructor.elementDataAttribute, 'item');
+		element.setAttribute(this.Accordion.dataAttributes.elementType, 'item');
 		this._element = element;
-		return this._element;
+		return element;
 	}
 
 	get count() {
@@ -116,9 +113,9 @@ module.exports = class Item {
 	}
 
 	filterElementsByScope(elementsInput) {
-		let elements = this.constructor.normalizeElements(elementsInput);
-		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
-		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
+		let elements = this.Accordion.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
+		return this.Accordion.filterElementsByContainer(elements, this.element, nestedBundleElements);
 	}
 
 	get trigger() {
@@ -126,24 +123,25 @@ module.exports = class Item {
 	}
 
 	set trigger(trigger) {
-		if (!(trigger instanceof Trigger) && trigger !== undefined && trigger !== null) {
+		if (!(trigger instanceof Accordion.Trigger) && trigger !== undefined && trigger !== null) {
 			throw new Error(`'trigger' must be a Trigger class instance, undefined, or null.`);
 		}
 		this._trigger = trigger;
-		return this._trigger;
+		return trigger;
 	}
 
 	addTrigger(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
 		if (elements.length > 0) {
 			const element = elements[0];
+			this.accordion.dispatchEvent(this.Accordion.eventNames.addTrigger.before, [element]);
 			try {
-				const trigger = new Trigger({
+				const trigger = new this.Accordion.Trigger({
 					item: this,
 					element: element
 				});
 				this.trigger = trigger;
-				this.element.dispatchEvent(this.accordionItemAddTriggerEvent);
+				this.accordion.dispatchEvent(this.Accordion.eventNames.addTrigger.after, [trigger]);
 				return true;
 			}
 			catch (error) {
@@ -163,7 +161,9 @@ module.exports = class Item {
 
 	removeTrigger() {
 		if (this.trigger) {
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeTrigger.before, [this.trigger]);
 			this.trigger.destroy();
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeTrigger.after, [this.trigger.element]);
 		}
 		this.trigger = undefined;
 	}
@@ -173,24 +173,25 @@ module.exports = class Item {
 	}
 
 	set content(content) {
-		if (!(content instanceof Content) && content !== undefined && content !== null) {
+		if (!(content instanceof Accordion.Content) && content !== undefined && content !== null) {
 			throw new Error(`'content' must be a Content class instance, undefined, or null.`);
 		}
 		this._content = content;
-		return this._content;
+		return content;
 	}
 
 	addContent(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
 		if (elements.length > 0) {
 			const element = elements[0];
+			this.accordion.dispatchEvent(this.Accordion.eventNames.addContent.before, [element]);
 			try {
-				const content = new Content({
+				const content = new this.Accordion.Content({
 					item: this,
 					element: element
 				});
 				this.content = content;
-				this.element.dispatchEvent(this.accordionItemAddContentEvent);
+				this.accordion.dispatchEvent(this.Accordion.eventNames.addContent.after, [content]);
 				return true;
 			}
 			catch (error) {
@@ -210,7 +211,9 @@ module.exports = class Item {
 
 	removeContent() {
 		if (this.content) {
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeContent.before, [this.content]);
 			this.content.destroy();
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeContent.after, [this.content.element]);
 		}
 		this.content = undefined;
 	}

@@ -43,6 +43,51 @@ module.exports = class Accordion {
 		};
 	}
 
+	static get eventNames() {
+		return {
+			addBundle: {
+				before: 'accordionBeforeAddBundle',
+				after: 'accordionAfterAddBundle'
+			},
+			removeBundle: {
+				before: 'accordionBeforeRemoveBundle',
+				after: 'accordionAfterRemoveBundle'
+			},
+			addItem: {
+				before: 'accordionBeforeAddItem',
+				after: 'accordionAfterAddItem'
+			},
+			removeItem: {
+				before: 'accordionBeforeRemoveItem',
+				after: 'accordionAfterRemoveItem'
+			},
+			addTrigger: {
+				before: 'accordionBeforeAddTrigger',
+				after: 'accordionAfterAddTrigger'
+			},
+			removeTrigger: {
+				before: 'accordionBeforeRemoveTrigger',
+				after: 'accordionAfterRemoveTrigger'
+			},
+			addContent: {
+				before: 'accordionBeforeAddContent',
+				after: 'accordionAfterAddContent'
+			},
+			removeContent: {
+				before: 'accordionBeforeRemoveContent',
+				after: 'accordionAfterRemoveContent'
+			},
+			addContentInner: {
+				before: 'accordionBeforeAddContentInner',
+				after: 'accordionAfterAddContentInner'
+			},
+			removeContentInner: {
+				before: 'accordionBeforeRemoveContentInner',
+				after: 'accordionAfterRemoveContentInner'
+			},
+		};
+	}
+
 	static get optionsDefault() {
 		return {
 			elements: {
@@ -350,51 +395,6 @@ module.exports = class Accordion {
 		}
 	}
 
-	static get eventNames() {
-		return {
-			addBundle: {
-				before: 'accordionBeforeAddBundle',
-				after: 'accordionAfterAddBundle'
-			},
-			removeBundle: {
-				before: 'accordionBeforeRemoveBundle',
-				after: 'accordionAfterRemoveBundle'
-			},
-			addItem: {
-				before: 'accordionBeforeAddItem',
-				after: 'accordionAfterAddItem'
-			},
-			removeItem: {
-				before: 'accordionBeforeRemoveItem',
-				after: 'accordionAfterRemoveItem'
-			},
-			addTrigger: {
-				before: 'accordionBeforeAddTrigger',
-				after: 'accordionAfterAddTrigger'
-			},
-			removeTrigger: {
-				before: 'accordionBeforeRemoveTrigger',
-				after: 'accordionAfterRemoveTrigger'
-			},
-			addContent: {
-				before: 'accordionBeforeAddContent',
-				after: 'accordionAfterAddContent'
-			},
-			removeContent: {
-				before: 'accordionBeforeRemoveContent',
-				after: 'accordionAfterRemoveContent'
-			},
-			addContentInner: {
-				before: 'accordionBeforeAddContentInner',
-				after: 'accordionAfterAddContentInner'
-			},
-			removeContentInner: {
-				before: 'accordionBeforeRemoveContentInner',
-				after: 'accordionAfterRemoveContentInner'
-			},
-		};
-	}
-
 	constructor(options) {
 		this.options = options;
 		this.Accordion.initializeHashChangeListener();
@@ -439,18 +439,18 @@ module.exports = class Accordion {
 			throw new Error(`'bundles' must only contain Bundle class instances.`);
 		}
 		this._bundles = bundles;
-		return this._bundles;
+		return bundles;
 	}
 
 	addBundle(element) {
-		this.dispatchEvent('beforeAddBundle', [element]);
+		this.dispatchEvent(this.Accordion.eventNames.addBundle.before, [element]);
 		try {
 			const bundle = new this.Accordion.Bundle({
 				accordion: this,
 				element: element
 			});
 			this.bundles.add(bundle);
-			this.dispatchEvent('afterAddBundle', [bundle]);
+			this.dispatchEvent(this.Accordion.eventNames.addBundle.after, [bundle]);
 			return true;
 		}
 		catch (error) {
@@ -479,10 +479,10 @@ module.exports = class Accordion {
 
 	removeBundle(bundle) {
 		if (this.bundles.has(bundle)) {
-			this.dispatchEvent('beforeRemoveBundle', [bundle]);
+			this.dispatchEvent(this.Accordion.eventNames.removeBundle.before, [bundle]);
 			this.bundles.delete(bundle);
 			bundle.destroy();
-			this.dispatchEvent('afterRemoveBundle', [bundle.element]);
+			this.dispatchEvent(this.Accordion.eventNames.removeBundle.after, [bundle.element]);
 			return bundle;
 		}
 		else {

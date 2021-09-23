@@ -46,7 +46,7 @@ module.exports = class Bundle {
 		}
 		this._element = element;
 		element.setAttribute(this.Accordion.dataAttributes.elementType, 'bundle');
-		return this._element;
+		return element;
 	}
 
 	filterElementsByScope(elementsInput) {
@@ -73,18 +73,18 @@ module.exports = class Bundle {
 			throw new Error(`'items' must only contain Item class instances.`);
 		}
 		this._items = items;
-		return this._items;
+		return items;
 	}
 
 	addItem(element) {
-		this.accordion.dispatchEvent('beforeAddItem', [element]);
+		this.accordion.dispatchEvent(this.Accordion.eventNames.addItem.before, [element]);
 		try {
 			const item = new this.Accordion.Item({
 				bundle: this,
 				element: element
 			});
 			this.items.add(item);
-			this.accordion.dispatchEvent('afterAddItem', [item]);
+			this.accordion.dispatchEvent(this.Accordion.eventNames.addItem.after, [item]);
 			return true;
 		}
 		catch (error) {
@@ -112,10 +112,10 @@ module.exports = class Bundle {
 
 	removeItem(item) {
 		if (this.items.has(item)) {
-			this.accordion.dispatchEvent('beforeRemoveItem', [item]);
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeItem.before, [item]);
 			this._items.delete(item);
 			item.destroy();
-			this.accordion.dispatchEvent('afterRemoveItem', [item.element]);
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeItem.after, [item.element]);
 			return item;
 		}
 		else {
