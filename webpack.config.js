@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
-const packageData = require('./package.json');
+const accordionPackageData = require('./package.json');
 
 module.exports = [
 	{
@@ -17,7 +17,7 @@ module.exports = [
 		},
 		plugins: [
 			new webpack.BannerPlugin({
-				banner: `accordion v${packageData.version}\nhttps://github.com/alexspirgel/accordion`
+				banner: `accordion v${accordionPackageData.version}\nhttps://github.com/alexspirgel/accordion`
 			})
 		],
 		optimization: {
@@ -38,7 +38,7 @@ module.exports = [
 		},
 		plugins: [
 			new webpack.BannerPlugin({
-				banner: `accordion v${packageData.version}\nhttps://github.com/alexspirgel/accordion`
+				banner: `accordion v${accordionPackageData.version}\nhttps://github.com/alexspirgel/accordion`
 			})
 		],
 		optimization: {

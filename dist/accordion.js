@@ -2,98 +2,207 @@
  * accordion v2.0.0
  * https://github.com/alexspirgel/accordion
  */
-var Accordion =
-/******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+var Accordion;
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
 
-const DataPathManager = __webpack_require__(3);
+/***/ 297:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const isPlainObject = __webpack_require__(369);
+
+const extend = (...arguments) => {
+	let target = arguments[0];
+	let argumentIndex, merge, mergeIsArray;
+	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
+		merge = arguments[argumentIndex];
+		if (merge === target) {
+			continue;
+		}
+		mergeIsArray = Array.isArray(merge);
+		if (mergeIsArray || isPlainObject(merge)) {
+			if (mergeIsArray && !Array.isArray(target)) {
+				target = [];
+			}
+			else if (!mergeIsArray && !isPlainObject(target)) {
+				target = {};
+			}
+			for (const property in merge) {
+				if (property === "__proto__") {
+					continue;
+				}
+				target[property] = extend(target[property], merge[property]);
+			}
+		}
+		else {
+			if (merge !== undefined) {
+				target = merge;
+			}
+		}
+	}
+	return target;
+};
+
+module.exports = extend;
+
+/***/ }),
+
+/***/ 369:
+/***/ ((module) => {
+
+/**
+ * isPlainObject v1.0.1
+ * https://github.com/alexspirgel/isPlainObject
+ */
+
+const isPlainObject = (object) => {
+	if (Object.prototype.toString.call(object) !== '[object Object]') {
+		return false;
+	}
+  if (object.constructor === undefined) {
+		return true;
+	}
+  if (Object.prototype.toString.call(object.constructor.prototype) !== '[object Object]') {
+		return false;
+	}
+  if (!object.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
+    return false;
+  }
+  return true;
+};
+
+if ( true && module.exports) {
+	module.exports = isPlainObject;
+}
+
+/***/ }),
+
+/***/ 121:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const isPlainObject = __webpack_require__(369);
+
+const extend = (...arguments) => {
+	let target = arguments[0];
+	let argumentIndex, merge, mergeIsArray;
+	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
+		merge = arguments[argumentIndex];
+		if (merge === target) {
+			continue;
+		}
+		mergeIsArray = Array.isArray(merge);
+		if (mergeIsArray || isPlainObject(merge)) {
+			if (mergeIsArray && !Array.isArray(target)) {
+				target = [];
+			}
+			else if (!mergeIsArray && !isPlainObject(target)) {
+				target = {};
+			}
+			for (const property in merge) {
+				if (property === "__proto__") {
+					continue;
+				}
+				target[property] = extend(target[property], merge[property]);
+			}
+		}
+		else {
+			if (merge !== undefined) {
+				target = merge;
+			}
+		}
+	}
+	return target;
+};
+
+module.exports = extend;
+
+/***/ }),
+
+/***/ 575:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const extend = __webpack_require__(121);
+
+class DataPathManager {
+	
+	constructor(data, path = []) {
+		this.data = data;
+		this.path = path;
+	}
+	
+	set path(path) {
+		if (Array.isArray(path)) {
+			this._path = path;
+		}
+		else {
+			throw new Error('Path must be an array');
+		}
+	}
+	
+	get path() {
+		return this._path;
+	}
+	
+	addPathSegment(pathSegment) {
+		this.path.push(pathSegment);
+	}
+	
+	removePathSegment() {
+		return this.path.splice(-1, 1)[0];
+	}
+	
+	get value() {
+		let value = this.data;
+		for (let path of this.path) {
+			try {
+				value = value[path];
+			}
+			catch (error) {
+				return undefined;
+			}
+		}
+		return value;
+	}
+
+	clone(options = {}) {
+
+		const defaultOptions = {
+			data: false,
+			path: true
+		};
+		options = extend({}, defaultOptions, options);
+
+		let data = this.data;
+		if (options.data) {
+			if (typeof data === 'object') {
+				if (Array.isArray(data)) {
+					data = extend([], data);
+				}
+				else {
+					data = extend({}, data);
+				}
+			}
+		}
+
+		let path = this.path;
+		if (options.path) {
+			path = [...this.path];
+		}
+
+		return new this.constructor(data, path);
+
+	}
+
+};
+
+module.exports = DataPathManager;
+
+/***/ }),
+
+/***/ 279:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const DataPathManager = __webpack_require__(575);
 
 class ValidationError extends Error {
 	
@@ -128,421 +237,69 @@ class ValidationError extends Error {
 module.exports = ValidationError;
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports) {
 
-module.exports = class Item {
+/***/ 28:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-	static isItem(instance) {
-		return instance instanceof this;
-	}
+const ValidationError = __webpack_require__(279);
 
-	static get availableStates() {
-		return [
-			'closed',
-			'closing',
-			'opened',
-			'opening'
-		];
-	}
-
-	static get instanceCount() {
-		if (typeof this._instanceCount !== 'number') {
-			this._instanceCount = 0;
-		}
-		return this._instanceCount;
-	}
-
-	static set instanceCount(count) {
-		if (typeof count !== 'number') {
-			throw('`instanceCount` must be a number.');
-		}
-		else {
-			return this._instanceCount = count;
-		}
-	}
-
-	static instanceCountIncrement() {
-		return this.instanceCount = this.instanceCount + 1;
-	}
-
-	constructor(parameters) {
-		this.bundle = parameters.bundle;
-		this.element = parameters.element;
-		const defaultOpenItemElements = this.Accordion.normalizeElements(this.options.defaultOpenItems);
-		this.state = 'closed';
-		if (defaultOpenItemElements.includes(this.element)) {
-			this.state = 'opened';
-		}
-		if (this.options.elements.content) {
-			this.addContent(this.options.elements.content);
-		}
-		if (this.options.elements.trigger) {
-			this.addTrigger(this.options.elements.trigger);
-		}
-		return this;
-	}
-
-	get bundle() {
-		return this._bundle;
-	}
-
-	set bundle(bundle) {
-		if (typeof bundle.constructor.isBundle !== 'function' || !bundle.constructor.isBundle(bundle)) {
-			throw new Error(`'bundle' must be an instance of the Bundle class.`);
-		}
-		this._bundle = bundle;
-		return bundle;
-	}
-
-	get accordion() {
-		return this.bundle.accordion;
-	}
-
-	get Accordion() {
-		return this.bundle.Accordion;
-	}
-
-	get options() {
-		return this.accordion.options;
-	}
-
-	get element() {
-		return this._element;
+class ValidationErrors {
+	
+	constructor() {
+		this.errors = [];
 	}
 	
-	set element(element) {
-		if (!this.Accordion.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
+	addError(error) {
+		if (Array.isArray(error)) {
+			for (const singleError of error) {
+				this.addError(singleError);
+			}
 		}
-		if (this.Accordion.isElementInitialized(element)) {
-			throw new this.Accordion.CodedError('already-initialized', `'element' already exists as part of an accordion.`);
-		}
-		element.setAttribute(this.Accordion.dataAttributes.elementType, 'item');
-		this._element = element;
-		return element;
-	}
-
-	get count() {
-		if (typeof this._count !== 'number') {
-			this._count = this.constructor.instanceCountIncrement();
-		}
-		return this._count;
-	}
-
-	get state() {
-		return this.element.getAttribute(this.Accordion.dataAttributes.itemState);
-	}
-
-	set state(state) {
-		if (!this.constructor.availableStates.includes(state)) {
-			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
-		}
-		this.element.setAttribute(this.Accordion.dataAttributes.itemState, state);
-		if (this.trigger) {
-			this.trigger.updateAriaExpanded();
+		else {
+			if (!(error instanceof ValidationError)) {
+				throw new Error(`Passed 'error' must be an instance of 'Schema.ValidationError'.`);
+			}
+			else {
+				this.errors.push(error);
+			}
 		}
 	}
-
-	filterElementsByScope(elementsInput) {
-		let elements = this.Accordion.normalizeElements(elementsInput);
-		const nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
-		return this.Accordion.filterElementsByContainer(elements, this.element, nestedBundleElements);
-	}
-
-	get trigger() {
-		return this._trigger;
-	}
-
-	set trigger(trigger) {
-		if (!(trigger instanceof Accordion.Trigger) && trigger !== undefined && trigger !== null) {
-			throw new Error(`'trigger' must be a Trigger class instance, undefined, or null.`);
-		}
-		this._trigger = trigger;
-		return trigger;
-	}
-
-	addTrigger(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		if (elements.length > 0) {
-			const element = elements[0];
-			this.accordion.dispatchEvent(this.Accordion.eventNames.addTrigger.before, [element]);
-			try {
-				const trigger = new this.Accordion.Trigger({
-					item: this,
-					element: element
+	
+	generateFormattedMessage() {
+		let message = `Schema errors:\n`;
+		for (const error of this.errors) {
+			let inputPath = 'root';
+			if (error.inputPathManager.path.length > 0) {
+				inputPath = error.inputPathManager.path.map((pathSegment) => {
+					return `['` + pathSegment + `']`;
 				});
-				this.trigger = trigger;
-				this.accordion.dispatchEvent(this.Accordion.eventNames.addTrigger.after, [trigger]);
-				return true;
+				inputPath = inputPath.join('');
 			}
-			catch (error) {
-				if (error.code === 'already-initialized') {
-					this.debug(error, element);
-					return false;
-				}
-				else {
-					throw error;
-				}
-			}
-		}
-		else {
-			this.debug(`No element was found when trying to add trigger.`);
-		}
-	}
-
-	removeTrigger() {
-		if (this.trigger) {
-			this.accordion.dispatchEvent(this.Accordion.eventNames.removeTrigger.before, [this.trigger]);
-			this.trigger.destroy();
-			this.accordion.dispatchEvent(this.Accordion.eventNames.removeTrigger.after, [this.trigger.element]);
-		}
-		this.trigger = undefined;
-	}
-
-	get content() {
-		return this._content;
-	}
-
-	set content(content) {
-		if (!(content instanceof Accordion.Content) && content !== undefined && content !== null) {
-			throw new Error(`'content' must be a Content class instance, undefined, or null.`);
-		}
-		this._content = content;
-		return content;
-	}
-
-	addContent(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		if (elements.length > 0) {
-			const element = elements[0];
-			this.accordion.dispatchEvent(this.Accordion.eventNames.addContent.before, [element]);
-			try {
-				const content = new this.Accordion.Content({
-					item: this,
-					element: element
+			let modelPath = 'root';
+			if (error.modelPathManager.path.length > 0) {
+				modelPath = error.modelPathManager.path.map((pathSegment) => {
+					return `['` + pathSegment + `']`;
 				});
-				this.content = content;
-				this.accordion.dispatchEvent(this.Accordion.eventNames.addContent.after, [content]);
-				return true;
+				modelPath = modelPath.join('');
 			}
-			catch (error) {
-				if (error.code = 'already-initialized') {
-					this.accordion.debug(error, element);
-					return false;
-				}
-				else {
-					throw error;
-				}
-			}
+			message = message + `\nInput Path: ${inputPath}\nModel Path: ${modelPath}\nMessage: ${error.message}\n`;
 		}
-		else {
-			this.debug(`No element was found when trying to add content.`);
-		}
-	}
-
-	removeContent() {
-		if (this.content) {
-			this.accordion.dispatchEvent(this.Accordion.eventNames.removeContent.before, [this.content]);
-			this.content.destroy();
-			this.accordion.dispatchEvent(this.Accordion.eventNames.removeContent.after, [this.content.element]);
-		}
-		this.content = undefined;
-	}
-
-	get nestedBundleElements() {
-		if (this.element) {
-			let nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
-			return Array.from(nestedBundleElements);
-		}
-	}
-
-	get nextLevelNestedBundleElements() {
-		const nestedBundleElements = this.nestedBundleElements;
-		if (nestedBundleElements) {
-			const nextLevelNestedBundleElements = this.Accordion.filterElementsByContainer(nestedBundleElements, null, nestedBundleElements);
-			return nextLevelNestedBundleElements;
-		}
-	}
-
-	getNextPreviousItem(nextPrevious) {
-		if (typeof nextPrevious !== 'string') {
-			throw new Error(`'nextPrevious' must be a string.`);
-		}
-		nextPrevious = nextPrevious.toLowerCase();
-		if (nextPrevious !== 'next' && nextPrevious !== 'previous') {
-			throw new Error(`'nextPrevious' must be 'next' or 'previous'.`);
-		}
-		let returnItem;
-		const items = Array.from(this.bundle.items);
-		const itemMappedElements = items.map(item => item.element);
-		const itemElements = itemMappedElements.filter(this.Accordion.isElement);
-		const orderedItemElements = this.Accordion.orderElementsByDOMTree(itemElements, 'desc');
-		const orderedItems = orderedItemElements.map(itemElement => this.Accordion.dataFromElement(itemElement));
-		const indexModifier = (nextPrevious === 'next') ? 1 : -1;
-		const indexWrapValue = (nextPrevious === 'next') ? 0 : (orderedItems.length - 1);
-		const thisIndex = orderedItems.indexOf(this);
-		if (thisIndex >= 0) {
-			let returnItemIndex = thisIndex + indexModifier;
-			if (returnItemIndex < 0 || returnItemIndex >= orderedItems.length) {
-				returnItemIndex = indexWrapValue
-			}
-			if (orderedItems[returnItemIndex]) {
-				returnItem = orderedItems[returnItemIndex]
-			}
-		}
-		return returnItem;
-	}
-
-	get nextItem() {
-		return this.getNextPreviousItem('next');
-	}
-
-	get previousItem() {
-		return this.getNextPreviousItem('previous');
-	}
-
-	open(skipTransition = false) {
-
-		if (!this.content) {
-			this.debug(`Item cannot open, missing content.`);
-			return false;
-		}
-		if (!this.content.element) {
-			this.debug(`Item cannot open, missing content element.`);
-			return false;
-		}
-		if (!this.content.contentInner) {
-			this.debug(`Item cannot open, missing content inner.`);
-			return false;
-		}
-		if (!this.content.contentInner.element) {
-			this.debug(`Item cannot open, missing content inner element.`);
-			return false;
-		}
-
-		this.accordion.dispatchEvent(this.Accordion.eventNames.openItem.before, [this]);
-
-		if (!this.options.multipleOpenItems) {
-			if (this.bundle) {
-				for (const bundleItem of this.bundle.items) {
-					if (bundleItem !== this) {
-						bundleItem.close(skipTransition);
-					}
-				}
-			}
-		}
-
-		let existingStyleTransition = '';
-		if (skipTransition) {
-			existingStyleTransition = this.content.element.style.transition;
-			this.content.element.style.transition = 'none';
-		}
-		this.state = 'opening';
-		this.Accordion.transitionAuto({
-			element: this.content.element,
-			innerElement: this.content.contentInner.element,
-			property: 'height',
-			value: 'auto',
-			debug: this.options.debug,
-			onComplete: () => {
-				this.state = 'opened';
-				if (skipTransition) {
-					this.content.element.offsetWidth; // force update
-					this.content.element.style.transition = existingStyleTransition;
-				}
-				this.accordion.dispatchEvent(this.Accordion.eventNames.openItem.after, [this]);
-			}
-		});
-
-	}
-	
-	close(skipTransition = false) {
-
-		if (!this.content) {
-			this.debug(`Item cannot close, missing content.`);
-			return false;
-		}
-		if (!this.content.element) {
-			this.debug(`Item cannot close, missing content element.`);
-			return false;
-		}
-		if (!this.content.contentInner) {
-			this.debug(`Item cannot close, missing content inner.`);
-			return false;
-		}
-		if (!this.content.contentInner.element) {
-			this.debug(`Item cannot close, missing content inner element.`);
-			return false;
-		}
-
-		this.accordion.dispatchEvent(this.Accordion.eventNames.closeItem.before, [this]);
-
-		let existingStyleTransition = '';
-		if (skipTransition) {
-			existingStyleTransition = this.content.element.style.transition;
-			this.content.element.style.transition = 'none';
-		}
-		this.state = 'closing';
-		this.Accordion.transitionAuto({
-			element: this.content.element,
-			innerElement: this.content.contentInner.element,
-			property: 'height',
-			value: 0,
-			debug: this.options.debug,
-			onComplete: () => {
-				this.state = 'closed';
-				if (skipTransition) {
-					this.content.element.offsetWidth; // force update
-					this.content.element.style.transition = existingStyleTransition;
-				}
-				this.accordion.dispatchEvent(this.Accordion.eventNames.closeItem.after, [this]);
-				if (this.options.closeNestedItems) {
-					if (this.nextLevelNestedBundleElements) {
-						for (const bundleElement of this.nextLevelNestedBundleElements) {
-							const bundle = this.Accordion.dataFromElement(bundleElement);
-							for (const item of bundle.items) {
-								item.close(true);
-							}
-						}
-					}
-				}
-			}
-		});
-	
-	}
-
-	toggle(skipTransition = false) {
-		if (this.state === 'closed' || this.state === 'closing') {
-			this.open(skipTransition);
-		}
-		else {
-			this.close(skipTransition);
-		}
-	}
-
-	destroy() {
-		if (this.trigger) {
-			this.trigger.destroy();
-		}
-		if (this.content) {
-			this.content.destroy();
-		}
-		this.element.removeAttribute(this.Accordion.dataAttributes.elementType);
-		this.element.removeAttribute(this.Accordion.dataAttributes.itemState);
-		this.bundle.removeItem(this);
+		return message;
 	}
 
 };
 
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
+module.exports = ValidationErrors;
 
-const DataPathManager = __webpack_require__(3);
-const ValidationError = __webpack_require__(0);
-const ValidationErrors = __webpack_require__(10);
-const modelModel = __webpack_require__(11);
+/***/ }),
+
+/***/ 139:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const DataPathManager = __webpack_require__(575);
+const ValidationError = __webpack_require__(279);
+const ValidationErrors = __webpack_require__(28);
+const modelModel = __webpack_require__(651);
 
 class Schema {
 	
@@ -951,90 +708,152 @@ Schema.ValidationError = ValidationError;
 module.exports = Schema;
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(4);
+/***/ 651:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-class DataPathManager {
-	
-	constructor(data, path = []) {
-		this.data = data;
-		this.path = path;
+const extend = __webpack_require__(121);
+const ValidationError = __webpack_require__(279);
+
+const typeRestriction = (types) => {
+	if (!Array.isArray(types)) {
+		types = [types];
 	}
-	
-	set path(path) {
-		if (Array.isArray(path)) {
-			this._path = path;
+	return (inputPathManager) => {
+		const validationProperty = inputPathManager.removePathSegment();
+		if (validationProperty === undefined || types.includes(inputPathManager.value.type)) {
+			return true;
 		}
 		else {
-			throw new Error('Path must be an array');
-		}
-	}
-	
-	get path() {
-		return this._path;
-	}
-	
-	addPathSegment(pathSegment) {
-		this.path.push(pathSegment);
-	}
-	
-	removePathSegment() {
-		return this.path.splice(-1, 1)[0];
-	}
-	
-	get value() {
-		let value = this.data;
-		for (let path of this.path) {
-			try {
-				value = value[path];
-			}
-			catch (error) {
-				return undefined;
-			}
-		}
-		return value;
-	}
-
-	clone(options = {}) {
-
-		const defaultOptions = {
-			data: false,
-			path: true
-		};
-		options = extend({}, defaultOptions, options);
-
-		let data = this.data;
-		if (options.data) {
-			if (typeof data === 'object') {
-				if (Array.isArray(data)) {
-					data = extend([], data);
+			let typesString = ``;
+			for (let i = 0; i < types.length; i++) {
+				const type = types[i];
+				if (i === 0) {
+					typesString += `'${type}'`;
+				}
+				else if (i < (types.length - 1)) {
+					typesString += `, '${type}'`;
 				}
 				else {
-					data = extend({}, data);
+					if (types.length > 2) {
+						typesString += `,`;
+					}
+					typesString += ` or '${type}'`;
 				}
 			}
+			throw new ValidationError(`The validation property '${validationProperty}' can only belong to a model with a type of ${typesString}.`);
 		}
-
-		let path = this.path;
-		if (options.path) {
-			path = [...this.path];
-		}
-
-		return new this.constructor(data, path);
-
-	}
-
+	};
 };
 
-module.exports = DataPathManager;
+const modelPropertySchema = {
+	required: {
+		type: 'boolean'
+	},
+	type: {
+		type: 'string',
+		exactValue: [
+			'boolean',
+			'number',
+			'string',
+			'array',
+			'object',
+			'function'
+		]
+	},
+	exactValue: {
+		custom: typeRestriction(['boolean', 'number', 'string'])
+	},
+	greaterThan: {
+		type: 'number',
+		custom: typeRestriction('number')
+	},
+	greaterThanOrEqualTo: {
+		type: 'number',
+		custom: typeRestriction('number')
+	},
+	lessThan: {
+		type: 'number',
+		custom: typeRestriction('number')
+	},
+	lessThanOrEqualTo: {
+		type: 'number',
+		custom: typeRestriction('number')
+	},
+	divisibleBy: {
+		type: 'number',
+		custom: typeRestriction('number')
+	},
+	notDivisibleBy: {
+		type: 'number',
+		custom: typeRestriction('number')
+	},
+	minimumCharacters: {
+		type: 'string',
+		custom: typeRestriction('string')
+	},
+	maximumCharacters: {
+		type: 'string',
+		custom: typeRestriction('string')
+	},
+	minimumLength: {
+		type: 'number',
+		custom: typeRestriction('array')
+	},
+	maximumLength: {
+		type: 'number',
+		custom: typeRestriction('array')
+	},
+	instanceOf: {
+		custom: typeRestriction('object')
+	},
+	allowUnvalidatedProperties: {
+		type: 'boolean',
+		custom: typeRestriction('object')
+	},
+	custom: {
+		type: 'function'
+	},
+	propertySchema: {
+		type: 'object',
+		custom: typeRestriction(['array', 'object'])
+	}
+};
+
+const modelObject = {
+	type: 'object',
+	propertySchema: modelPropertySchema
+};
+
+const modelArray = {
+	type: 'array',
+	allPropertySchema: {
+		type: 'object',
+		propertySchema: modelPropertySchema
+	}
+};
+
+const model = [
+	modelObject,
+	modelArray
+];
+
+const modelTypeRestricted = [
+	extend({}, modelObject, {custom: typeRestriction(['array', 'object'])}),
+	extend({}, modelArray, {custom: typeRestriction(['array', 'object'])})
+];
+
+modelPropertySchema.allPropertySchema = modelTypeRestricted;
+modelPropertySchema.propertySchema.allPropertySchema = model;
+
+module.exports = model;
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
 
-const isPlainObject = __webpack_require__(5);
+/***/ 670:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const isPlainObject = __webpack_require__(369);
 
 const extend = (...arguments) => {
 	let target = arguments[0];
@@ -1071,208 +890,268 @@ const extend = (...arguments) => {
 module.exports = extend;
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
 
-/**
- * isPlainObject v1.0.1
- * https://github.com/alexspirgel/isPlainObject
- */
+/***/ 129:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-const isPlainObject = (object) => {
-	if (Object.prototype.toString.call(object) !== '[object Object]') {
-		return false;
-	}
-  if (object.constructor === undefined) {
-		return true;
-	}
-  if (Object.prototype.toString.call(object.constructor.prototype) !== '[object Object]') {
-		return false;
-	}
-  if (!object.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
-    return false;
-  }
-  return true;
-};
+const optionsSchema = __webpack_require__(684);
+const extend = __webpack_require__(670);
 
-if ( true && module.exports) {
-	module.exports = isPlainObject;
-}
+const transitionAuto = (function () {
 
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = class Content {
-
-	constructor(parameters) {
-		this.boundUpdateAriaLabelledBy = this.updateAriaLabelledBy.bind(this);
-		this.item = parameters.item;
-		this.element = parameters.element;
-		if (this.options.elements.contentInner) {
-			this.addContentInner(this.options.elements.contentInner);
-		}
-		return this;
+	function prefixedError(message) {
+		throw new Error('transitionAuto error: ' + message);
 	}
 
-	get item() {
-		return this._item;
-	}
-
-	set item(item) {
-		if (!(item instanceof __webpack_require__(1))) {
-			throw new Error(`'item' must be an instance of the Item class.`);
-		}
-		this._item = item;
-	}
-
-	get options() {
-		return this.item.bundle.accordion.options;
-	}
-
-	get element() {
-		return this._element;
-	}
-
-	set element(element) {
-		if (!this.constructor.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
-		}
-		if (this.constructor.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
-		}
-		
-		this._element = element;
-	
-		element[this.constructor.elementProperty] = this;
-		element.setAttribute(this.constructor.elementDataAttribute, 'content');
-		
-		this.usingExistingId = true;
-		if (!element.getAttribute('id')) {
-			element.setAttribute('id', 'accordion-content-' + this.item.count);
-			this.usingExistingId = false;
-		}
-
-		this.updateAriaLabelledBy();
-		this.item.element.addEventListener(this.item.constructor.accordionItemAddTriggerEventName, this.boundUpdateAriaLabelledBy);
-		
-		this.existingStyleHeight = 	element.style.height;
-		if (this.item.state === 'closed') {
-			element.style.height = 0;
-		}
-		
-		return this._element;
-	}
-
-	updateAriaLabelledBy() {
-		if (this.element && this.item.trigger) {
-			this.element.setAttribute('aria-labelledby', this.item.trigger.element.getAttribute('id'));
+	function debug(options, ...messages) {
+		if (options.debug) {
+			console.log('transitionAuto debug: ', ...messages);
 		}
 	}
 
-	filterElementsByScope(elementsInput) {
-		let elements = this.constructor.normalizeElements(elementsInput);
-		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
-		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
-	}
+	function normalizeOptions(options) {
+		options = extend({}, options);
 
-	get contentInner() {
-		return this._contentInner;
-	}
-
-	set contentInner(contentInner) {
-		if (!(contentInner instanceof ContentInner)) {
-			throw new Error(`'contentInner' must be a ContentInner class instance.`);
-		}
-		this._contentInner = contentInner;
-		return this._contentInner;
-	}
-
-	addContentInner(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		const element = elements[0];
-		try {
-			const contentInner = new ContentInner({
-				content: this,
-				element: element
-			});
-			this.contentInner = contentInner;
-			return true;
-		}
-		catch (error) {
-			if (error.code = 'already-initialized') {
-				this.debug(error, element);
-				return false;
+		if (options.innerElement === undefined || options.innerElement === null) {
+			if (options.element.children.length > 0) {
+				options.innerElement = options.element.children[0];
 			}
 			else {
-				throw error;
+				prefixedError(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
 			}
 		}
 
+		if (typeof options.value === 'number') {
+			options.value += 'px';
+		}
+
+		if (options.suppressDuplicates === undefined) {
+			options.suppressDuplicates = true;
+		}
+
+		if (options.debug === undefined) {
+			options.debug = false;
+		}
+
+		return options;
 	}
 
-	destroy() {
-		if (this.contentInner) {
-			this.contentInner.destroy();
+	function setValue(options) {
+		options.element.transitionAutoValue = options.value;
+		const computedStyle = getComputedStyle(options.element);
+		options.element.style[options.property] = computedStyle[options.property];
+		options.element.offsetHeight; // This line does nothing but force the element to repaint so transitions work properly.
+		
+		let hasTransition = false;
+		const transitionPropertyValues = computedStyle.transitionProperty.split(', ');
+		const transitionDurationValues = computedStyle.transitionDuration.split(', ');
+		for (let i = 0; i < transitionPropertyValues.length; i++) {
+			if (transitionPropertyValues[i] === 'all' || transitionPropertyValues[i] === options.property) {
+				const transitionDuration = transitionDurationValues[i] ? transitionDurationValues[i] : transitionDurationValues[0];
+				if (transitionDuration !== '0s') {
+					hasTransition = true;
+					break;
+				}
+			}
 		}
-		delete this.element[this.constructor.elementProperty];
-		this.element.removeAttribute(this.constructor.elementDataAttribute);
-		if (!this.usingExistingId) {
-			this.element.removeAttribute('id');
+
+		if (hasTransition) {
+			debug(options, 'transition detected.');
+			if (options.value === 'auto') {
+				const elementDimensions = options.element.getBoundingClientRect();
+				const innerElementDimensions = options.innerElement.getBoundingClientRect();
+				if (elementDimensions[options.property] !== innerElementDimensions[options.property]) {
+					options.element.transitionAutoBoundHandler = transitionendHandler.bind(options);
+					options.element.addEventListener('transitionend', options.element.transitionAutoBoundHandler);
+					options.element.style[options.property] = innerElementDimensions[options.property] + 'px';
+					return;
+				}
+			}
+			else {
+				if (options.element.style[options.property] !== options.value) {
+					options.element.transitionAutoBoundHandler = transitionendHandler.bind(options);
+					options.element.addEventListener('transitionend', options.element.transitionAutoBoundHandler);
+					options.element.style[options.property] = options.value;
+					return;
+				}
+			}
 		}
-		this.element.removeAttribute('aria-labelledby');
-		this.item.element.removeEventListener(this.item.constructor.accordionItemAddTriggerEventName, this.boundUpdateAriaLabelledBy);
-		this.element.style.height = this.existingStyleHeight;
+
+		debug(options, 'immediate fallback.');
+		options.element.style[options.property] = options.value;
+		onComplete(options);
+	}
+	
+	function transitionendHandler(event) {
+		if (event.propertyName === this.property) {
+			if (this.element.transitionAutoBoundHandler) {
+				this.element.removeEventListener('transitionend', this.element.transitionAutoBoundHandler);
+				delete this.element.transitionAutoBoundHandler;
+			}
+			if (this.value === 'auto') {
+				this.element.style[this.property] = this.value;
+			}
+		}
+		onComplete(this);
 	}
 
+	function onComplete(options) {
+		if (options.element.transitionAutoValue) {
+			delete options.element.transitionAutoValue;
+		}
+		if (options.onComplete) {
+			options.onComplete(options);
+		}
+	}
+
+	return function (options) {
+		try {
+			optionsSchema.validate(options);
+		}
+		catch (error) {
+			prefixedError(error);
+		}
+		options = normalizeOptions(options);
+		debug(options, 'options:', options);
+		if (options.suppressDuplicates && options.element.transitionAutoValue) {
+			if (options.value === options.element.transitionAutoValue) {
+				debug(options, 'duplicate suppressed.');
+				return;
+			}
+		}
+		if (options.element.transitionAutoBoundHandler) {
+			options.element.removeEventListener('transitionend', options.element.transitionAutoBoundHandler);
+			delete options.element.transitionAutoBoundHandler;
+		}
+		setValue(options);
+	};
+
+})();
+
+module.exports = transitionAuto;
+
+/***/ }),
+
+/***/ 684:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const Schema = __webpack_require__(139);
+
+const optionsModel = {
+	required: true,
+	type: 'object',
+	allowUnvalidatedProperties: false,
+	propertySchema: {
+		element: {
+			required: true,
+			type: 'object',
+			instanceOf: Element
+		},
+		innerElement: {
+			type: 'object',
+			instanceOf: Element,
+			custom: (inputPathManager) => {
+				const innerElement = inputPathManager.value;
+				inputPathManager.removePathSegment();
+				const element = inputPathManager.value.element;
+				if (element.contains(innerElement) && element !== innerElement) {
+					return true;
+				}
+				else {
+					throw new Schema.ValidationError(`'options.innerElement' must be contained within 'options.element'.`);
+				}
+			}
+		},
+		property: {
+			required: true,
+			type: 'string',
+			exactValue: [
+				'height',
+				'width'
+			]
+		},
+		value: [
+			{
+				required: true,
+				type: 'number',
+				greaterThanOrEqualTo: 0
+			},
+			{
+				required: true,
+				type: 'string',
+				custom: (inputPathManager) => {
+					const value = inputPathManager.value;
+					if (value.endsWith('px')) {
+						return true;
+					}
+					else {
+						throw new Schema.ValidationError(`'options.value' string must end with 'px'.`);
+					}
+				}
+			},
+			{
+				required: true,
+				type: 'string',
+				exactValue: 'auto'
+			}
+		],
+		onComplete: {
+			type: 'function'
+		},
+		suppressDuplicates: {
+			type: 'boolean'
+		},
+		debug: {
+			type: 'boolean'
+		}
+	}
 };
 
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
+const optionsSchema = new Schema(optionsModel);
 
-module.exports = __webpack_require__(8);
+module.exports = optionsSchema;
 
 /***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
+
+/***/ 558:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 module.exports = class Accordion {
 	
 	static get extend() {
-		return __webpack_require__(9);
+		return __webpack_require__(297);
 	}
 
 	static get Schema() {
-		return __webpack_require__(2);
+		return __webpack_require__(139);
 	}
 
 	static get transitionAuto() {
-		return __webpack_require__(12);
+		return __webpack_require__(129);
 	}
 
 	static get CodedError() {
-		return __webpack_require__(15);
+		return __webpack_require__(771);
 	}
 	
 	static get Bundle() {
-		return __webpack_require__(16);
+		return __webpack_require__(112);
 	}
 
 	static get Item() {
-		return __webpack_require__(1);
+		return __webpack_require__(835);
 	}
 
 	static get Trigger() {
-		return __webpack_require__(17);
+		return __webpack_require__(45);
 	}
 
 	static get Content() {
-		return __webpack_require__(6);
+		return __webpack_require__(0);
 	}
 
 	static get ContentInner() {
-		return __webpack_require__(18);
+		return __webpack_require__(533);
 	}
 
 	static get dataAttributes() {
@@ -1813,546 +1692,9 @@ module.exports = class Accordion {
 };
 
 /***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
 
-/**
- * Extend v3.0.0
- * https://github.com/alexspirgel/extend
- */
-
-const extend = (...arguments) => {
-
-	let target = arguments[0];
-	let argumentIndex, merge, mergeIsArray;
-	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
-		merge = arguments[argumentIndex];
-		if (merge === target) {
-			continue;
-		}
-		mergeIsArray = Array.isArray(merge);
-		if (mergeIsArray || extend.isPlainObject(merge)) {
-			if (mergeIsArray && !Array.isArray(target)) {
-				target = [];
-			}
-			else if (!mergeIsArray && !extend.isPlainObject(target)) {
-				target = {};
-			}
-			for (const property in merge) {
-				if (property === "__proto__") {
-					continue;
-				}
-				target[property] = extend(target[property], merge[property]);
-			}
-		}
-		else {
-			if (merge !== undefined) {
-				target = merge;
-			}
-		}
-	}
-
-	return target;
-
-};
-
-extend.isPlainObject = (object) => {
-	const baseObject = {};
-	const toString = baseObject.toString;
-	const hasOwnProperty = baseObject.hasOwnProperty;
-	const functionToString = hasOwnProperty.toString;
-	const objectFunctionString = functionToString.call(Object);
-	if (toString.call(object) !== '[object Object]') {
-		return false;
-	}
-	const prototype = Object.getPrototypeOf(object);
-	if (prototype) {
-		if (hasOwnProperty.call(prototype, 'constructor')) {
-			if (typeof prototype.constructor === 'function') {
-				if (functionToString.call(prototype.constructor) !== objectFunctionString) {
-					return false;
-				}
-			}
-		}
-	}
-	return true;
-};
-
-if ( true && module.exports) {
-	module.exports = extend;
-}
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const ValidationError = __webpack_require__(0);
-
-class ValidationErrors {
-	
-	constructor() {
-		this.errors = [];
-	}
-	
-	addError(error) {
-		if (Array.isArray(error)) {
-			for (const singleError of error) {
-				this.addError(singleError);
-			}
-		}
-		else {
-			if (!(error instanceof ValidationError)) {
-				throw new Error(`Passed 'error' must be an instance of 'Schema.ValidationError'.`);
-			}
-			else {
-				this.errors.push(error);
-			}
-		}
-	}
-	
-	generateFormattedMessage() {
-		let message = `Schema errors:\n`;
-		for (const error of this.errors) {
-			let inputPath = 'root';
-			if (error.inputPathManager.path.length > 0) {
-				inputPath = error.inputPathManager.path.map((pathSegment) => {
-					return `['` + pathSegment + `']`;
-				});
-				inputPath = inputPath.join('');
-			}
-			let modelPath = 'root';
-			if (error.modelPathManager.path.length > 0) {
-				modelPath = error.modelPathManager.path.map((pathSegment) => {
-					return `['` + pathSegment + `']`;
-				});
-				modelPath = modelPath.join('');
-			}
-			message = message + `\nInput Path: ${inputPath}\nModel Path: ${modelPath}\nMessage: ${error.message}\n`;
-		}
-		return message;
-	}
-
-};
-
-module.exports = ValidationErrors;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const extend = __webpack_require__(4);
-const ValidationError = __webpack_require__(0);
-
-const typeRestriction = (types) => {
-	if (!Array.isArray(types)) {
-		types = [types];
-	}
-	return (inputPathManager) => {
-		const validationProperty = inputPathManager.removePathSegment();
-		if (validationProperty === undefined || types.includes(inputPathManager.value.type)) {
-			return true;
-		}
-		else {
-			let typesString = ``;
-			for (let i = 0; i < types.length; i++) {
-				const type = types[i];
-				if (i === 0) {
-					typesString += `'${type}'`;
-				}
-				else if (i < (types.length - 1)) {
-					typesString += `, '${type}'`;
-				}
-				else {
-					if (types.length > 2) {
-						typesString += `,`;
-					}
-					typesString += ` or '${type}'`;
-				}
-			}
-			throw new ValidationError(`The validation property '${validationProperty}' can only belong to a model with a type of ${typesString}.`);
-		}
-	};
-};
-
-const modelPropertySchema = {
-	required: {
-		type: 'boolean'
-	},
-	type: {
-		type: 'string',
-		exactValue: [
-			'boolean',
-			'number',
-			'string',
-			'array',
-			'object',
-			'function'
-		]
-	},
-	exactValue: {
-		custom: typeRestriction(['boolean', 'number', 'string'])
-	},
-	greaterThan: {
-		type: 'number',
-		custom: typeRestriction('number')
-	},
-	greaterThanOrEqualTo: {
-		type: 'number',
-		custom: typeRestriction('number')
-	},
-	lessThan: {
-		type: 'number',
-		custom: typeRestriction('number')
-	},
-	lessThanOrEqualTo: {
-		type: 'number',
-		custom: typeRestriction('number')
-	},
-	divisibleBy: {
-		type: 'number',
-		custom: typeRestriction('number')
-	},
-	notDivisibleBy: {
-		type: 'number',
-		custom: typeRestriction('number')
-	},
-	minimumCharacters: {
-		type: 'string',
-		custom: typeRestriction('string')
-	},
-	maximumCharacters: {
-		type: 'string',
-		custom: typeRestriction('string')
-	},
-	minimumLength: {
-		type: 'number',
-		custom: typeRestriction('array')
-	},
-	maximumLength: {
-		type: 'number',
-		custom: typeRestriction('array')
-	},
-	instanceOf: {
-		custom: typeRestriction('object')
-	},
-	allowUnvalidatedProperties: {
-		type: 'boolean',
-		custom: typeRestriction('object')
-	},
-	custom: {
-		type: 'function'
-	},
-	propertySchema: {
-		type: 'object',
-		custom: typeRestriction(['array', 'object'])
-	}
-};
-
-const modelObject = {
-	type: 'object',
-	propertySchema: modelPropertySchema
-};
-
-const modelArray = {
-	type: 'array',
-	allPropertySchema: {
-		type: 'object',
-		propertySchema: modelPropertySchema
-	}
-};
-
-const model = [
-	modelObject,
-	modelArray
-];
-
-const modelTypeRestricted = [
-	extend({}, modelObject, {custom: typeRestriction(['array', 'object'])}),
-	extend({}, modelArray, {custom: typeRestriction(['array', 'object'])})
-];
-
-modelPropertySchema.allPropertySchema = modelTypeRestricted;
-modelPropertySchema.propertySchema.allPropertySchema = model;
-
-module.exports = model;
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const optionsSchema = __webpack_require__(13);
-const extend = __webpack_require__(14);
-
-const transitionAuto = (function () {
-
-	function prefixedError(message) {
-		throw new Error('transitionAuto error: ' + message);
-	}
-
-	function debug(options, ...messages) {
-		if (options.debug) {
-			console.log('transitionAuto debug: ', ...messages);
-		}
-	}
-
-	function normalizeOptions(options) {
-		options = extend({}, options);
-
-		if (options.innerElement === undefined || options.innerElement === null) {
-			if (options.element.children.length > 0) {
-				options.innerElement = options.element.children[0];
-			}
-			else {
-				prefixedError(`'options.element' must have at least one child element to use as 'options.innerElement'.`);
-			}
-		}
-
-		if (typeof options.value === 'number') {
-			options.value += 'px';
-		}
-
-		if (options.suppressDuplicates === undefined) {
-			options.suppressDuplicates = true;
-		}
-
-		if (options.debug === undefined) {
-			options.debug = false;
-		}
-
-		return options;
-	}
-
-	function setValue(options) {
-		options.element.transitionAutoValue = options.value;
-		const computedStyle = getComputedStyle(options.element);
-		options.element.style[options.property] = computedStyle[options.property];
-		options.element.offsetHeight; // This line does nothing but force the element to repaint so transitions work properly.
-		
-		let hasTransition = false;
-		const transitionPropertyValues = computedStyle.transitionProperty.split(', ');
-		const transitionDurationValues = computedStyle.transitionDuration.split(', ');
-		for (let i = 0; i < transitionPropertyValues.length; i++) {
-			if (transitionPropertyValues[i] === 'all' || transitionPropertyValues[i] === options.property) {
-				const transitionDuration = transitionDurationValues[i] ? transitionDurationValues[i] : transitionDurationValues[0];
-				if (transitionDuration !== '0s') {
-					hasTransition = true;
-					break;
-				}
-			}
-		}
-
-		if (hasTransition) {
-			debug(options, 'transition detected.');
-			if (options.value === 'auto') {
-				const elementDimensions = options.element.getBoundingClientRect();
-				const innerElementDimensions = options.innerElement.getBoundingClientRect();
-				if (elementDimensions[options.property] !== innerElementDimensions[options.property]) {
-					options.element.transitionAutoBoundHandler = transitionendHandler.bind(options);
-					options.element.addEventListener('transitionend', options.element.transitionAutoBoundHandler);
-					options.element.style[options.property] = innerElementDimensions[options.property] + 'px';
-					return;
-				}
-			}
-			else {
-				if (options.element.style[options.property] !== options.value) {
-					options.element.transitionAutoBoundHandler = transitionendHandler.bind(options);
-					options.element.addEventListener('transitionend', options.element.transitionAutoBoundHandler);
-					options.element.style[options.property] = options.value;
-					return;
-				}
-			}
-		}
-
-		debug(options, 'immediate fallback.');
-		options.element.style[options.property] = options.value;
-		onComplete(options);
-	}
-	
-	function transitionendHandler(event) {
-		if (event.propertyName === this.property) {
-			if (this.element.transitionAutoBoundHandler) {
-				this.element.removeEventListener('transitionend', this.element.transitionAutoBoundHandler);
-				delete this.element.transitionAutoBoundHandler;
-			}
-			if (this.value === 'auto') {
-				this.element.style[this.property] = this.value;
-			}
-		}
-		onComplete(this);
-	}
-
-	function onComplete(options) {
-		if (options.element.transitionAutoValue) {
-			delete options.element.transitionAutoValue;
-		}
-		if (options.onComplete) {
-			options.onComplete(options);
-		}
-	}
-
-	return function (options) {
-		try {
-			optionsSchema.validate(options);
-		}
-		catch (error) {
-			prefixedError(error);
-		}
-		options = normalizeOptions(options);
-		debug(options, 'options:', options);
-		if (options.suppressDuplicates && options.element.transitionAutoValue) {
-			if (options.value === options.element.transitionAutoValue) {
-				debug(options, 'duplicate suppressed.');
-				return;
-			}
-		}
-		if (options.element.transitionAutoBoundHandler) {
-			options.element.removeEventListener('transitionend', options.element.transitionAutoBoundHandler);
-			delete options.element.transitionAutoBoundHandler;
-		}
-		setValue(options);
-	};
-
-})();
-
-module.exports = transitionAuto;
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Schema = __webpack_require__(2);
-
-const optionsModel = {
-	required: true,
-	type: 'object',
-	allowUnvalidatedProperties: false,
-	propertySchema: {
-		element: {
-			required: true,
-			type: 'object',
-			instanceOf: Element
-		},
-		innerElement: {
-			type: 'object',
-			instanceOf: Element,
-			custom: (inputPathManager) => {
-				const innerElement = inputPathManager.value;
-				inputPathManager.removePathSegment();
-				const element = inputPathManager.value.element;
-				if (element.contains(innerElement) && element !== innerElement) {
-					return true;
-				}
-				else {
-					throw new Schema.ValidationError(`'options.innerElement' must be contained within 'options.element'.`);
-				}
-			}
-		},
-		property: {
-			required: true,
-			type: 'string',
-			exactValue: [
-				'height',
-				'width'
-			]
-		},
-		value: [
-			{
-				required: true,
-				type: 'number',
-				greaterThanOrEqualTo: 0
-			},
-			{
-				required: true,
-				type: 'string',
-				custom: (inputPathManager) => {
-					const value = inputPathManager.value;
-					if (value.endsWith('px')) {
-						return true;
-					}
-					else {
-						throw new Schema.ValidationError(`'options.value' string must end with 'px'.`);
-					}
-				}
-			},
-			{
-				required: true,
-				type: 'string',
-				exactValue: 'auto'
-			}
-		],
-		onComplete: {
-			type: 'function'
-		},
-		suppressDuplicates: {
-			type: 'boolean'
-		},
-		debug: {
-			type: 'boolean'
-		}
-	}
-};
-
-const optionsSchema = new Schema(optionsModel);
-
-module.exports = optionsSchema;
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const isPlainObject = __webpack_require__(5);
-
-const extend = (...arguments) => {
-	let target = arguments[0];
-	let argumentIndex, merge, mergeIsArray;
-	for (argumentIndex = 1; argumentIndex < arguments.length; argumentIndex++) {
-		merge = arguments[argumentIndex];
-		if (merge === target) {
-			continue;
-		}
-		mergeIsArray = Array.isArray(merge);
-		if (mergeIsArray || isPlainObject(merge)) {
-			if (mergeIsArray && !Array.isArray(target)) {
-				target = [];
-			}
-			else if (!mergeIsArray && !isPlainObject(target)) {
-				target = {};
-			}
-			for (const property in merge) {
-				if (property === "__proto__") {
-					continue;
-				}
-				target[property] = extend(target[property], merge[property]);
-			}
-		}
-		else {
-			if (merge !== undefined) {
-				target = merge;
-			}
-		}
-	}
-	return target;
-};
-
-module.exports = extend;
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports) {
-
-module.exports = class CodedError extends Error {
-  constructor(code, ...params) {
-    super(...params);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, CodedError);
-    }
-    this.code = code;
-  }
-};
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports) {
+/***/ 112:
+/***/ ((module) => {
 
 module.exports = class Bundle {
 
@@ -2516,8 +1858,614 @@ module.exports = class Bundle {
 };
 
 /***/ }),
-/* 17 */
-/***/ (function(module, exports) {
+
+/***/ 771:
+/***/ ((module) => {
+
+module.exports = class CodedError extends Error {
+  constructor(code, ...params) {
+    super(...params);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CodedError);
+    }
+    this.code = code;
+  }
+};
+
+/***/ }),
+
+/***/ 533:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = class ContentInner {
+
+	constructor(parameters) {
+		this.content = parameters.content;
+		this.element = parameters.element;
+		return this;
+	}
+
+	get content() {
+		return this._content;
+	}
+
+	set content(content) {
+		if (!(content instanceof __webpack_require__(0))) {
+			throw new Error(`'content' must be an instance of the Content class.`);
+		}
+		this._content = content;
+	}
+
+	get options() {
+		return this.content.item.bundle.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.constructor.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.constructor.isElementInitialized(element)) {
+			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		this._element = element;
+		element[this.constructor.elementProperty] = this;
+		element.setAttribute(this.constructor.elementDataAttribute, 'content-inner');
+		return this._element;
+	}
+
+	destroy() {
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+	}
+
+};
+
+/***/ }),
+
+/***/ 0:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = class Content {
+
+	constructor(parameters) {
+		this.boundUpdateAriaLabelledBy = this.updateAriaLabelledBy.bind(this);
+		this.item = parameters.item;
+		this.element = parameters.element;
+		if (this.options.elements.contentInner) {
+			this.addContentInner(this.options.elements.contentInner);
+		}
+		return this;
+	}
+
+	get item() {
+		return this._item;
+	}
+
+	set item(item) {
+		if (!(item instanceof __webpack_require__(835))) {
+			throw new Error(`'item' must be an instance of the Item class.`);
+		}
+		this._item = item;
+	}
+
+	get options() {
+		return this.item.bundle.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.constructor.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.constructor.isElementInitialized(element)) {
+			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		
+		this._element = element;
+	
+		element[this.constructor.elementProperty] = this;
+		element.setAttribute(this.constructor.elementDataAttribute, 'content');
+		
+		this.usingExistingId = true;
+		if (!element.getAttribute('id')) {
+			element.setAttribute('id', 'accordion-content-' + this.item.count);
+			this.usingExistingId = false;
+		}
+
+		this.updateAriaLabelledBy();
+		this.item.element.addEventListener(this.item.constructor.accordionItemAddTriggerEventName, this.boundUpdateAriaLabelledBy);
+		
+		this.existingStyleHeight = 	element.style.height;
+		if (this.item.state === 'closed') {
+			element.style.height = 0;
+		}
+		
+		return this._element;
+	}
+
+	updateAriaLabelledBy() {
+		if (this.element && this.item.trigger) {
+			this.element.setAttribute('aria-labelledby', this.item.trigger.element.getAttribute('id'));
+		}
+	}
+
+	filterElementsByScope(elementsInput) {
+		let elements = this.constructor.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
+		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
+	}
+
+	get contentInner() {
+		return this._contentInner;
+	}
+
+	set contentInner(contentInner) {
+		if (!(contentInner instanceof ContentInner)) {
+			throw new Error(`'contentInner' must be a ContentInner class instance.`);
+		}
+		this._contentInner = contentInner;
+		return this._contentInner;
+	}
+
+	addContentInner(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		const element = elements[0];
+		try {
+			const contentInner = new ContentInner({
+				content: this,
+				element: element
+			});
+			this.contentInner = contentInner;
+			return true;
+		}
+		catch (error) {
+			if (error.code = 'already-initialized') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+
+	}
+
+	destroy() {
+		if (this.contentInner) {
+			this.contentInner.destroy();
+		}
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		if (!this.usingExistingId) {
+			this.element.removeAttribute('id');
+		}
+		this.element.removeAttribute('aria-labelledby');
+		this.item.element.removeEventListener(this.item.constructor.accordionItemAddTriggerEventName, this.boundUpdateAriaLabelledBy);
+		this.element.style.height = this.existingStyleHeight;
+	}
+
+};
+
+/***/ }),
+
+/***/ 835:
+/***/ ((module) => {
+
+module.exports = class Item {
+
+	static isItem(instance) {
+		return instance instanceof this;
+	}
+
+	static get availableStates() {
+		return [
+			'closed',
+			'closing',
+			'opened',
+			'opening'
+		];
+	}
+
+	static get instanceCount() {
+		if (typeof this._instanceCount !== 'number') {
+			this._instanceCount = 0;
+		}
+		return this._instanceCount;
+	}
+
+	static set instanceCount(count) {
+		if (typeof count !== 'number') {
+			throw('`instanceCount` must be a number.');
+		}
+		else {
+			return this._instanceCount = count;
+		}
+	}
+
+	static instanceCountIncrement() {
+		return this.instanceCount = this.instanceCount + 1;
+	}
+
+	constructor(parameters) {
+		this.bundle = parameters.bundle;
+		this.element = parameters.element;
+		const defaultOpenItemElements = this.Accordion.normalizeElements(this.options.defaultOpenItems);
+		this.state = 'closed';
+		if (defaultOpenItemElements.includes(this.element)) {
+			this.state = 'opened';
+		}
+		if (this.options.elements.content) {
+			this.addContent(this.options.elements.content);
+		}
+		if (this.options.elements.trigger) {
+			this.addTrigger(this.options.elements.trigger);
+		}
+		return this;
+	}
+
+	get bundle() {
+		return this._bundle;
+	}
+
+	set bundle(bundle) {
+		if (typeof bundle.constructor.isBundle !== 'function' || !bundle.constructor.isBundle(bundle)) {
+			throw new Error(`'bundle' must be an instance of the Bundle class.`);
+		}
+		this._bundle = bundle;
+		return bundle;
+	}
+
+	get accordion() {
+		return this.bundle.accordion;
+	}
+
+	get Accordion() {
+		return this.bundle.Accordion;
+	}
+
+	get options() {
+		return this.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+	
+	set element(element) {
+		if (!this.Accordion.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.Accordion.isElementInitialized(element)) {
+			throw new this.Accordion.CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		element.setAttribute(this.Accordion.dataAttributes.elementType, 'item');
+		this._element = element;
+		return element;
+	}
+
+	get count() {
+		if (typeof this._count !== 'number') {
+			this._count = this.constructor.instanceCountIncrement();
+		}
+		return this._count;
+	}
+
+	get state() {
+		return this.element.getAttribute(this.Accordion.dataAttributes.itemState);
+	}
+
+	set state(state) {
+		if (!this.constructor.availableStates.includes(state)) {
+			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
+		}
+		this.element.setAttribute(this.Accordion.dataAttributes.itemState, state);
+		if (this.trigger) {
+			this.trigger.updateAriaExpanded();
+		}
+	}
+
+	filterElementsByScope(elementsInput) {
+		let elements = this.Accordion.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
+		return this.Accordion.filterElementsByContainer(elements, this.element, nestedBundleElements);
+	}
+
+	get trigger() {
+		return this._trigger;
+	}
+
+	set trigger(trigger) {
+		if (!(trigger instanceof Accordion.Trigger) && trigger !== undefined && trigger !== null) {
+			throw new Error(`'trigger' must be a Trigger class instance, undefined, or null.`);
+		}
+		this._trigger = trigger;
+		return trigger;
+	}
+
+	addTrigger(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		if (elements.length > 0) {
+			const element = elements[0];
+			this.accordion.dispatchEvent(this.Accordion.eventNames.addTrigger.before, [element]);
+			try {
+				const trigger = new this.Accordion.Trigger({
+					item: this,
+					element: element
+				});
+				this.trigger = trigger;
+				this.accordion.dispatchEvent(this.Accordion.eventNames.addTrigger.after, [trigger]);
+				return true;
+			}
+			catch (error) {
+				if (error.code === 'already-initialized') {
+					this.debug(error, element);
+					return false;
+				}
+				else {
+					throw error;
+				}
+			}
+		}
+		else {
+			this.debug(`No element was found when trying to add trigger.`);
+		}
+	}
+
+	removeTrigger() {
+		if (this.trigger) {
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeTrigger.before, [this.trigger]);
+			this.trigger.destroy();
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeTrigger.after, [this.trigger.element]);
+		}
+		this.trigger = undefined;
+	}
+
+	get content() {
+		return this._content;
+	}
+
+	set content(content) {
+		if (!(content instanceof Accordion.Content) && content !== undefined && content !== null) {
+			throw new Error(`'content' must be a Content class instance, undefined, or null.`);
+		}
+		this._content = content;
+		return content;
+	}
+
+	addContent(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		if (elements.length > 0) {
+			const element = elements[0];
+			this.accordion.dispatchEvent(this.Accordion.eventNames.addContent.before, [element]);
+			try {
+				const content = new this.Accordion.Content({
+					item: this,
+					element: element
+				});
+				this.content = content;
+				this.accordion.dispatchEvent(this.Accordion.eventNames.addContent.after, [content]);
+				return true;
+			}
+			catch (error) {
+				if (error.code = 'already-initialized') {
+					this.accordion.debug(error, element);
+					return false;
+				}
+				else {
+					throw error;
+				}
+			}
+		}
+		else {
+			this.debug(`No element was found when trying to add content.`);
+		}
+	}
+
+	removeContent() {
+		if (this.content) {
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeContent.before, [this.content]);
+			this.content.destroy();
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeContent.after, [this.content.element]);
+		}
+		this.content = undefined;
+	}
+
+	get nestedBundleElements() {
+		if (this.element) {
+			let nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
+			return Array.from(nestedBundleElements);
+		}
+	}
+
+	get nextLevelNestedBundleElements() {
+		const nestedBundleElements = this.nestedBundleElements;
+		if (nestedBundleElements) {
+			const nextLevelNestedBundleElements = this.Accordion.filterElementsByContainer(nestedBundleElements, null, nestedBundleElements);
+			return nextLevelNestedBundleElements;
+		}
+	}
+
+	getNextPreviousItem(nextPrevious) {
+		if (typeof nextPrevious !== 'string') {
+			throw new Error(`'nextPrevious' must be a string.`);
+		}
+		nextPrevious = nextPrevious.toLowerCase();
+		if (nextPrevious !== 'next' && nextPrevious !== 'previous') {
+			throw new Error(`'nextPrevious' must be 'next' or 'previous'.`);
+		}
+		let returnItem;
+		const items = Array.from(this.bundle.items);
+		const itemMappedElements = items.map(item => item.element);
+		const itemElements = itemMappedElements.filter(this.Accordion.isElement);
+		const orderedItemElements = this.Accordion.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => this.Accordion.dataFromElement(itemElement));
+		const indexModifier = (nextPrevious === 'next') ? 1 : -1;
+		const indexWrapValue = (nextPrevious === 'next') ? 0 : (orderedItems.length - 1);
+		const thisIndex = orderedItems.indexOf(this);
+		if (thisIndex >= 0) {
+			let returnItemIndex = thisIndex + indexModifier;
+			if (returnItemIndex < 0 || returnItemIndex >= orderedItems.length) {
+				returnItemIndex = indexWrapValue
+			}
+			if (orderedItems[returnItemIndex]) {
+				returnItem = orderedItems[returnItemIndex]
+			}
+		}
+		return returnItem;
+	}
+
+	get nextItem() {
+		return this.getNextPreviousItem('next');
+	}
+
+	get previousItem() {
+		return this.getNextPreviousItem('previous');
+	}
+
+	open(skipTransition = false) {
+
+		if (!this.content) {
+			this.debug(`Item cannot open, missing content.`);
+			return false;
+		}
+		if (!this.content.element) {
+			this.debug(`Item cannot open, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner) {
+			this.debug(`Item cannot open, missing content inner.`);
+			return false;
+		}
+		if (!this.content.contentInner.element) {
+			this.debug(`Item cannot open, missing content inner element.`);
+			return false;
+		}
+
+		this.accordion.dispatchEvent(this.Accordion.eventNames.openItem.before, [this]);
+
+		if (!this.options.multipleOpenItems) {
+			if (this.bundle) {
+				for (const bundleItem of this.bundle.items) {
+					if (bundleItem !== this) {
+						bundleItem.close(skipTransition);
+					}
+				}
+			}
+		}
+
+		let existingStyleTransition = '';
+		if (skipTransition) {
+			existingStyleTransition = this.content.element.style.transition;
+			this.content.element.style.transition = 'none';
+		}
+		this.state = 'opening';
+		this.Accordion.transitionAuto({
+			element: this.content.element,
+			innerElement: this.content.contentInner.element,
+			property: 'height',
+			value: 'auto',
+			debug: this.options.debug,
+			onComplete: () => {
+				this.state = 'opened';
+				if (skipTransition) {
+					this.content.element.offsetWidth; // force update
+					this.content.element.style.transition = existingStyleTransition;
+				}
+				this.accordion.dispatchEvent(this.Accordion.eventNames.openItem.after, [this]);
+			}
+		});
+
+	}
+	
+	close(skipTransition = false) {
+
+		if (!this.content) {
+			this.debug(`Item cannot close, missing content.`);
+			return false;
+		}
+		if (!this.content.element) {
+			this.debug(`Item cannot close, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner) {
+			this.debug(`Item cannot close, missing content inner.`);
+			return false;
+		}
+		if (!this.content.contentInner.element) {
+			this.debug(`Item cannot close, missing content inner element.`);
+			return false;
+		}
+
+		this.accordion.dispatchEvent(this.Accordion.eventNames.closeItem.before, [this]);
+
+		let existingStyleTransition = '';
+		if (skipTransition) {
+			existingStyleTransition = this.content.element.style.transition;
+			this.content.element.style.transition = 'none';
+		}
+		this.state = 'closing';
+		this.Accordion.transitionAuto({
+			element: this.content.element,
+			innerElement: this.content.contentInner.element,
+			property: 'height',
+			value: 0,
+			debug: this.options.debug,
+			onComplete: () => {
+				this.state = 'closed';
+				if (skipTransition) {
+					this.content.element.offsetWidth; // force update
+					this.content.element.style.transition = existingStyleTransition;
+				}
+				this.accordion.dispatchEvent(this.Accordion.eventNames.closeItem.after, [this]);
+				if (this.options.closeNestedItems) {
+					if (this.nextLevelNestedBundleElements) {
+						for (const bundleElement of this.nextLevelNestedBundleElements) {
+							const bundle = this.Accordion.dataFromElement(bundleElement);
+							for (const item of bundle.items) {
+								item.close(true);
+							}
+						}
+					}
+				}
+			}
+		});
+	
+	}
+
+	toggle(skipTransition = false) {
+		if (this.state === 'closed' || this.state === 'closing') {
+			this.open(skipTransition);
+		}
+		else {
+			this.close(skipTransition);
+		}
+	}
+
+	destroy() {
+		if (this.trigger) {
+			this.trigger.destroy();
+		}
+		if (this.content) {
+			this.content.destroy();
+		}
+		this.element.removeAttribute(this.Accordion.dataAttributes.elementType);
+		this.element.removeAttribute(this.Accordion.dataAttributes.itemState);
+		this.bundle.removeItem(this);
+	}
+
+};
+
+/***/ }),
+
+/***/ 45:
+/***/ ((module) => {
 
 module.exports = class Trigger {
 
@@ -2615,24 +2563,30 @@ module.exports = class Trigger {
 			if (event.keyCode === 40) { // arrow down
 				event.preventDefault();
 				event.stopPropagation();
-				if (this.item.nextItem.trigger.element) {
+				if (this.item.nextItem?.trigger?.element) {
 					this.item.nextItem.trigger.element.focus();
 				}
 			}
 			else if (event.keyCode === 38) { // arrow up
 				event.preventDefault();
 				event.stopPropagation();
-				this.item.previousItem.trigger.element.focus();
+				if (this.item.previousItem?.trigger?.element) {
+					this.item.previousItem.trigger.element.focus();
+				}
 			}
 			else if (event.keyCode === 36) { // home
 				event.preventDefault();
 				event.stopPropagation();
-				this.item.bundle.firstItem.trigger.element.focus();
+				if (this.item.bundle?.firstItem?.trigger?.element) {
+					this.item.bundle.firstItem.trigger.element.focus();
+				}
 			}
 			else if (event.keyCode === 35) { // end
 				event.preventDefault();
 				event.stopPropagation();
-				this.item.bundle.lastItem.trigger.element.focus();
+				if (this.item.bundle?.lastItem?.trigger?.element) {
+					this.item.bundle.lastItem.trigger.element.focus();
+				}
 			}
 		}
 	}
@@ -2653,55 +2607,47 @@ module.exports = class Trigger {
 };
 
 /***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = class ContentInner {
+/***/ 138:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-	constructor(parameters) {
-		this.content = parameters.content;
-		this.element = parameters.element;
-		return this;
-	}
-
-	get content() {
-		return this._content;
-	}
-
-	set content(content) {
-		if (!(content instanceof __webpack_require__(6))) {
-			throw new Error(`'content' must be an instance of the Content class.`);
-		}
-		this._content = content;
-	}
-
-	get options() {
-		return this.content.item.bundle.accordion.options;
-	}
-
-	get element() {
-		return this._element;
-	}
-
-	set element(element) {
-		if (!this.constructor.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
-		}
-		if (this.constructor.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
-		}
-		this._element = element;
-		element[this.constructor.elementProperty] = this;
-		element.setAttribute(this.constructor.elementDataAttribute, 'content-inner');
-		return this._element;
-	}
-
-	destroy() {
-		delete this.element[this.constructor.elementProperty];
-		this.element.removeAttribute(this.constructor.elementDataAttribute);
-	}
-
-};
+module.exports = __webpack_require__(558);
 
 /***/ })
-/******/ ]);
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module used 'module' so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__(138);
+/******/ 	Accordion = __webpack_exports__;
+/******/ 	
+/******/ })()
+;

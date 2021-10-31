@@ -94,24 +94,30 @@ module.exports = class Trigger {
 			if (event.keyCode === 40) { // arrow down
 				event.preventDefault();
 				event.stopPropagation();
-				if (this.item.nextItem.trigger.element) {
+				if (this.item.nextItem?.trigger?.element) {
 					this.item.nextItem.trigger.element.focus();
 				}
 			}
 			else if (event.keyCode === 38) { // arrow up
 				event.preventDefault();
 				event.stopPropagation();
-				this.item.previousItem.trigger.element.focus();
+				if (this.item.previousItem?.trigger?.element) {
+					this.item.previousItem.trigger.element.focus();
+				}
 			}
 			else if (event.keyCode === 36) { // home
 				event.preventDefault();
 				event.stopPropagation();
-				this.item.bundle.firstItem.trigger.element.focus();
+				if (this.item.bundle?.firstItem?.trigger?.element) {
+					this.item.bundle.firstItem.trigger.element.focus();
+				}
 			}
 			else if (event.keyCode === 35) { // end
 				event.preventDefault();
 				event.stopPropagation();
-				this.item.bundle.lastItem.trigger.element.focus();
+				if (this.item.bundle?.lastItem?.trigger?.element) {
+					this.item.bundle.lastItem.trigger.element.focus();
+				}
 			}
 		}
 	}

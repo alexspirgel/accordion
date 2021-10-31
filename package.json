@@ -23,13 +23,13 @@
     "build": "webpack"
   },
   "dependencies": {
-    "@alexspirgel/extend": "^3.0.0",
+    "@alexspirgel/extend": "^3.0.1",
     "@alexspirgel/schema": "^1.1.5",
     "@alexspirgel/transition-auto": "^2.0.6"
   },
   "devDependencies": {
-    "terser-webpack-plugin": "^3.1.0",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    "terser-webpack-plugin": "^5.2.4",
+    "webpack": "^5.61.0",
+    "webpack-cli": "^4.9.1"
   }
 }
