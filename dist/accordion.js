@@ -86,201 +86,14 @@ var Accordion =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-module.exports = class Base {
-
-	static get elementProperty() {
-		return 'accordion';
-	}
-
-	static get elementDataAttribute() {
-		return 'data-accordion';
-	}
-
-	static isInstanceOfThis(instance) {
-		return instance instanceof this;
-	}
-
-	static isElement(element) {
-		if (element instanceof Element) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	static isElementInitialized(element) {
-		if (element[this.elementProperty] !== undefined && element.hasAttribute(this.elementDataAttribute)) {
-			return true;
-		}
-	}
-
-	static normalizeElements(inputValue, elementsSet = new Set()) {
-		if (Array.isArray(inputValue) || inputValue instanceof NodeList) {
-			for (let value of inputValue) {
-				this.normalizeElements(value, elementsSet);
-			}
-		}
-		else if (typeof inputValue === 'string') {
-			let elements = document.querySelectorAll(inputValue);
-			this.normalizeElements(elements, elementsSet);
-		}
-		else if (this.isElement(inputValue)) {
-			elementsSet.add(inputValue);
-		}
-		const optionElements = Array.from(elementsSet);
-		return optionElements;
-	}
-
-	static orderElementsByDOMTree(elements, order = 'asc') {
-		if (!Array.isArray(elements)) {
-			throw new Error(`'elements' must be an array.`);
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error(`'elements' array must only contain elements.`);
-		}
-		order = order.toLowerCase();
-		if (order !== 'asc' && order !== 'desc') {
-			throw new Error(`'order' must be 'asc' or 'desc'.`);
-		}
-		const temporaryClass = 'orderElementsByDOMTree-' + Date.now().toString();
-		for (const element of elements) {
-			element.classList.add(temporaryClass);
-		}
-		const orderedElements = Array.from(document.querySelectorAll('.' + temporaryClass));
-		for (const element of elements) {
-			element.classList.remove(temporaryClass);
-		}
-		if (order === 'asc') {
-			orderedElements.reverse();
-		}
-		return orderedElements;
-	}
-
-	static isElementContainedBy(element, containedByElementsInput = [], operator = 'and') {
-		if (!this.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
-		}
-		const containedByElements = this.normalizeElements(containedByElementsInput);
-		if (typeof operator !== 'string') {
-			throw new Error(`'operator' must be a string.`);
-		}
-		operator = operator.toLowerCase();
-		if (operator !== 'and' && operator !== 'or') {
-			throw new Error(`'operator' must be 'and' or 'or'.`);
-		}
-		let flag = false;
-		for (const containedByElement of containedByElements) {
-			if (containedByElement.contains(element) && containedByElement !== element) {
-				flag = true;
-				if (operator === 'or') {
-					break;
-				}
-			}
-			else {
-				flag = false;
-				if (operator === 'and') {
-					break;
-				}
-			}
-		}
-		return flag;
-	}
-
-	static isElementNotContainedBy(element, notContainedByElementsInput = [], operator = 'and') {
-		if (typeof operator !== 'string') {
-			throw new Error(`'operator' must be a string.`);
-		}
-		operator = operator.toLowerCase();
-		if (operator === 'and') {
-			return !this.isElementContainedBy(element, notContainedByElementsInput, 'or');
-		}
-		else if (operator === 'or') {
-			return !this.isElementContainedBy(element, notContainedByElementsInput, 'and');
-		}
-		else {
-			throw new Error(`'operator' must be 'and' or 'or'.`);
-		}
-	}
-
-	static filterElementsByContainer(elements, containedBy = [], notContainedBy = [], operator = 'and') {
-		if (!Array.isArray(elements)) {
-			throw new Error(`'elements' must be an array.`);
-		}
-		if (!elements.every(this.isElement)) {
-			throw new Error(`'elements' array must only contain elements.`);
-		}
-		const filteredElements = elements.filter((element) => {
-			let flag = true;
-			if (containedBy) {
-				if (!this.isElementContainedBy(element, containedBy, operator)) {
-					flag = false;
-				}
-			}
-			if (notContainedBy) {
-				if (flag) {
-					if (!this.isElementNotContainedBy(element, notContainedBy, operator)) {
-						flag = false;
-					}
-				}
-			}
-			return flag;
-		});
-		return filteredElements;
-	}
-
-	constructor() {}
-
-	debug(...messages) {
-		try {
-			if (this.options.debug) {
-				console.log('Accordion Debug:', ...messages);
-			}
-		}
-		catch(error) {
-			// suppress
-		}
-	}
-
-	accessibilityWarn(...messages) {
-		try {
-			if (this.options.accessibilityWarnings) {
-				console.warn('Accordion Accessibility Warning:', ...messages);
-			}
-		}
-		catch(error) {
-			// suppress
-		}
-	}
-
-};
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-module.exports = class CodedError extends Error {
-  constructor(code, ...params) {
-    super(...params);
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, CodedError);
-    }
-    this.code = code;
-  }
-};
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const DataPathManager = __webpack_require__(6);
+const DataPathManager = __webpack_require__(3);
 
 class ValidationError extends Error {
 	
@@ -315,19 +128,13 @@ class ValidationError extends Error {
 module.exports = ValidationError;
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
+/* 1 */
+/***/ (function(module, exports) {
 
-const Base = __webpack_require__(0);
-const CodedError = __webpack_require__(1);
-const Trigger = __webpack_require__(15);
-const Content = __webpack_require__(10);
-const transitionAuto = __webpack_require__(17);
+module.exports = class Item {
 
-module.exports = class Item extends Base {
-
-	static get itemStateDataAttribute() {
-		return 'data-accordion-item-state';
+	static isItem(instance) {
+		return instance instanceof this;
 	}
 
 	static get availableStates() {
@@ -359,24 +166,13 @@ module.exports = class Item extends Base {
 		return this.instanceCount = this.instanceCount + 1;
 	}
 
-	static get accordionItemAddTriggerEventName() {
-		return 'accordionItemAddTrigger';
-	}
-
-	static get accordionItemAddContentEventName() {
-		return 'accordionItemAddContent';
-	}
-
 	constructor(parameters) {
-		super();
-		this.accordionItemAddTriggerEvent = new Event(this.constructor.accordionItemAddTriggerEventName);
-		this.accordionItemAddContentEvent = new Event(this.constructor.accordionItemAddContentEventName);
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
-		const defaultOpenItemElements = this.constructor.normalizeElements(this.options.defaultOpenItems);
+		const defaultOpenItemElements = this.Accordion.normalizeElements(this.options.defaultOpenItems);
 		this.state = 'closed';
 		if (defaultOpenItemElements.includes(this.element)) {
-			this.state = 'opened'
+			this.state = 'opened';
 		}
 		if (this.options.elements.content) {
 			this.addContent(this.options.elements.content);
@@ -392,14 +188,23 @@ module.exports = class Item extends Base {
 	}
 
 	set bundle(bundle) {
-		if (!(bundle instanceof __webpack_require__(9))) {
+		if (typeof bundle.constructor.isBundle !== 'function' || !bundle.constructor.isBundle(bundle)) {
 			throw new Error(`'bundle' must be an instance of the Bundle class.`);
 		}
 		this._bundle = bundle;
+		return bundle;
+	}
+
+	get accordion() {
+		return this.bundle.accordion;
+	}
+
+	get Accordion() {
+		return this.bundle.Accordion;
 	}
 
 	get options() {
-		return this.bundle.accordion.options;
+		return this.accordion.options;
 	}
 
 	get element() {
@@ -407,16 +212,15 @@ module.exports = class Item extends Base {
 	}
 	
 	set element(element) {
-		if (!this.constructor.isElement(element)) {
+		if (!this.Accordion.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
-		if (this.constructor.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		if (this.Accordion.isElementInitialized(element)) {
+			throw new this.Accordion.CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
-		element[this.constructor.elementProperty] = this;
-		element.setAttribute(this.constructor.elementDataAttribute, 'item');
+		element.setAttribute(this.Accordion.dataAttributes.elementType, 'item');
 		this._element = element;
-		return this._element;
+		return element;
 	}
 
 	get count() {
@@ -427,23 +231,23 @@ module.exports = class Item extends Base {
 	}
 
 	get state() {
-		return this.element.getAttribute(this.constructor.itemStateDataAttribute);
+		return this.element.getAttribute(this.Accordion.dataAttributes.itemState);
 	}
 
 	set state(state) {
 		if (!this.constructor.availableStates.includes(state)) {
 			throw new Error(`'state' must be an available state. Available states include: ${this.constructor.availableStates.join(', ')}.`);
 		}
-		this.element.setAttribute(this.constructor.itemStateDataAttribute, state);
+		this.element.setAttribute(this.Accordion.dataAttributes.itemState, state);
 		if (this.trigger) {
 			this.trigger.updateAriaExpanded();
 		}
 	}
 
 	filterElementsByScope(elementsInput) {
-		let elements = this.constructor.normalizeElements(elementsInput);
-		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
-		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
+		let elements = this.Accordion.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
+		return this.Accordion.filterElementsByContainer(elements, this.element, nestedBundleElements);
 	}
 
 	get trigger() {
@@ -451,24 +255,25 @@ module.exports = class Item extends Base {
 	}
 
 	set trigger(trigger) {
-		if (!(trigger instanceof Trigger) && trigger !== undefined && trigger !== null) {
+		if (!(trigger instanceof Accordion.Trigger) && trigger !== undefined && trigger !== null) {
 			throw new Error(`'trigger' must be a Trigger class instance, undefined, or null.`);
 		}
 		this._trigger = trigger;
-		return this._trigger;
+		return trigger;
 	}
 
 	addTrigger(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
 		if (elements.length > 0) {
 			const element = elements[0];
+			this.accordion.dispatchEvent(this.Accordion.eventNames.addTrigger.before, [element]);
 			try {
-				const trigger = new Trigger({
+				const trigger = new this.Accordion.Trigger({
 					item: this,
 					element: element
 				});
 				this.trigger = trigger;
-				this.element.dispatchEvent(this.accordionItemAddTriggerEvent);
+				this.accordion.dispatchEvent(this.Accordion.eventNames.addTrigger.after, [trigger]);
 				return true;
 			}
 			catch (error) {
@@ -488,7 +293,9 @@ module.exports = class Item extends Base {
 
 	removeTrigger() {
 		if (this.trigger) {
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeTrigger.before, [this.trigger]);
 			this.trigger.destroy();
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeTrigger.after, [this.trigger.element]);
 		}
 		this.trigger = undefined;
 	}
@@ -498,29 +305,30 @@ module.exports = class Item extends Base {
 	}
 
 	set content(content) {
-		if (!(content instanceof Content) && content !== undefined && content !== null) {
+		if (!(content instanceof Accordion.Content) && content !== undefined && content !== null) {
 			throw new Error(`'content' must be a Content class instance, undefined, or null.`);
 		}
 		this._content = content;
-		return this._content;
+		return content;
 	}
 
 	addContent(elementsInput) {
 		const elements = this.filterElementsByScope(elementsInput);
 		if (elements.length > 0) {
 			const element = elements[0];
+			this.accordion.dispatchEvent(this.Accordion.eventNames.addContent.before, [element]);
 			try {
-				const content = new Content({
+				const content = new this.Accordion.Content({
 					item: this,
 					element: element
 				});
 				this.content = content;
-				this.element.dispatchEvent(this.accordionItemAddContentEvent);
+				this.accordion.dispatchEvent(this.Accordion.eventNames.addContent.after, [content]);
 				return true;
 			}
 			catch (error) {
 				if (error.code = 'already-initialized') {
-					this.debug(error, element);
+					this.accordion.debug(error, element);
 					return false;
 				}
 				else {
@@ -535,20 +343,26 @@ module.exports = class Item extends Base {
 
 	removeContent() {
 		if (this.content) {
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeContent.before, [this.content]);
 			this.content.destroy();
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeContent.after, [this.content.element]);
 		}
 		this.content = undefined;
 	}
 
 	get nestedBundleElements() {
-		let nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
-		return Array.from(nestedBundleElements);
+		if (this.element) {
+			let nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
+			return Array.from(nestedBundleElements);
+		}
 	}
 
 	get nextLevelNestedBundleElements() {
 		const nestedBundleElements = this.nestedBundleElements;
-		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(nestedBundleElements, null, nestedBundleElements);
-		return nextLevelNestedBundleElements;
+		if (nestedBundleElements) {
+			const nextLevelNestedBundleElements = this.Accordion.filterElementsByContainer(nestedBundleElements, null, nestedBundleElements);
+			return nextLevelNestedBundleElements;
+		}
 	}
 
 	getNextPreviousItem(nextPrevious) {
@@ -561,9 +375,10 @@ module.exports = class Item extends Base {
 		}
 		let returnItem;
 		const items = Array.from(this.bundle.items);
-		const itemElements = items.map(item => item.element);
-		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
-		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
+		const itemMappedElements = items.map(item => item.element);
+		const itemElements = itemMappedElements.filter(this.Accordion.isElement);
+		const orderedItemElements = this.Accordion.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => this.Accordion.dataFromElement(itemElement));
 		const indexModifier = (nextPrevious === 'next') ? 1 : -1;
 		const indexWrapValue = (nextPrevious === 'next') ? 0 : (orderedItems.length - 1);
 		const thisIndex = orderedItems.indexOf(this);
@@ -588,21 +403,43 @@ module.exports = class Item extends Base {
 	}
 
 	open(skipTransition = false) {
+
+		if (!this.content) {
+			this.debug(`Item cannot open, missing content.`);
+			return false;
+		}
 		if (!this.content.element) {
 			this.debug(`Item cannot open, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner) {
+			this.debug(`Item cannot open, missing content inner.`);
 			return false;
 		}
 		if (!this.content.contentInner.element) {
 			this.debug(`Item cannot open, missing content inner element.`);
 			return false;
 		}
+
+		this.accordion.dispatchEvent(this.Accordion.eventNames.openItem.before, [this]);
+
+		if (!this.options.multipleOpenItems) {
+			if (this.bundle) {
+				for (const bundleItem of this.bundle.items) {
+					if (bundleItem !== this) {
+						bundleItem.close(skipTransition);
+					}
+				}
+			}
+		}
+
 		let existingStyleTransition = '';
 		if (skipTransition) {
 			existingStyleTransition = this.content.element.style.transition;
 			this.content.element.style.transition = 'none';
 		}
 		this.state = 'opening';
-		transitionAuto({
+		this.Accordion.transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
 			property: 'height',
@@ -614,35 +451,40 @@ module.exports = class Item extends Base {
 					this.content.element.offsetWidth; // force update
 					this.content.element.style.transition = existingStyleTransition;
 				}
+				this.accordion.dispatchEvent(this.Accordion.eventNames.openItem.after, [this]);
 			}
 		});
-		if (!this.options.multipleOpenItems) {
-			if (this.bundle) {
-				for (const bundleItem of this.bundle.items) {
-					if (bundleItem !== this) {
-						bundleItem.close(skipTransition);
-					}
-				}
-			}
-		}
+
 	}
 	
 	close(skipTransition = false) {
+
+		if (!this.content) {
+			this.debug(`Item cannot close, missing content.`);
+			return false;
+		}
 		if (!this.content.element) {
 			this.debug(`Item cannot close, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner) {
+			this.debug(`Item cannot close, missing content inner.`);
 			return false;
 		}
 		if (!this.content.contentInner.element) {
 			this.debug(`Item cannot close, missing content inner element.`);
 			return false;
 		}
+
+		this.accordion.dispatchEvent(this.Accordion.eventNames.closeItem.before, [this]);
+
 		let existingStyleTransition = '';
 		if (skipTransition) {
 			existingStyleTransition = this.content.element.style.transition;
 			this.content.element.style.transition = 'none';
 		}
 		this.state = 'closing';
-		transitionAuto({
+		this.Accordion.transitionAuto({
 			element: this.content.element,
 			innerElement: this.content.contentInner.element,
 			property: 'height',
@@ -654,10 +496,11 @@ module.exports = class Item extends Base {
 					this.content.element.offsetWidth; // force update
 					this.content.element.style.transition = existingStyleTransition;
 				}
+				this.accordion.dispatchEvent(this.Accordion.eventNames.closeItem.after, [this]);
 				if (this.options.closeNestedItems) {
 					if (this.nextLevelNestedBundleElements) {
 						for (const bundleElement of this.nextLevelNestedBundleElements) {
-							const bundle = bundleElement[this.constructor.elementProperty]
+							const bundle = this.Accordion.dataFromElement(bundleElement);
 							for (const item of bundle.items) {
 								item.close(true);
 							}
@@ -666,6 +509,7 @@ module.exports = class Item extends Base {
 				}
 			}
 		});
+	
 	}
 
 	toggle(skipTransition = false) {
@@ -684,395 +528,21 @@ module.exports = class Item extends Base {
 		if (this.content) {
 			this.content.destroy();
 		}
-		delete this.element[this.constructor.elementProperty];
-		this.element.removeAttribute(this.constructor.elementDataAttribute);
-		this.element.removeAttribute(this.constructor.itemStateDataAttribute);
+		this.element.removeAttribute(this.Accordion.dataAttributes.elementType);
+		this.element.removeAttribute(this.Accordion.dataAttributes.itemState);
 		this.bundle.removeItem(this);
 	}
 
 };
 
 /***/ }),
-/* 4 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Base = __webpack_require__(0);
-const extend = __webpack_require__(12);
-const Schema = __webpack_require__(5);
-
-module.exports = class Accordion extends Base {
-
-	static get Bundle() {
-		return __webpack_require__(9);
-	}
-
-	static get Item() {
-		return __webpack_require__(3);
-	}
-
-	static get optionsDefault() {
-		return {
-			elements: {
-				bundle: null,
-				item: null,
-				trigger: null,
-				content: null,
-				contentInner: null
-			},
-			accessibilityWarnings: true,
-			closeNestedItems: false,
-			defaultOpenItems: null,
-			multipleOpenItems: true,
-			openAnchoredItems: true,
-			debug: false
-		};
-	}
-
-	static get optionsSchema() {
-		const elementsModel = [
-			{
-				type: 'string'
-			},
-			{
-				type: 'object',
-				instanceOf: [Element, NodeList]
-			},
-			{
-				type: 'array',
-				allPropertySchema: [
-					{
-						type: 'string'
-					},
-					{
-						type: 'object',
-						instanceOf: [Element, NodeList]
-					}
-				]
-			}
-		];
-		const optionsModel = {
-			type: 'object',
-			allowUnvalidatedProperties: false,
-			propertySchema: {
-				elements: {
-					type: 'object',
-					allowUnvalidatedProperties: false,
-					propertySchema: {
-						bundle: elementsModel,
-						item: elementsModel,
-						trigger: elementsModel,
-						content: elementsModel,
-						contentInner: elementsModel
-					}
-				},
-				accessibilityWarnings: {
-					type: 'boolean'
-				},
-				closeNestedItems: {
-					type: 'boolean'
-				},
-				defaultOpenItems: elementsModel,
-				multipleOpenItems: {
-					type: 'boolean'
-				},
-				openAnchoredItems: {
-					type: 'boolean'
-				},
-				debug: {
-					type: 'boolean'
-				}
-			}
-		};
-		return new Schema(optionsModel);
-	}
-
-	static get accordions() {
-		if (!this._accordions) {
-			this._accordions = new Set();
-		}
-		return this._accordions;
-	}
-
-	static addAccordion(accordion) {
-		if (!this.isAccordion(accordion)) {
-			throw new Error(`'accordion' must be an Accordion class instance.`);
-		}
-		if (this.accordions.has(accordion)) {
-			throw new Error(`'accordion' has already been added.`);
-		}
-		this._accordions.add(accordion);
-		return accordion;
-	}
-
-	static removeAccordion(accordion) {
-		if (this.accordions.has(accordion)) {
-			this._accordions.delete(accordion);
-			return accordion;
-		}
-		else {
-			this.debug(`Accordion to be removed was not found in the set.`);
-			return false;
-		}
-	}
-
-	static get elementDataAttribute() {
-		return 'data-accordion';
-	}
-
-	static initializeHashChangeListener() {
-		if (!this.initializedHashListener) {
-			window.addEventListener('hashchange', this.hashChangeHandler.bind(this));
-			this.initializedHashListener = true;
-		}
-	}
-
-	static hashChangeHandler(event) {
-		this.openAnchoredItem(event.target.location.hash);
-	}
-
-	static openAnchoredItem(hash = location.hash) {
-		if (hash) {
-			const hashElement = document.querySelector(hash);
-			if (hashElement) {
-				let itemOpened = false;
-				for (const accordion of this.accordions) {
-					if (accordion.options.openAnchoredItems) {
-						for (const bundle of accordion.bundles) {
-							for (const item of bundle.items) {
-								if (item.element) {
-									if (item.element.contains(hashElement)) {
-										item.open(true);
-										itemOpened = true;
-									}
-								}
-							}
-						}
-					}
-				}
-				if (itemOpened) {
-					hashElement.scrollIntoView();
-				}
-			}
-		}
-	}
-
-	static dataFromElement(element) {
-		if (!this.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
-		}
-		for (const accordion of this.accordions) {
-			for (const bundle of accordion.bundles) {
-				if (element === bundle.element) {
-					return bundle;
-				}
-				for (const item of bundle.items) {
-					if (element === item.element) {
-						return item;
-					}
-					if (item.content) {
-						if (element === item.content.element) {
-							return item.content;
-						}
-						if (item.content.contentInner) {
-							if (element === item.content.contentInner.element) {
-								return item.content.contentInner;
-							}
-						}
-					}
-					if (item.trigger) {
-						if (element === item.trigger.element) {
-							return item.trigger;
-						}
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	static isElement(element) {
-		if (element instanceof Element) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	static isElementInitialized(element) {
-		if (this.dataFromElement(element)) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	static isAccordion(instance) {
-		return instance instanceof this;
-	}
-
-	constructor(options) {
-		super();
-		this.options = options;
-		this.constructor.initializeHashChangeListener();
-		this.constructor.addAccordion(this);
-		if (this.options.elements.bundle) {
-			this.addBundles(this.options.elements.bundle);
-			this.constructor.openAnchoredItem();
-		}
-		this.debug(this);
-		return this;
-	}
-
-	get options() {
-		if (!this._options) {
-			this._options = extend({}, this.constructor.optionsDefault);
-		}
-		return this._options;
-	}
-
-	set options(options) {
-		this.constructor.optionsSchema.validate(options);
-		this._options = extend(this.options, options);
-		return this._options;
-	}
-
-	get bundles() {
-		if (!this._bundles) {
-			this._bundles = new Set();
-		}
-		return this._bundles;
-	}
-
-	set bundles(bundles) {
-		if (!(bundles instanceof Set)) {
-			throw new Error(`'bundles' must be a Set.`);
-		}
-		if (!Array.from(bundles).every(this.constructor.Bundle.isInstanceOfThis)) {
-			throw new Error(`'bundles' must only contain Bundle class instances.`);
-		}
-		this._bundles = bundles;
-		return this._bundles;
-	}
-
-	addBundle(element) {
-		try {
-			const bundle = new this.constructor.Bundle({
-				accordion: this,
-				element: element
-			});
-			this.bundles.add(bundle);
-			this.dispatchEvent('addBundle', [bundle]);
-			return true;
-		}
-		catch (error) {
-			if (error.code === 'already-initialized') {
-				this.debug(error, element);
-				return false;
-			}
-			else {
-				throw error;
-			}
-		}
-	}
-
-	addBundles(elementsInput) {
-		let elements = this.constructor.normalizeElements(elementsInput);
-		if (elements.length > 0) {
-			elements = this.constructor.orderElementsByDOMTree(elements, 'asc');
-			for (const element of elements) {
-				this.addBundle(element);
-			}
-		}
-		else {
-			this.debug(`No elements were found when trying to add bundles.`);
-		}
-	}
-
-	removeBundle(bundle) {
-		if (this.bundles.has(bundle)) {
-			this.bundles.delete(bundle);
-			bundle.destroy();
-			this.dispatchEvent('removeBundle', [bundle]);
-			return bundle;
-		}
-		else {
-			this.debug(`Bundle to be removed was not found in the set.`);
-			return false;
-		}
-	}
-
-	get eventListeners() {
-		if (!this._eventListeners) {
-			this._eventListeners = {};
-		}
-		return this._eventListeners;
-	}
-
-	addEventListener(eventName, listener) {
-		if (typeof eventName !== 'string') {
-			throw new Error(`'eventName' must be a string.`);
-		}
-		if (typeof listener !== 'function') {
-			throw new Error(`'listener' must be a function.`);
-		}
-		if (!Array.isArray(this.eventListeners[eventName])) {
-			this.eventListeners[eventName] = [];
-		}
-		if (!this.eventListeners[eventName].includes(listener)) {
-			this.eventListeners[eventName].push(listener);
-		}
-	}
-
-	removeEventListener(eventName, listener) {
-		if (typeof eventName !== 'string') {
-			throw new Error(`'eventName' must be a string.`);
-		}
-		if (typeof listener !== 'function') {
-			throw new Error(`'listener' must be a function.`);
-		}
-		const thisEventListeners = this.eventListeners[eventName];
-		if (Array.isArray(thisEventListeners)) {
-			const listenerIndex = thisEventListeners.indexOf(listener);
-			if (listenerIndex >= 0) {
-				thisEventListeners.splice(listenerIndex, 1);
-			}
-		}
-	}
-
-	dispatchEvent(eventName, parameters) {
-		if (typeof eventName !== 'string') {
-			throw new Error(`'eventName' must be a string.`);
-		}
-		if (!Array.isArray(parameters)) {
-			throw new Error(`'parameters' must be an array.`);
-		}
-		const thisEventListeners = this.eventListeners[eventName];
-		if (Array.isArray(thisEventListeners)) {
-			for (const listener of thisEventListeners) {
-				listener.apply(this, parameters);
-			}
-		}
-	}
-
-	destroy() {
-		for (const bundle of this.bundles) {
-			bundle.destroy();
-		}
-		this.constructor.removeAccordion(this);
-	}
-
-};
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const DataPathManager = __webpack_require__(6);
-const ValidationError = __webpack_require__(2);
-const ValidationErrors = __webpack_require__(13);
-const modelModel = __webpack_require__(14);
+const DataPathManager = __webpack_require__(3);
+const ValidationError = __webpack_require__(0);
+const ValidationErrors = __webpack_require__(10);
+const modelModel = __webpack_require__(11);
 
 class Schema {
 	
@@ -1481,10 +951,10 @@ Schema.ValidationError = ValidationError;
 module.exports = Schema;
 
 /***/ }),
-/* 6 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(7);
+const extend = __webpack_require__(4);
 
 class DataPathManager {
 	
@@ -1561,10 +1031,10 @@ class DataPathManager {
 module.exports = DataPathManager;
 
 /***/ }),
-/* 7 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const isPlainObject = __webpack_require__(8);
+const isPlainObject = __webpack_require__(5);
 
 const extend = (...arguments) => {
 	let target = arguments[0];
@@ -1601,7 +1071,7 @@ const extend = (...arguments) => {
 module.exports = extend;
 
 /***/ }),
-/* 8 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -1630,176 +1100,12 @@ if ( true && module.exports) {
 }
 
 /***/ }),
-/* 9 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Base = __webpack_require__(0);
-const CodedError = __webpack_require__(1);
-const Item = __webpack_require__(3);
-
-module.exports = class Bundle extends Base {
+module.exports = class Content {
 
 	constructor(parameters) {
-		super();
-		this.accordion = parameters.accordion;
-		this.element = parameters.element;
-		if (this.options.elements.item) {
-			this.addItems(this.options.elements.item);
-		}
-		return this;
-	}
-
-	get accordion() {
-		return this._accordion;
-	}
-
-	set accordion(accordion) {
-		if (typeof accordion.constructor.isAccordion !== 'function' || !accordion.constructor.isAccordion(accordion)) {
-			throw new Error(`'accordion' must be an instance of the Accordion class.`);
-		}
-		this._accordion = accordion;
-		return this._accordion;
-	}
-
-	get options() {
-		return this.accordion.options;
-	}
-
-	get element() {
-		return this._element;
-	}
-
-	set element(element) {
-		if (!this.accordion.constructor.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
-		}
-		if (this.accordion.constructor.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
-		}
-		this._element = element;
-		element.setAttribute(this.accordion.constructor.elementDataAttribute, 'bundle');
-		return this._element;
-	}
-
-	filterElementsByScope(elementsInput) {
-		if (!this.element) {
-			throw new Error(`Cannot filter elements by scope without a defined 'this.element'.`);
-		}
-		let elements = this.constructor.normalizeElements(elementsInput);
-		const nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
-		return this.constructor.filterElementsByContainer(elements, this.element, nestedBundleElements);
-	}
-
-	get items() {
-		if (!this._items) {
-			this._items = new Set();
-		}
-		return this._items;
-	}
-
-	set items(items) {
-		if (!(items instanceof Set)) {
-			throw new Error(`'items' must be a Set.`);
-		}
-		if (!Array.from(items).every(Item.isInstanceOfThis)) {
-			throw new Error(`'items' must only contain Item class instances.`);
-		}
-		this._items = items;
-		return this._items;
-	}
-
-	addItem(element) {
-		try {
-			const item = new Item({
-				bundle: this,
-				element: element
-			});
-			this.items.add(item);
-			return true;
-		}
-		catch (error) {
-			if (error.code === 'already-initialized') {
-				this.debug(error, element);
-				return false;
-			}
-			else {
-				throw error;
-			}
-		}
-	}
-	
-	addItems(elementsInput) {
-		const elements = this.filterElementsByScope(elementsInput);
-		if (elements.length > 0) {
-			for (const element of elements) {
-				this.addItem(element);
-			}
-		}
-		else {
-			this.debug(`No elements were found when trying to add items.`);
-		}
-	}
-
-	removeItem(item) {
-		if (this.items.has(item)) {
-			this._items.delete(item);
-			item.destroy();
-			return true;
-		}
-		else {
-			this.debug(`Item to be removed was not found in the set.`);
-			return false;
-		}
-	}
-
-	getItemsOrderedByDOMTree() {
-		const items = Array.from(this.items);
-		let itemElements = items.map(item => item.element);
-		if (!itemElements.every(this.constructor.isElement)) {
-			this.debug(`When ordering items by DOM tree, some items do not have elements, those without elements will be omitted from the ordered list.`);
-			itemElements = itemElements.filter(this.constructor.isElement);
-		}
-		if (itemElements.length < 1) {
-			throw new Error(`No items have an element to order by DOM tree.`);
-		}
-		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
-		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
-		return orderedItems;
-	}
-
-	get firstItem() {
-		const items = this.getItemsOrderedByDOMTree();
-		return items[0];
-	}
-
-	get lastItem() {
-		const items = this.getItemsOrderedByDOMTree();
-		return items[items.length - 1];
-	}
-	
-	destroy() {
-		for (const item of Array.from(this.items)) {
-			item.destroy();
-		}
-		delete this.element[this.constructor.elementProperty];
-		this.element.removeAttribute(this.constructor.elementDataAttribute);
-		this.accordion.removeBundle(this);
-	}
-
-};
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Base = __webpack_require__(0);
-const CodedError = __webpack_require__(1);
-const ContentInner = __webpack_require__(16);
-
-module.exports = class Content extends Base {
-
-	constructor(parameters) {
-		super();
 		this.boundUpdateAriaLabelledBy = this.updateAriaLabelledBy.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;
@@ -1814,7 +1120,7 @@ module.exports = class Content extends Base {
 	}
 
 	set item(item) {
-		if (!(item instanceof __webpack_require__(3))) {
+		if (!(item instanceof __webpack_require__(1))) {
 			throw new Error(`'item' must be an instance of the Item class.`);
 		}
 		this._item = item;
@@ -1922,13 +1228,592 @@ module.exports = class Content extends Base {
 };
 
 /***/ }),
-/* 11 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(4);
+module.exports = __webpack_require__(8);
 
 /***/ }),
-/* 12 */
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = class Accordion {
+	
+	static get extend() {
+		return __webpack_require__(9);
+	}
+
+	static get Schema() {
+		return __webpack_require__(2);
+	}
+
+	static get transitionAuto() {
+		return __webpack_require__(12);
+	}
+
+	static get CodedError() {
+		return __webpack_require__(15);
+	}
+	
+	static get Bundle() {
+		return __webpack_require__(16);
+	}
+
+	static get Item() {
+		return __webpack_require__(1);
+	}
+
+	static get Trigger() {
+		return __webpack_require__(17);
+	}
+
+	static get Content() {
+		return __webpack_require__(6);
+	}
+
+	static get ContentInner() {
+		return __webpack_require__(18);
+	}
+
+	static get dataAttributes() {
+		return {
+			elementType: 'data-accordion',
+			itemState: 'data-accordion-item-state'
+		};
+	}
+
+	static get eventNames() {
+		return {
+			addBundle: {
+				before: 'accordionBeforeAddBundle',
+				after: 'accordionAfterAddBundle'
+			},
+			removeBundle: {
+				before: 'accordionBeforeRemoveBundle',
+				after: 'accordionAfterRemoveBundle'
+			},
+			addItem: {
+				before: 'accordionBeforeAddItem',
+				after: 'accordionAfterAddItem'
+			},
+			removeItem: {
+				before: 'accordionBeforeRemoveItem',
+				after: 'accordionAfterRemoveItem'
+			},
+			addTrigger: {
+				before: 'accordionBeforeAddTrigger',
+				after: 'accordionAfterAddTrigger'
+			},
+			removeTrigger: {
+				before: 'accordionBeforeRemoveTrigger',
+				after: 'accordionAfterRemoveTrigger'
+			},
+			addContent: {
+				before: 'accordionBeforeAddContent',
+				after: 'accordionAfterAddContent'
+			},
+			removeContent: {
+				before: 'accordionBeforeRemoveContent',
+				after: 'accordionAfterRemoveContent'
+			},
+			addContentInner: {
+				before: 'accordionBeforeAddContentInner',
+				after: 'accordionAfterAddContentInner'
+			},
+			removeContentInner: {
+				before: 'accordionBeforeRemoveContentInner',
+				after: 'accordionAfterRemoveContentInner'
+			},
+			openItem: {
+				before: 'accordionBeforeOpenItem',
+				after: 'accordionAfterOpenItem'
+			},
+			closeItem: {
+				before: 'accordionBeforeCloseItem',
+				after: 'accordionAfterCloseItem'
+			}
+		};
+	}
+
+	static get optionsDefault() {
+		return {
+			elements: {
+				bundle: null,
+				item: null,
+				trigger: null,
+				content: null,
+				contentInner: null
+			},
+			accessibilityWarnings: true,
+			closeNestedItems: false,
+			defaultOpenItems: null,
+			multipleOpenItems: true,
+			openAnchoredItems: true,
+			debug: false
+		};
+	}
+
+	static get optionsSchema() {
+		const elementsModel = [
+			{
+				type: 'string'
+			},
+			{
+				type: 'object',
+				instanceOf: [Element, NodeList]
+			},
+			{
+				type: 'array',
+				allPropertySchema: [
+					{
+						type: 'string'
+					},
+					{
+						type: 'object',
+						instanceOf: [Element, NodeList]
+					}
+				]
+			}
+		];
+		const optionsModel = {
+			type: 'object',
+			allowUnvalidatedProperties: false,
+			propertySchema: {
+				elements: {
+					type: 'object',
+					allowUnvalidatedProperties: false,
+					propertySchema: {
+						bundle: elementsModel,
+						item: elementsModel,
+						trigger: elementsModel,
+						content: elementsModel,
+						contentInner: elementsModel
+					}
+				},
+				accessibilityWarnings: {
+					type: 'boolean'
+				},
+				closeNestedItems: {
+					type: 'boolean'
+				},
+				defaultOpenItems: elementsModel,
+				multipleOpenItems: {
+					type: 'boolean'
+				},
+				openAnchoredItems: {
+					type: 'boolean'
+				},
+				debug: {
+					type: 'boolean'
+				}
+			}
+		};
+		return new this.Schema(optionsModel);
+	}
+
+	static get accordions() {
+		if (!this._accordions) {
+			this._accordions = new Set();
+		}
+		return this._accordions;
+	}
+
+	static isElement(element) {
+		return element instanceof Element;
+	}
+
+	static normalizeElements(inputValue, elementsSet = new Set()) {
+		if (Array.isArray(inputValue) || inputValue instanceof NodeList) {
+			for (let value of inputValue) {
+				this.normalizeElements(value, elementsSet);
+			}
+		}
+		else if (typeof inputValue === 'string') {
+			let elements = document.querySelectorAll(inputValue);
+			this.normalizeElements(elements, elementsSet);
+		}
+		else if (this.isElement(inputValue)) {
+			elementsSet.add(inputValue);
+		}
+		const optionElements = Array.from(elementsSet);
+		return optionElements;
+	}
+
+	static orderElementsByDOMTree(elements, order = 'asc') {
+		if (!Array.isArray(elements)) {
+			throw new Error(`'elements' must be an array.`);
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error(`'elements' array must only contain elements.`);
+		}
+		order = order.toLowerCase();
+		if (order !== 'asc' && order !== 'desc') {
+			throw new Error(`'order' must be 'asc' or 'desc'.`);
+		}
+		const temporaryClass = 'orderElementsByDOMTree-' + Date.now().toString();
+		for (const element of elements) {
+			element.classList.add(temporaryClass);
+		}
+		const orderedElements = Array.from(document.querySelectorAll('.' + temporaryClass));
+		for (const element of elements) {
+			element.classList.remove(temporaryClass);
+		}
+		if (order === 'asc') {
+			orderedElements.reverse();
+		}
+		return orderedElements;
+	}
+
+	static isElementContainedBy(element, containedByElementsInput = [], operator = 'and') {
+		if (!this.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		const containedByElements = this.normalizeElements(containedByElementsInput);
+		if (typeof operator !== 'string') {
+			throw new Error(`'operator' must be a string.`);
+		}
+		operator = operator.toLowerCase();
+		if (operator !== 'and' && operator !== 'or') {
+			throw new Error(`'operator' must be 'and' or 'or'.`);
+		}
+		let flag = false;
+		for (const containedByElement of containedByElements) {
+			if (containedByElement.contains(element) && containedByElement !== element) {
+				flag = true;
+				if (operator === 'or') {
+					break;
+				}
+			}
+			else {
+				flag = false;
+				if (operator === 'and') {
+					break;
+				}
+			}
+		}
+		return flag;
+	}
+
+	static isElementNotContainedBy(element, notContainedByElementsInput = [], operator = 'and') {
+		if (typeof operator !== 'string') {
+			throw new Error(`'operator' must be a string.`);
+		}
+		operator = operator.toLowerCase();
+		if (operator === 'and') {
+			return !this.isElementContainedBy(element, notContainedByElementsInput, 'or');
+		}
+		else if (operator === 'or') {
+			return !this.isElementContainedBy(element, notContainedByElementsInput, 'and');
+		}
+		else {
+			throw new Error(`'operator' must be 'and' or 'or'.`);
+		}
+	}
+
+	static filterElementsByContainer(elements, containedBy = [], notContainedBy = [], operator = 'and') {
+		if (!Array.isArray(elements)) {
+			throw new Error(`'elements' must be an array.`);
+		}
+		if (!elements.every(this.isElement)) {
+			throw new Error(`'elements' array must only contain elements.`);
+		}
+		const filteredElements = elements.filter((element) => {
+			let flag = true;
+			if (containedBy) {
+				if (!this.isElementContainedBy(element, containedBy, operator)) {
+					flag = false;
+				}
+			}
+			if (notContainedBy) {
+				if (flag) {
+					if (!this.isElementNotContainedBy(element, notContainedBy, operator)) {
+						flag = false;
+					}
+				}
+			}
+			return flag;
+		});
+		return filteredElements;
+	}
+
+	static isElementInitialized(element) {
+		if (this.dataFromElement(element)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	static dataFromElement(element) {
+		if (!this.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		for (const accordion of this.accordions) {
+			for (const bundle of accordion.bundles) {
+				if (element === bundle.element) {
+					return bundle;
+				}
+				for (const item of bundle.items) {
+					if (element === item.element) {
+						return item;
+					}
+					if (item.content) {
+						if (element === item.content.element) {
+							return item.content;
+						}
+						if (item.content.contentInner) {
+							if (element === item.content.contentInner.element) {
+								return item.content.contentInner;
+							}
+						}
+					}
+					if (item.trigger) {
+						if (element === item.trigger.element) {
+							return item.trigger;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	static isAccordion(instance) {
+		return instance instanceof this;
+	}
+
+	static addAccordion(accordion) {
+		if (!this.isAccordion(accordion)) {
+			throw new Error(`'accordion' must be an Accordion class instance.`);
+		}
+		if (this.accordions.has(accordion)) {
+			throw new Error(`'accordion' has already been added.`);
+		}
+		this._accordions.add(accordion);
+		return accordion;
+	}
+
+	static removeAccordion(accordion) {
+		if (this.accordions.has(accordion)) {
+			this.accordions.delete(accordion);
+			return accordion;
+		}
+		else {
+			this.debug(`Accordion to be removed was not found.`);
+			return false;
+		}
+	}
+
+	static initializeHashChangeListener() {
+		if (!this.initializedHashListener) {
+			window.addEventListener('hashchange', this.hashChangeHandler.bind(this));
+			this.initializedHashListener = true;
+		}
+	}
+
+	static hashChangeHandler(event) {
+		this.openAnchoredItem(event.target.location.hash);
+	}
+
+	static openAnchoredItem(hash = location.hash) {
+		if (hash) {
+			const hashElement = document.querySelector(hash);
+			if (hashElement) {
+				let itemOpened = false;
+				for (const accordion of this.accordions) {
+					if (accordion.options.openAnchoredItems) {
+						for (const bundle of accordion.bundles) {
+							for (const item of bundle.items) {
+								if (item.element) {
+									if (item.element.contains(hashElement)) {
+										item.open(true);
+										itemOpened = true;
+									}
+								}
+							}
+						}
+					}
+				}
+				if (itemOpened) {
+					hashElement.scrollIntoView();
+				}
+			}
+		}
+	}
+
+	constructor(options) {
+		this.options = options;
+		this.Accordion.initializeHashChangeListener();
+		this.Accordion.addAccordion(this);
+		if (this.options.elements.bundle) {
+			this.addBundles(this.options.elements.bundle);
+			this.Accordion.openAnchoredItem();
+		}
+		this.debug(this);
+		return this;
+	}
+
+	get options() {
+		if (!this._options) {
+			this._options = this.Accordion.extend({}, this.Accordion.optionsDefault);
+		}
+		return this._options;
+	}
+
+	set options(options) {
+		this.Accordion.optionsSchema.validate(options);
+		this._options = this.Accordion.extend(this.options, options);
+		return this._options;
+	}
+
+	get Accordion() {
+		return this.constructor;
+	}
+
+	get bundles() {
+		if (!this._bundles) {
+			this._bundles = new Set();
+		}
+		return this._bundles;
+	}
+
+	set bundles(bundles) {
+		if (!(bundles instanceof Set)) {
+			throw new Error(`'bundles' must be a Set.`);
+		}
+		if (!Array.from(bundles).every(this.Accordion.Bundle.isBundle)) {
+			throw new Error(`'bundles' must only contain Bundle class instances.`);
+		}
+		this._bundles = bundles;
+		return bundles;
+	}
+
+	addBundle(element) {
+		this.dispatchEvent(this.Accordion.eventNames.addBundle.before, [element]);
+		try {
+			const bundle = new this.Accordion.Bundle({
+				accordion: this,
+				element: element
+			});
+			this.bundles.add(bundle);
+			this.dispatchEvent(this.Accordion.eventNames.addBundle.after, [bundle]);
+			return true;
+		}
+		catch (error) {
+			if (error.code === 'already-initialized') {
+				this.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+	}
+
+	addBundles(elementsInput) {
+		let elements = this.Accordion.normalizeElements(elementsInput);
+		if (elements.length > 0) {
+			elements = this.Accordion.orderElementsByDOMTree(elements, 'asc');
+			for (const element of elements) {
+				this.addBundle(element);
+			}
+		}
+		else {
+			this.debug(`No elements were found when trying to add bundles.`);
+		}
+	}
+
+	removeBundle(bundle) {
+		if (this.bundles.has(bundle)) {
+			this.dispatchEvent(this.Accordion.eventNames.removeBundle.before, [bundle]);
+			this.bundles.delete(bundle);
+			bundle.destroy();
+			this.dispatchEvent(this.Accordion.eventNames.removeBundle.after, [bundle.element]);
+			return bundle;
+		}
+		else {
+			this.debug(`Bundle to be removed was not found in the set.`);
+			return false;
+		}
+	}
+
+	get eventListeners() {
+		if (!this._eventListeners) {
+			this._eventListeners = {};
+		}
+		return this._eventListeners;
+	}
+
+	addEventListener(eventName, listener) {
+		if (typeof eventName !== 'string') {
+			throw new Error(`'eventName' must be a string.`);
+		}
+		if (typeof listener !== 'function') {
+			throw new Error(`'listener' must be a function.`);
+		}
+		if (!Array.isArray(this.eventListeners[eventName])) {
+			this.eventListeners[eventName] = [];
+		}
+		if (!this.eventListeners[eventName].includes(listener)) {
+			this.eventListeners[eventName].push(listener);
+		}
+	}
+
+	removeEventListener(eventName, listener) {
+		if (typeof eventName !== 'string') {
+			throw new Error(`'eventName' must be a string.`);
+		}
+		if (typeof listener !== 'function') {
+			throw new Error(`'listener' must be a function.`);
+		}
+		const thisEventListeners = this.eventListeners[eventName];
+		if (Array.isArray(thisEventListeners)) {
+			const listenerIndex = thisEventListeners.indexOf(listener);
+			if (listenerIndex >= 0) {
+				thisEventListeners.splice(listenerIndex, 1);
+			}
+		}
+	}
+
+	dispatchEvent(eventName, parameters) {
+		if (typeof eventName !== 'string') {
+			throw new Error(`'eventName' must be a string.`);
+		}
+		if (!Array.isArray(parameters)) {
+			throw new Error(`'parameters' must be an array.`);
+		}
+		const thisEventListeners = this.eventListeners[eventName];
+		if (Array.isArray(thisEventListeners)) {
+			for (const listener of thisEventListeners) {
+				listener.apply(this, parameters);
+			}
+		}
+	}
+
+	destroy() {
+		for (const bundle of this.bundles) {
+			bundle.destroy();
+		}
+		this.Accordion.removeAccordion(this);
+	}
+
+	debug(...parameters) {
+		if (this.options.debug) {
+			console.log('Accordion Debug:', ...parameters);
+		}
+	}
+
+	accessibilityWarn(...parameters) {
+		if (this.options.accessibilityWarnings) {
+			console.warn('Accordion Accessibility Warning:', ...parameters);
+		}
+	}
+
+};
+
+/***/ }),
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -1998,10 +1883,10 @@ if ( true && module.exports) {
 }
 
 /***/ }),
-/* 13 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const ValidationError = __webpack_require__(2);
+const ValidationError = __webpack_require__(0);
 
 class ValidationErrors {
 	
@@ -2052,11 +1937,11 @@ class ValidationErrors {
 module.exports = ValidationErrors;
 
 /***/ }),
-/* 14 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const extend = __webpack_require__(7);
-const ValidationError = __webpack_require__(2);
+const extend = __webpack_require__(4);
+const ValidationError = __webpack_require__(0);
 
 const typeRestriction = (types) => {
 	if (!Array.isArray(types)) {
@@ -2192,199 +2077,11 @@ modelPropertySchema.propertySchema.allPropertySchema = model;
 module.exports = model;
 
 /***/ }),
-/* 15 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Base = __webpack_require__(0);
-const CodedError = __webpack_require__(1);
-
-module.exports = class Trigger extends Base {
-
-	constructor(parameters) {
-		super();
-		this.boundClickHandler = this.clickHandler.bind(this);
-		this.boundKeydownHandler = this.keydownHandler.bind(this);
-		this.boundUpdateAriaControls = this.updateAriaControls.bind(this);
-		this.item = parameters.item;
-		this.element = parameters.element;
-		return this;
-	}
-
-	get item() {
-		return this._item;
-	}
-
-	set item(item) {
-		if (!(item instanceof __webpack_require__(3))) {
-			throw new Error(`'item' must be an instance of the Item class.`);
-		}
-		this._item = item;
-	}
-
-	get options() {
-		return this.item.bundle.accordion.options;
-	}
-
-	get element() {
-		return this._element;
-	}
-
-	set element(element) {
-		if (!this.constructor.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
-		}
-		if (this.constructor.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
-		}
-
-		this._element = element;
-
-		element[this.constructor.elementProperty] = this;
-		
-		element.addEventListener('click', this.boundClickHandler);
-		
-		element.addEventListener('keydown', this.boundKeydownHandler);
-
-		element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
-
-		this.usingExistingId = true;
-		if (!element.getAttribute('id')) {
-			element.setAttribute('id', 'accordion-trigger-' + this.item.count);
-			this.usingExistingId = false;
-		}
-
-		this.updateAriaControls();
-		this.item.element.addEventListener(this.item.constructor.accordionItemAddContentEventName, this.boundUpdateAriaControls);
-
-		this.updateAriaExpanded();
-
-		if (!(element instanceof HTMLButtonElement)) {
-			this.accessibilityWarn(`Accordion trigger should be a <button> element.`);
-		}
-
-		return element;
-	}
-
-	updateAriaControls() {
-		if (this.element && this.item.content.element) {
-			this.element.setAttribute('aria-controls', this.item.content.element.getAttribute('id'));
-		}
-	}
-
-	updateAriaExpanded() {
-		if (this.element) {
-			if (this.item.state === 'closing' || this.item.state === 'closed') {
-				this.element.setAttribute('aria-expanded', 'false');
-			}
-			else if (this.item.state === 'opening' || this.item.state === 'opened') {
-				this.element.setAttribute('aria-expanded', 'true');
-			}
-		}
-	}
-
-	clickHandler() {
-		this.item.toggle();
-	}
-
-	keydownHandler(event) {
-		if (event.keyCode === 40) { // arrow down
-			event.preventDefault();
-			event.stopPropagation();
-			this.item.nextItem.trigger.element.focus();
-		}
-		else if (event.keyCode === 38) { // arrow up
-			event.preventDefault();
-  		event.stopPropagation();
-			this.item.previousItem.trigger.element.focus();
-		}
-		else if (event.keyCode === 36) { // home
-			event.preventDefault();
-  		event.stopPropagation();
-			this.item.bundle.firstItem.trigger.element.focus();
-		}
-		else if (event.keyCode === 35) { // end
-			event.preventDefault();
-  		event.stopPropagation();
-			this.item.bundle.lastItem.trigger.element.focus();
-		}
-	}
-
-	destroy() {
-		delete this.element[this.constructor.elementProperty];
-		this.element.removeAttribute(this.constructor.elementDataAttribute);
-		this.element.removeEventListener('click', this.boundClickHandler);
-		this.element.removeEventListener('keydown', this.boundKeydownHandler);
-		if (!this.usingExistingId) {
-			this.element.removeAttribute('id');
-		}
-		this.element.removeAttribute('aria-expanded');
-		this.element.removeAttribute('aria-controls');
-		this.item.element.removeEventListener(this.item.constructor.accordionItemAddContentEventName, this.boundUpdateAriaControls);
-	}
-
-};
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const Base = __webpack_require__(0);
-const CodedError = __webpack_require__(1);
-
-module.exports = class ContentInner extends Base {
-
-	constructor(parameters) {
-		super();
-		this.content = parameters.content;
-		this.element = parameters.element;
-		return this;
-	}
-
-	get content() {
-		return this._content;
-	}
-
-	set content(content) {
-		if (!(content instanceof __webpack_require__(10))) {
-			throw new Error(`'content' must be an instance of the Content class.`);
-		}
-		this._content = content;
-	}
-
-	get options() {
-		return this.content.item.bundle.accordion.options;
-	}
-
-	get element() {
-		return this._element;
-	}
-
-	set element(element) {
-		if (!this.constructor.isElement(element)) {
-			throw new Error(`'element' must be an element.`);
-		}
-		if (this.constructor.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
-		}
-		this._element = element;
-		element[this.constructor.elementProperty] = this;
-		element.setAttribute(this.constructor.elementDataAttribute, 'content-inner');
-		return this._element;
-	}
-
-	destroy() {
-		delete this.element[this.constructor.elementProperty];
-		this.element.removeAttribute(this.constructor.elementDataAttribute);
-	}
-
-};
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const optionsSchema = __webpack_require__(18);
-const extend = __webpack_require__(19);
+const optionsSchema = __webpack_require__(13);
+const extend = __webpack_require__(14);
 
 const transitionAuto = (function () {
 
@@ -2520,10 +2217,10 @@ const transitionAuto = (function () {
 module.exports = transitionAuto;
 
 /***/ }),
-/* 18 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Schema = __webpack_require__(5);
+const Schema = __webpack_require__(2);
 
 const optionsModel = {
 	required: true,
@@ -2600,10 +2297,10 @@ const optionsSchema = new Schema(optionsModel);
 module.exports = optionsSchema;
 
 /***/ }),
-/* 19 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const isPlainObject = __webpack_require__(8);
+const isPlainObject = __webpack_require__(5);
 
 const extend = (...arguments) => {
 	let target = arguments[0];
@@ -2638,6 +2335,373 @@ const extend = (...arguments) => {
 };
 
 module.exports = extend;
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports) {
+
+module.exports = class CodedError extends Error {
+  constructor(code, ...params) {
+    super(...params);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CodedError);
+    }
+    this.code = code;
+  }
+};
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
+
+module.exports = class Bundle {
+
+	static isBundle(instance) {
+		return instance instanceof this;
+	}
+	
+	constructor(parameters) {
+		this.accordion = parameters.accordion;
+		this.element = parameters.element;
+		if (this.options.elements.item) {
+			this.addItems(this.options.elements.item);
+		}
+		return this;
+	}
+
+	get accordion() {
+		return this._accordion;
+	}
+
+	set accordion(accordion) {
+		if (typeof accordion.constructor.isAccordion !== 'function' || !accordion.constructor.isAccordion(accordion)) {
+			throw new Error(`'accordion' must be an instance of the Accordion class.`);
+		}
+		this._accordion = accordion;
+		return accordion;
+	}
+
+	get Accordion() {
+		return this.accordion.Accordion;
+	}
+
+	get options() {
+		return this.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.Accordion.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.Accordion.isElementInitialized(element)) {
+			throw new this.Accordion.CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		this._element = element;
+		element.setAttribute(this.Accordion.dataAttributes.elementType, 'bundle');
+		return element;
+	}
+
+	filterElementsByScope(elementsInput) {
+		if (!this.element) {
+			throw new Error(`Cannot filter elements by scope without a defined 'this.element'.`);
+		}
+		let elements = this.Accordion.normalizeElements(elementsInput);
+		const nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
+		return this.Accordion.filterElementsByContainer(elements, this.element, nestedBundleElements);
+	}
+
+	get items() {
+		if (!this._items) {
+			this._items = new Set();
+		}
+		return this._items;
+	}
+
+	set items(items) {
+		if (!(items instanceof Set)) {
+			throw new Error(`'items' must be a Set.`);
+		}
+		if (!Array.from(items).every(this.Accordion.Item.isItem)) {
+			throw new Error(`'items' must only contain Item class instances.`);
+		}
+		this._items = items;
+		return items;
+	}
+
+	addItem(element) {
+		this.accordion.dispatchEvent(this.Accordion.eventNames.addItem.before, [element]);
+		try {
+			const item = new this.Accordion.Item({
+				bundle: this,
+				element: element
+			});
+			this.items.add(item);
+			this.accordion.dispatchEvent(this.Accordion.eventNames.addItem.after, [item]);
+			return true;
+		}
+		catch (error) {
+			if (error.code === 'already-initialized') {
+				this.accordion.debug(error, element);
+				return false;
+			}
+			else {
+				throw error;
+			}
+		}
+	}
+	
+	addItems(elementsInput) {
+		const elements = this.filterElementsByScope(elementsInput);
+		if (elements.length > 0) {
+			for (const element of elements) {
+				this.addItem(element);
+			}
+		}
+		else {
+			this.accordion.debug(`No elements were found when trying to add items.`);
+		}
+	}
+
+	removeItem(item) {
+		if (this.items.has(item)) {
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeItem.before, [item]);
+			this._items.delete(item);
+			item.destroy();
+			this.accordion.dispatchEvent(this.Accordion.eventNames.removeItem.after, [item.element]);
+			return item;
+		}
+		else {
+			this.accordion.debug(`Item to be removed was not found in the set.`);
+			return false;
+		}
+	}
+
+	getItemsOrderedByDOMTree() {
+		const items = Array.from(this.items);
+		let itemElements = items.map(item => item.element);
+		if (!itemElements.every(this.Accordion.isElement)) {
+			this.debug(`When ordering items by DOM tree, some items do not have elements, those without elements will be omitted from the ordered list.`);
+			itemElements = itemElements.filter(this.Accordion.isElement);
+		}
+		if (itemElements.length < 1) {
+			throw new Error(`No items have an element to order by DOM tree.`);
+		}
+		const orderedItemElements = this.Accordion.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => this.Accordion.dataFromElement(itemElement));
+		return orderedItems;
+	}
+
+	get firstItem() {
+		const items = this.getItemsOrderedByDOMTree();
+		return items[0];
+	}
+
+	get lastItem() {
+		const items = this.getItemsOrderedByDOMTree();
+		return items[items.length - 1];
+	}
+	
+	destroy() {
+		for (const item of Array.from(this.items)) {
+			item.destroy();
+		}
+		this.element.removeAttribute(this.Accordion.dataAttributes.elementType);
+		this.accordion.removeBundle(this);
+	}
+
+};
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports) {
+
+module.exports = class Trigger {
+
+	constructor(parameters) {
+		this.boundClickHandler = this.clickHandler.bind(this);
+		this.boundKeydownHandler = this.keydownHandler.bind(this);
+		this.boundUpdateAriaControls = this.updateAriaControls.bind(this);
+		this.item = parameters.item;
+		this.element = parameters.element;
+		return this;
+	}
+
+	get item() {
+		return this._item;
+	}
+
+	set item(item) {
+		if (typeof item.constructor.isItem !== 'function' || !item.constructor.isItem(item)) {
+			throw new Error(`'item' must be an instance of the Item class.`);
+		}
+		this._item = item;
+		return item;
+	}
+
+	get accordion() {
+		return this.item.accordion;
+	}
+
+	get Accordion() {
+		return this.accordion.Accordion;
+	}
+
+	get options() {
+		return this.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.Accordion.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.Accordion.isElementInitialized(element)) {
+			throw new this.Accordion.CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		if (!(element instanceof HTMLButtonElement)) {
+			this.accordion.accessibilityWarn(`Accordion trigger should be a <button> element.`);
+		}
+
+		element.addEventListener('click', this.boundClickHandler);
+		element.addEventListener('keydown', this.boundKeydownHandler);
+		element.setAttribute(this.Accordion.dataAttributes.elementType, 'trigger');
+
+		if (element.getAttribute('id')) {
+			this.usingExistingId = true;
+		}
+		else {
+			this.usingExistingId = false;
+			element.setAttribute('id', 'accordion-trigger-' + this.item.count);
+		}
+
+		this.updateAriaControls();
+		this.item.element.addEventListener(this.item.constructor.accordionItemAddContentEventName, this.boundUpdateAriaControls);
+		this.updateAriaExpanded();
+
+		this._element = element;
+		return element;
+	}
+
+	updateAriaControls() {
+		if (this.element && this.item.content.element) {
+			this.element.setAttribute('aria-controls', this.item.content.element.getAttribute('id'));
+		}
+	}
+
+	updateAriaExpanded() {
+		if (this.element) {
+			if (this.item.state === 'closing' || this.item.state === 'closed') {
+				this.element.setAttribute('aria-expanded', 'false');
+			}
+			else if (this.item.state === 'opening' || this.item.state === 'opened') {
+				this.element.setAttribute('aria-expanded', 'true');
+			}
+		}
+	}
+
+	clickHandler() {
+		this.item.toggle();
+	}
+
+	keydownHandler(event) {
+		if (this.item) {
+			if (event.keyCode === 40) { // arrow down
+				event.preventDefault();
+				event.stopPropagation();
+				if (this.item.nextItem.trigger.element) {
+					this.item.nextItem.trigger.element.focus();
+				}
+			}
+			else if (event.keyCode === 38) { // arrow up
+				event.preventDefault();
+				event.stopPropagation();
+				this.item.previousItem.trigger.element.focus();
+			}
+			else if (event.keyCode === 36) { // home
+				event.preventDefault();
+				event.stopPropagation();
+				this.item.bundle.firstItem.trigger.element.focus();
+			}
+			else if (event.keyCode === 35) { // end
+				event.preventDefault();
+				event.stopPropagation();
+				this.item.bundle.lastItem.trigger.element.focus();
+			}
+		}
+	}
+
+	destroy() {
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+		this.element.removeEventListener('click', this.boundClickHandler);
+		this.element.removeEventListener('keydown', this.boundKeydownHandler);
+		if (!this.usingExistingId) {
+			this.element.removeAttribute('id');
+		}
+		this.element.removeAttribute('aria-expanded');
+		this.element.removeAttribute('aria-controls');
+		this.item.element.removeEventListener(this.item.constructor.accordionItemAddContentEventName, this.boundUpdateAriaControls);
+	}
+
+};
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = class ContentInner {
+
+	constructor(parameters) {
+		this.content = parameters.content;
+		this.element = parameters.element;
+		return this;
+	}
+
+	get content() {
+		return this._content;
+	}
+
+	set content(content) {
+		if (!(content instanceof __webpack_require__(6))) {
+			throw new Error(`'content' must be an instance of the Content class.`);
+		}
+		this._content = content;
+	}
+
+	get options() {
+		return this.content.item.bundle.accordion.options;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!this.constructor.isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.constructor.isElementInitialized(element)) {
+			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		this._element = element;
+		element[this.constructor.elementProperty] = this;
+		element.setAttribute(this.constructor.elementDataAttribute, 'content-inner');
+		return this._element;
+	}
+
+	destroy() {
+		delete this.element[this.constructor.elementProperty];
+		this.element.removeAttribute(this.constructor.elementDataAttribute);
+	}
+
+};
 
 /***/ })
 /******/ ]);

@@ -18,7 +18,7 @@ module.exports = class Bundle {
 	}
 
 	set accordion(accordion) {
-		if (typeof accordion.constructor?.isAccordion !== 'function' || !accordion.constructor.isAccordion(accordion)) {
+		if (typeof accordion.constructor.isAccordion !== 'function' || !accordion.constructor.isAccordion(accordion)) {
 			throw new Error(`'accordion' must be an instance of the Accordion class.`);
 		}
 		this._accordion = accordion;

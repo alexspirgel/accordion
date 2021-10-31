@@ -1,11 +1,6 @@
-const Base = require('./base.js');
-const CodedError = require('./coded-error.js');
-const ContentInner = require('./content-inner.js');
-
-module.exports = class Content extends Base {
+module.exports = class Content {
 
 	constructor(parameters) {
-		super();
 		this.boundUpdateAriaLabelledBy = this.updateAriaLabelledBy.bind(this);
 		this.item = parameters.item;
 		this.element = parameters.element;

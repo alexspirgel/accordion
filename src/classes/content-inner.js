@@ -1,10 +1,6 @@
-const Base = require('./base.js');
-const CodedError = require('./coded-error.js');
-
-module.exports = class ContentInner extends Base {
+module.exports = class ContentInner {
 
 	constructor(parameters) {
-		super();
 		this.content = parameters.content;
 		this.element = parameters.element;
 		return this;

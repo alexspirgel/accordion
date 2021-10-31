@@ -85,6 +85,14 @@ module.exports = class Accordion {
 				before: 'accordionBeforeRemoveContentInner',
 				after: 'accordionAfterRemoveContentInner'
 			},
+			openItem: {
+				before: 'accordionBeforeOpenItem',
+				after: 'accordionAfterOpenItem'
+			},
+			closeItem: {
+				before: 'accordionBeforeCloseItem',
+				after: 'accordionAfterCloseItem'
+			}
 		};
 	}
 

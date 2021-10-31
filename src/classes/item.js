@@ -34,13 +34,12 @@ module.exports = class Item {
 	}
 
 	constructor(parameters) {
-		super();
 		this.bundle = parameters.bundle;
 		this.element = parameters.element;
 		const defaultOpenItemElements = this.Accordion.normalizeElements(this.options.defaultOpenItems);
 		this.state = 'closed';
 		if (defaultOpenItemElements.includes(this.element)) {
-			this.state = 'opened'
+			this.state = 'opened';
 		}
 		if (this.options.elements.content) {
 			this.addContent(this.options.elements.content);
@@ -56,7 +55,7 @@ module.exports = class Item {
 	}
 
 	set bundle(bundle) {
-		if (typeof bundle.constructor?.isBundle !== 'function' || !bundle.constructor.isBundle(bundle)) {
+		if (typeof bundle.constructor.isBundle !== 'function' || !bundle.constructor.isBundle(bundle)) {
 			throw new Error(`'bundle' must be an instance of the Bundle class.`);
 		}
 		this._bundle = bundle;
@@ -84,7 +83,7 @@ module.exports = class Item {
 			throw new Error(`'element' must be an element.`);
 		}
 		if (this.Accordion.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+			throw new this.Accordion.CodedError('already-initialized', `'element' already exists as part of an accordion.`);
 		}
 		element.setAttribute(this.Accordion.dataAttributes.elementType, 'item');
 		this._element = element;
@@ -196,7 +195,7 @@ module.exports = class Item {
 			}
 			catch (error) {
 				if (error.code = 'already-initialized') {
-					this.debug(error, element);
+					this.accordion.debug(error, element);
 					return false;
 				}
 				else {
@@ -219,14 +218,18 @@ module.exports = class Item {
 	}
 
 	get nestedBundleElements() {
-		let nestedBundleElements = this.element.querySelectorAll('[' + this.constructor.elementDataAttribute + '="bundle"]');
-		return Array.from(nestedBundleElements);
+		if (this.element) {
+			let nestedBundleElements = this.element.querySelectorAll('[' + this.Accordion.dataAttributes.elementType + '="bundle"]');
+			return Array.from(nestedBundleElements);
+		}
 	}
 
 	get nextLevelNestedBundleElements() {
 		const nestedBundleElements = this.nestedBundleElements;
-		const nextLevelNestedBundleElements = this.constructor.filterElementsByContainer(nestedBundleElements, null, nestedBundleElements);
-		return nextLevelNestedBundleElements;
+		if (nestedBundleElements) {
+			const nextLevelNestedBundleElements = this.Accordion.filterElementsByContainer(nestedBundleElements, null, nestedBundleElements);
+			return nextLevelNestedBundleElements;
+		}
 	}
 
 	getNextPreviousItem(nextPrevious) {
@@ -239,9 +242,10 @@ module.exports = class Item {
 		}
 		let returnItem;
 		const items = Array.from(this.bundle.items);
-		const itemElements = items.map(item => item.element);
-		const orderedItemElements = this.constructor.orderElementsByDOMTree(itemElements, 'desc');
-		const orderedItems = orderedItemElements.map(itemElement => itemElement[this.constructor.elementProperty]);
+		const itemMappedElements = items.map(item => item.element);
+		const itemElements = itemMappedElements.filter(this.Accordion.isElement);
+		const orderedItemElements = this.Accordion.orderElementsByDOMTree(itemElements, 'desc');
+		const orderedItems = orderedItemElements.map(itemElement => this.Accordion.dataFromElement(itemElement));
 		const indexModifier = (nextPrevious === 'next') ? 1 : -1;
 		const indexWrapValue = (nextPrevious === 'next') ? 0 : (orderedItems.length - 1);
 		const thisIndex = orderedItems.indexOf(this);
@@ -266,14 +270,36 @@ module.exports = class Item {
 	}
 
 	open(skipTransition = false) {
+
+		if (!this.content) {
+			this.debug(`Item cannot open, missing content.`);
+			return false;
+		}
 		if (!this.content.element) {
 			this.debug(`Item cannot open, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner) {
+			this.debug(`Item cannot open, missing content inner.`);
 			return false;
 		}
 		if (!this.content.contentInner.element) {
 			this.debug(`Item cannot open, missing content inner element.`);
 			return false;
 		}
+
+		this.accordion.dispatchEvent(this.Accordion.eventNames.openItem.before, [this]);
+
+		if (!this.options.multipleOpenItems) {
+			if (this.bundle) {
+				for (const bundleItem of this.bundle.items) {
+					if (bundleItem !== this) {
+						bundleItem.close(skipTransition);
+					}
+				}
+			}
+		}
+
 		let existingStyleTransition = '';
 		if (skipTransition) {
 			existingStyleTransition = this.content.element.style.transition;
@@ -292,28 +318,33 @@ module.exports = class Item {
 					this.content.element.offsetWidth; // force update
 					this.content.element.style.transition = existingStyleTransition;
 				}
+				this.accordion.dispatchEvent(this.Accordion.eventNames.openItem.after, [this]);
 			}
 		});
-		if (!this.options.multipleOpenItems) {
-			if (this.bundle) {
-				for (const bundleItem of this.bundle.items) {
-					if (bundleItem !== this) {
-						bundleItem.close(skipTransition);
-					}
-				}
-			}
-		}
+
 	}
 	
 	close(skipTransition = false) {
+
+		if (!this.content) {
+			this.debug(`Item cannot close, missing content.`);
+			return false;
+		}
 		if (!this.content.element) {
 			this.debug(`Item cannot close, missing content element.`);
+			return false;
+		}
+		if (!this.content.contentInner) {
+			this.debug(`Item cannot close, missing content inner.`);
 			return false;
 		}
 		if (!this.content.contentInner.element) {
 			this.debug(`Item cannot close, missing content inner element.`);
 			return false;
 		}
+
+		this.accordion.dispatchEvent(this.Accordion.eventNames.closeItem.before, [this]);
+
 		let existingStyleTransition = '';
 		if (skipTransition) {
 			existingStyleTransition = this.content.element.style.transition;
@@ -332,10 +363,11 @@ module.exports = class Item {
 					this.content.element.offsetWidth; // force update
 					this.content.element.style.transition = existingStyleTransition;
 				}
+				this.accordion.dispatchEvent(this.Accordion.eventNames.closeItem.after, [this]);
 				if (this.options.closeNestedItems) {
 					if (this.nextLevelNestedBundleElements) {
 						for (const bundleElement of this.nextLevelNestedBundleElements) {
-							const bundle = bundleElement[this.constructor.elementProperty]
+							const bundle = this.Accordion.dataFromElement(bundleElement);
 							for (const item of bundle.items) {
 								item.close(true);
 							}
@@ -344,6 +376,7 @@ module.exports = class Item {
 				}
 			}
 		});
+	
 	}
 
 	toggle(skipTransition = false) {
@@ -362,7 +395,6 @@ module.exports = class Item {
 		if (this.content) {
 			this.content.destroy();
 		}
-		delete this.element[this.constructor.elementProperty];
 		this.element.removeAttribute(this.Accordion.dataAttributes.elementType);
 		this.element.removeAttribute(this.Accordion.dataAttributes.itemState);
 		this.bundle.removeItem(this);

@@ -1,10 +1,6 @@
-const Base = require('./base.js');
-const CodedError = require('./coded-error.js');
-
-module.exports = class Trigger extends Base {
+module.exports = class Trigger {
 
 	constructor(parameters) {
-		super();
 		this.boundClickHandler = this.clickHandler.bind(this);
 		this.boundKeydownHandler = this.keydownHandler.bind(this);
 		this.boundUpdateAriaControls = this.updateAriaControls.bind(this);
@@ -18,14 +14,23 @@ module.exports = class Trigger extends Base {
 	}
 
 	set item(item) {
-		if (!(item instanceof require('./item.js'))) {
+		if (typeof item.constructor.isItem !== 'function' || !item.constructor.isItem(item)) {
 			throw new Error(`'item' must be an instance of the Item class.`);
 		}
 		this._item = item;
+		return item;
+	}
+
+	get accordion() {
+		return this.item.accordion;
+	}
+
+	get Accordion() {
+		return this.accordion.Accordion;
 	}
 
 	get options() {
-		return this.item.bundle.accordion.options;
+		return this.accordion.options;
 	}
 
 	get element() {
@@ -33,38 +38,33 @@ module.exports = class Trigger extends Base {
 	}
 
 	set element(element) {
-		if (!this.constructor.isElement(element)) {
+		if (!this.Accordion.isElement(element)) {
 			throw new Error(`'element' must be an element.`);
 		}
-		if (this.constructor.isElementInitialized(element)) {
-			throw new CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		if (this.Accordion.isElementInitialized(element)) {
+			throw new this.Accordion.CodedError('already-initialized', `'element' already exists as part of an accordion.`);
+		}
+		if (!(element instanceof HTMLButtonElement)) {
+			this.accordion.accessibilityWarn(`Accordion trigger should be a <button> element.`);
 		}
 
-		this._element = element;
-
-		element[this.constructor.elementProperty] = this;
-		
 		element.addEventListener('click', this.boundClickHandler);
-		
 		element.addEventListener('keydown', this.boundKeydownHandler);
+		element.setAttribute(this.Accordion.dataAttributes.elementType, 'trigger');
 
-		element.setAttribute(this.constructor.elementDataAttribute, 'trigger');
-
-		this.usingExistingId = true;
-		if (!element.getAttribute('id')) {
-			element.setAttribute('id', 'accordion-trigger-' + this.item.count);
+		if (element.getAttribute('id')) {
+			this.usingExistingId = true;
+		}
+		else {
 			this.usingExistingId = false;
+			element.setAttribute('id', 'accordion-trigger-' + this.item.count);
 		}
 
 		this.updateAriaControls();
 		this.item.element.addEventListener(this.item.constructor.accordionItemAddContentEventName, this.boundUpdateAriaControls);
-
 		this.updateAriaExpanded();
 
-		if (!(element instanceof HTMLButtonElement)) {
-			this.accessibilityWarn(`Accordion trigger should be a <button> element.`);
-		}
-
+		this._element = element;
 		return element;
 	}
 
@@ -90,25 +90,29 @@ module.exports = class Trigger extends Base {
 	}
 
 	keydownHandler(event) {
-		if (event.keyCode === 40) { // arrow down
-			event.preventDefault();
-			event.stopPropagation();
-			this.item.nextItem.trigger.element.focus();
-		}
-		else if (event.keyCode === 38) { // arrow up
-			event.preventDefault();
-  		event.stopPropagation();
-			this.item.previousItem.trigger.element.focus();
-		}
-		else if (event.keyCode === 36) { // home
-			event.preventDefault();
-  		event.stopPropagation();
-			this.item.bundle.firstItem.trigger.element.focus();
-		}
-		else if (event.keyCode === 35) { // end
-			event.preventDefault();
-  		event.stopPropagation();
-			this.item.bundle.lastItem.trigger.element.focus();
+		if (this.item) {
+			if (event.keyCode === 40) { // arrow down
+				event.preventDefault();
+				event.stopPropagation();
+				if (this.item.nextItem.trigger.element) {
+					this.item.nextItem.trigger.element.focus();
+				}
+			}
+			else if (event.keyCode === 38) { // arrow up
+				event.preventDefault();
+				event.stopPropagation();
+				this.item.previousItem.trigger.element.focus();
+			}
+			else if (event.keyCode === 36) { // home
+				event.preventDefault();
+				event.stopPropagation();
+				this.item.bundle.firstItem.trigger.element.focus();
+			}
+			else if (event.keyCode === 35) { // end
+				event.preventDefault();
+				event.stopPropagation();
+				this.item.bundle.lastItem.trigger.element.focus();
+			}
 		}
 	}
 
