@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Accordion Demo</title>
+		<!-- <link href="./index.css" rel="stylesheet"/> -->
+		<script src="../dist/accordion.js"></script>
+	</head>
+	<body>
+		<ul class="accordion">
+			<li class="accordion__item">
+				<button class="accordion__item-trigger">Short Content</button>
+				<div class="accordion__item-content">
+					<div class="accordion__item-content-inner">
+						<p>Lorem ipsum dolor sit amet.</p>
+					</div>
+				</div>
+			</li>
+			<li class="accordion__item">
+				<button class="accordion__item-trigger">Long Content</button>
+				<div class="accordion__item-content">
+					<div class="accordion__item-content-inner">
+						<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus a urna sapien. Nullam imperdiet molestie eros, a sagittis nisi aliquam viverra. Sed eleifend, turpis a tristique pretium, dui neque ultrices ligula, sed pellentesque est nulla sit amet ante. Ut dignissim cursus libero sit amet ullamcorper. Integer efficitur accumsan dolor eu luctus. Nullam nibh orci, laoreet eu feugiat quis, consequat ac metus. Aliquam vel nunc eu urna rhoncus molestie a non nisi. Maecenas dapibus ornare semper. Maecenas hendrerit odio sed erat maximus lacinia. Nullam velit nunc, aliquam ut lacinia sed, imperdiet sit amet sapien.</p>
+						<p>Morbi vestibulum id massa vel efficitur. Curabitur sollicitudin eleifend ipsum, nec fringilla lectus varius a. Maecenas condimentum justo sodales, blandit lectus sit amet, tempus odio. Praesent orci ligula, hendrerit id eleifend in, tincidunt sed nunc. Suspendisse nec erat eget elit consectetur pharetra. Suspendisse sollicitudin, augue quis faucibus aliquet, eros enim elementum neque, quis condimentum orci erat sit amet turpis. Integer risus nisi, commodo ac vehicula non, iaculis a tortor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec fermentum bibendum dolor. Integer vitae bibendum tortor. Praesent in ligula molestie, congue justo eget, efficitur erat. Aenean sit amet vehicula felis.</p>
+						<p>Pellentesque feugiat convallis est, eget pellentesque leo. Nulla vestibulum nunc nec libero pulvinar vestibulum. Cras cursus tellus dolor, vel auctor lorem laoreet sed. Aliquam malesuada sapien vitae neque sagittis aliquam id vel mi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed et porta leo. Vestibulum ut enim accumsan, euismod risus vitae, pellentesque augue. Donec diam dolor, dictum sit amet mauris at, tempus pretium ante. Quisque ultrices sit amet velit eu aliquet. Vivamus egestas placerat ante vel consequat. Aenean sit amet ligula ut nisi condimentum scelerisque vitae vitae nisl.</p>
+					</div>
+				</div>
+			</li>
+			<li class="accordion__item">
+				<button class="accordion__item-trigger">Nested Accordion</button>
+				<div class="accordion__item-content">
+					<div class="accordion__item-content-inner">
+						<ul class="accordion">
+							<li class="accordion__item">
+								<button class="accordion__item-trigger">Short Content (depth 2)</button>
+								<div class="accordion__item-content">
+									<div class="accordion__item-content-inner">
+										<p>Lorem ipsum dolor sit amet.</p>
+									</div>
+								</div>
+							</li>
+							<li class="accordion__item">
+								<button class="accordion__item-trigger">Long Content (depth 2)</button>
+								<div class="accordion__item-content">
+									<div class="accordion__item-content-inner">
+										<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus a urna sapien. Nullam imperdiet molestie eros, a sagittis nisi aliquam viverra. Sed eleifend, turpis a tristique pretium, dui neque ultrices ligula, sed pellentesque est nulla sit amet ante. Ut dignissim cursus libero sit amet ullamcorper. Integer efficitur accumsan dolor eu luctus. Nullam nibh orci, laoreet eu feugiat quis, consequat ac metus. Aliquam vel nunc eu urna rhoncus molestie a non nisi. Maecenas dapibus ornare semper. Maecenas hendrerit odio sed erat maximus lacinia. Nullam velit nunc, aliquam ut lacinia sed, imperdiet sit amet sapien.</p>
+										<p>Morbi vestibulum id massa vel efficitur. Curabitur sollicitudin eleifend ipsum, nec fringilla lectus varius a. Maecenas condimentum justo sodales, blandit lectus sit amet, tempus odio. Praesent orci ligula, hendrerit id eleifend in, tincidunt sed nunc. Suspendisse nec erat eget elit consectetur pharetra. Suspendisse sollicitudin, augue quis faucibus aliquet, eros enim elementum neque, quis condimentum orci erat sit amet turpis. Integer risus nisi, commodo ac vehicula non, iaculis a tortor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec fermentum bibendum dolor. Integer vitae bibendum tortor. Praesent in ligula molestie, congue justo eget, efficitur erat. Aenean sit amet vehicula felis.</p>
+										<p>Pellentesque feugiat convallis est, eget pellentesque leo. Nulla vestibulum nunc nec libero pulvinar vestibulum. Cras cursus tellus dolor, vel auctor lorem laoreet sed. Aliquam malesuada sapien vitae neque sagittis aliquam id vel mi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed et porta leo. Vestibulum ut enim accumsan, euismod risus vitae, pellentesque augue. Donec diam dolor, dictum sit amet mauris at, tempus pretium ante. Quisque ultrices sit amet velit eu aliquet. Vivamus egestas placerat ante vel consequat. Aenean sit amet ligula ut nisi condimentum scelerisque vitae vitae nisl.</p>
+									</div>
+								</div>
+							</li>
+							<li class="accordion__item">
+								<button class="accordion__item-trigger">Nested Accordion (depth 2)</button>
+								<div class="accordion__item-content">
+									<div class="accordion__item-content-inner">
+										<ul class="accordion">
+											<li class="accordion__item">
+												<button class="accordion__item-trigger">Short Content (depth 3)</button>
+												<div class="accordion__item-content">
+													<div class="accordion__item-content-inner">
+														<p>Lorem ipsum dolor sit amet.</p>
+													</div>
+												</div>
+											</li>
+											<li class="accordion__item">
+												<button class="accordion__item-trigger">Long Content (depth 3)</button>
+												<div class="accordion__item-content">
+													<div class="accordion__item-content-inner">
+														<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus a urna sapien. Nullam imperdiet molestie eros, a sagittis nisi aliquam viverra. Sed eleifend, turpis a tristique pretium, dui neque ultrices ligula, sed pellentesque est nulla sit amet ante. Ut dignissim cursus libero sit amet ullamcorper. Integer efficitur accumsan dolor eu luctus. Nullam nibh orci, laoreet eu feugiat quis, consequat ac metus. Aliquam vel nunc eu urna rhoncus molestie a non nisi. Maecenas dapibus ornare semper. Maecenas hendrerit odio sed erat maximus lacinia. Nullam velit nunc, aliquam ut lacinia sed, imperdiet sit amet sapien.</p>
+														<p>Morbi vestibulum id massa vel efficitur. Curabitur sollicitudin eleifend ipsum, nec fringilla lectus varius a. Maecenas condimentum justo sodales, blandit lectus sit amet, tempus odio. Praesent orci ligula, hendrerit id eleifend in, tincidunt sed nunc. Suspendisse nec erat eget elit consectetur pharetra. Suspendisse sollicitudin, augue quis faucibus aliquet, eros enim elementum neque, quis condimentum orci erat sit amet turpis. Integer risus nisi, commodo ac vehicula non, iaculis a tortor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec fermentum bibendum dolor. Integer vitae bibendum tortor. Praesent in ligula molestie, congue justo eget, efficitur erat. Aenean sit amet vehicula felis.</p>
+														<p>Pellentesque feugiat convallis est, eget pellentesque leo. Nulla vestibulum nunc nec libero pulvinar vestibulum. Cras cursus tellus dolor, vel auctor lorem laoreet sed. Aliquam malesuada sapien vitae neque sagittis aliquam id vel mi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed et porta leo. Vestibulum ut enim accumsan, euismod risus vitae, pellentesque augue. Donec diam dolor, dictum sit amet mauris at, tempus pretium ante. Quisque ultrices sit amet velit eu aliquet. Vivamus egestas placerat ante vel consequat. Aenean sit amet ligula ut nisi condimentum scelerisque vitae vitae nisl.</p>
+													</div>
+												</div>
+											</li>
+											<li class="accordion__item">
+												<button class="accordion__item-trigger">Nested Accordion (depth 3)</button>
+												<div class="accordion__item-content">
+													<div class="accordion__item-content-inner">
+													</div>
+												</div>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</li>
+		</ul>
+
+		<script>
+			new Accordion({
+				selectors: {
+					bundle: '.accordion',
+					item: '.accordion__item',
+					trigger: '.accordion__item-trigger',
+					content: '.accordion__item-content',
+					contentInner: '.accordion__item-content-inner'
+				},
+				debug: true
+			});
+		</script>
+	</body>
+</html>
