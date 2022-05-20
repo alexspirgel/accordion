@@ -84,50 +84,62 @@ module.exports = class Accordion {
 		}
 	}
 
-	// static isElementContainedBy(element, containedByElementsInput = [], operator = 'and') {
-	// 	if (!isElement(element)) {
-	// 		throw new Error(`'element' must be an element.`);
-	// 	}
-	// 	const containedByElements = normalizeElements(containedByElementsInput);
-	// 	if (typeof operator !== 'string') {
-	// 		throw new Error(`'operator' must be a string.`);
-	// 	}
-	// 	operator = operator.toLowerCase();
-	// 	if (operator !== 'and' && operator !== 'or') {
-	// 		throw new Error(`'operator' must be 'and' or 'or'.`);
-	// 	}
-	// 	let isContainedBy = false;
-	// 	for (const containedByElement of containedByElements) {
-	// 		if (containedByElement.contains(element) && containedByElement !== element) {
-	// 			isContainedBy = true;
-	// 			if (operator === 'or') {
-	// 				break;
-	// 			}
-	// 		}
-	// 		else {
-	// 			isContainedBy = false;
-	// 			if (operator === 'and') {
-	// 				break;
-	// 			}
-	// 		}
-	// 	}
-	// 	return isContainedBy;
-	// }
+	static removeExistingAccordionObjectElementsFromArray(elements) {
+		if (!Array.isArray(elements)) {
+			throw new Error(`'elements' must be an array.`);
+		}
+		elements = elements.filter((element) => {
+			if (!this.getAccordionObject(element)) {
+				return true;
+			}
+		});
+		return elements;
+	}
 
-	// static getNestedBundles(element) {
-	// 	if (!isElement(element)) {
-	// 		throw new Error(`'element' must be an element.`);
-	// 	}
-	// 	const nestedBundles = [];
-	// 	for (const accordion of this.accordions) {
-	// 		for (const bundle of accordion.bundles) {
-	// 			if (isElement(bundle.element) && element.contains(bundle.element) && element !== bundle.element) {
-	// 				nestedBundles.push(bundle);
-	// 			}
-	// 		}
-	// 	}
-	// 	return nestedBundles;
-	// }
+	static getNestedBundles(element) {
+		if (!isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		const nestedBundles = [];
+		for (const accordion of this.accordions) {
+			for (const bundle of accordion.bundles) {
+				if (isElement(bundle.element) && element.contains(bundle.element) && element !== bundle.element) {
+					nestedBundles.push(bundle);
+				}
+			}
+		}
+		return nestedBundles;
+	}
+
+	static isElementContainedBy(element, containedByElementsInput = [], operator = 'and') {
+		if (!isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		const containedByElements = normalizeElements(containedByElementsInput);
+		if (typeof operator !== 'string') {
+			throw new Error(`'operator' must be a string.`);
+		}
+		operator = operator.toLowerCase();
+		if (operator !== 'and' && operator !== 'or') {
+			throw new Error(`'operator' must be 'and' or 'or'.`);
+		}
+		let isContainedBy = false;
+		for (const containedByElement of containedByElements) {
+			if (containedByElement.contains(element) && containedByElement !== element) {
+				isContainedBy = true;
+				if (operator === 'or') {
+					break;
+				}
+			}
+			else {
+				isContainedBy = false;
+				if (operator === 'and') {
+					break;
+				}
+			}
+		}
+		return isContainedBy;
+	}
 
 	static get defaultOptions() {
 		return {
@@ -210,34 +222,60 @@ module.exports = class Accordion {
 
 		if (!this.initialized) {
 
-			// bundle
 			const bundleSelector = this.options.get('selectors.bundle');
+			const itemSelector = this.options.get('selectors.item');
+			const triggerSelector = this.options.get('selectors.trigger');
+			const contentSelector = this.options.get('selectors.content');
+			const contentInnerSelector = this.options.get('selectors.contentInner');
+
+			const initialBundles = [];
+			const initialItems = [];
+
+			// bundle
 			if (bundleSelector) {
-				const bundleElements = Array.from(document.querySelectorAll(bundleSelector));
-				for (const bundleElement of bundleElements) {
-					this.addBundle(bundleElement);
+				let initialBundleElements = Array.from(document.querySelectorAll(bundleSelector));
+				initialBundleElements = this.constructor.removeExistingAccordionObjectElementsFromArray(initialBundleElements);
+				for (const initialBundleElement of initialBundleElements) {
+					const initialBundle = this.addBundle(initialBundleElement);
+					initialBundles.push(initialBundle);
 				}
-				bundleElements.reverse();
-				const bundles = bundleElements.map((bundleElement) => {
-					return this.constructor.getAccordionObject(bundleElement);
-				});
-				// item
-				const itemSelector = this.options.get('selectors.item');
-				const triggerSelector = this.options.get('selectors.trigger');
-				if (itemSelector) {
-					for (const bundle of bundles) {
-						const itemElements = bundle.element.querySelectorAll(itemSelector);
-						for (const itemElement of itemElements) {
-							const existingAccordionElement = this.constructor.getAccordionObject(itemElement);
-							if (!existingAccordionElement) {
-								bundle.addItem(itemElement);
-								const item = this.constructor.getAccordionObject(itemElement);
-								// trigger
-								if (triggerSelector) {}
-							}
+			}
+
+			// item
+			if (itemSelector) {
+				for (const initialBundle of initialBundles) {
+					let initialItemElements = Array.from(initialBundle.element.querySelectorAll(itemSelector));
+					initialItemElements = this.constructor.removeExistingAccordionObjectElementsFromArray(initialItemElements);
+					const nestedBundles = this.constructor.getNestedBundles(initialBundle.element);
+					const nestedBundleElements = [];
+					for (const nestedBundle of nestedBundles) {
+						if (isElement(nestedBundle.element)) {
+							nestedBundleElements.push(nestedBundle.element);
 						}
 					}
+					initialItemElements = initialItemElements.filter((element) => {
+						return !this.constructor.isElementContainedBy(element, nestedBundleElements, 'or');
+					});
+					for (const initialItemElement of initialItemElements) {
+						const initialItem = initialBundle.addItem(initialItemElement);
+						initialItems.push(initialItem);
+					}
 				}
+			}
+
+			// trigger
+			if (triggerSelector) {
+				for (const initialItem of initialItems) {}
+			}
+			
+			// content
+			if (contentSelector) {
+				for (const initialItem of initialItems) {}
+			}
+			
+			// content inner
+			if (contentInnerSelector) {
+				for (const initialItem of initialItems) {}
 			}
 
 			this.initialized = true;
@@ -265,31 +303,17 @@ module.exports = class Accordion {
 		this._bundles = bundles;
 	}
 
-	getBundle(bundle) {
-		if (Bundle.isBundle(bundle)) {
-			return this.bundles.find((value) => {
-				return value === bundle;
-			});
-		}
-		else if (isElement(bundle)) {
-			return this.bundles.find((value) => {
-				return value.element === bundle;
-			});
-		}
-	}
-
 	addBundle(element) {
 		const bundle = new Bundle(this, element);
 		this.bundles.push(bundle);
+		return bundle;
 	}
 
 	removeBundle(bundle) {
-		const existingBundle = this.getBundle(bundle);
-		if (existingBundle) {
-			const existingBundleIndex = this.bundles.indexOf(existingBundle);
-			if (existingBundleIndex >= 0) {
-				this.bundles.splice(existingBundleIndex, 1);
-			}
+		const existingBundleIndex = this.bundles.indexOf(bundle);
+		if (existingBundleIndex >= 0) {
+			this.bundles.splice(existingBundleIndex, 1);
+			return bundle;
 		}
 	}
 

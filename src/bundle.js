@@ -27,7 +27,7 @@ module.exports = class Bundle {
 			throw new Error(`'element' must be an element.`);
 		}
 		if (this.accordion.constructor.getAccordionObject(element)) {
-			throw new Error(`'element' is already used in another accordion.`);
+			throw new Error(`'element' is already used in an accordion.`);
 		}
 		element.setAttribute(this.accordion.options.get('dataAttributes.elementType'), 'bundle');
 		this._unsetElement();
