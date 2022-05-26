@@ -78,11 +78,15 @@ module.exports = normalizeElements;
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const ObjectManager = __webpack_require__(160);
-const Bundle = __webpack_require__(768);
 const isElement = __webpack_require__(683);
 const normalizeElements = __webpack_require__(364);
+const Bundle = __webpack_require__(768);
 
 module.exports = class Accordion {
+
+	static isAccordion(accordion) {
+		return (accordion instanceof this);
+	}
 
 	static get accordions() {
 		if (!Array.isArray(this._accordions)) {
@@ -101,35 +105,20 @@ module.exports = class Accordion {
 		this._accordions = accordions;
 	}
 
-	static isAccordion(accordion) {
-		return (accordion instanceof this);
-	}
-
-	static getAccordion(accordion) {
-		if (this.isAccordion(accordion)) {
-			return this.accordions.find((item) => {
-				return item === accordion;
-			});
-		}
-	}
-
 	static addAccordion(accordion) {
 		if (!this.isAccordion(accordion)) {
 			throw new Error(`'accordion' must be an accordion.`);
 		}
-		const existingAccordion = this.getAccordion(accordion);
-		if (!existingAccordion) {
-			this.accordions.push(accordion);
+		if (this.accordions.includes(accordion)) {
+			throw new Error(`'accordion' already exists in the array of accordions.`);
 		}
+		this.accordions.push(accordion);
 	}
 
 	static removeAccordion(accordion) {
-		const existingAccordion = this.getAccordion(accordion);
-		if (existingAccordion) {
-			const existingAccordionIndex = this.accordions.indexOf(existingAccordionIndex);
-			if (existingAccordionIndex >= 0) {
-				this.accordions.splice(existingAccordionIndex, 1);
-			}
+		const accordionIndex = this.accordions.indexOf(accordion);
+		if (accordionIndex >= 0) {
+			this.accordions.splice(accordionIndex, 1);
 		}
 	}
 
@@ -143,18 +132,18 @@ module.exports = class Accordion {
 					if (element === item.element) {
 						return item;
 					}
-					if (item.trigger) {
-						if (element === item.trigger.element) {
-							return item.trigger;
+					if (item.header) {
+						if (element === item.header.element) {
+							return item.header;
 						}
 					}
-					if (item.content) {
-						if (element === item.content.element) {
-							return item.content;
+					if (item.panel) {
+						if (element === item.panel.element) {
+							return item.panel;
 						}
-						if (item.content.contentInner) {
-							if (element === item.content.contentInner.element) {
-								return item.content.contentInner;
+						if (item.panel.panelInner) {
+							if (element === item.panel.panelInner.element) {
+								return item.panel.panelInner;
 							}
 						}
 					}
@@ -225,9 +214,9 @@ module.exports = class Accordion {
 			selectors: {
 				bundle: undefined,
 				item: undefined,
-				trigger: undefined,
-				content: undefined,
-				contentInner: undefined
+				header: undefined,
+				panel: undefined,
+				panelInner: undefined
 			},
 			defaultOpenItems: undefined,
 			accessibilityWarnings: true,
@@ -266,9 +255,9 @@ module.exports = class Accordion {
 			},
 			'selectors.bundle': validateSelector,
 			'selectors.item': validateSelector,
-			'selectors.trigger': validateSelector,
-			'selectors.content': validateSelector,
-			'selectors.contentInner': validateSelector,
+			'selectors.header': validateSelector,
+			'selectors.panel': validateSelector,
+			'selectors.panelInner': validateSelector,
 			'defaultOpenItems': ({value, pathId}) => {
 				if (typeof value !== 'number'
 				&& typeof value !== 'string'
@@ -303,19 +292,24 @@ module.exports = class Accordion {
 
 			const bundleSelector = this.options.get('selectors.bundle');
 			const itemSelector = this.options.get('selectors.item');
-			const triggerSelector = this.options.get('selectors.trigger');
-			const contentSelector = this.options.get('selectors.content');
-			const contentInnerSelector = this.options.get('selectors.contentInner');
+			const headerSelector = this.options.get('selectors.header');
+			const panelSelector = this.options.get('selectors.panel');
+			const panelInnerSelector = this.options.get('selectors.panelInner');
 
 			const initialBundles = [];
 			const initialItems = [];
+			const initialHeaders = [];
+			const initialPanels = [];
+			const initialPanelInners = [];
 
 			// bundle
 			if (bundleSelector) {
 				let initialBundleElements = Array.from(document.querySelectorAll(bundleSelector));
 				initialBundleElements = this.constructor.removeExistingAccordionObjectElementsFromArray(initialBundleElements);
 				for (const initialBundleElement of initialBundleElements) {
-					const initialBundle = this.addBundle(initialBundleElement);
+					const initialBundle = this.addBundle({
+						element: initialBundleElement
+					});
 					initialBundles.push(initialBundle);
 				}
 			}
@@ -336,25 +330,51 @@ module.exports = class Accordion {
 						return !this.constructor.isElementContainedBy(element, nestedBundleElements, 'or');
 					});
 					for (const initialItemElement of initialItemElements) {
-						const initialItem = initialBundle.addItem(initialItemElement);
+						const initialItem = initialBundle.addItem({
+							element: initialItemElement
+						});
 						initialItems.push(initialItem);
 					}
 				}
 			}
 
-			// trigger
-			if (triggerSelector) {
-				for (const initialItem of initialItems) {}
+			// header
+			if (headerSelector) {
+				for (const initialItem of initialItems) {
+					let initialHeaderElement = initialItem.element.querySelector(headerSelector);
+					if (initialHeaderElement) {
+						const initialHeader = initialItem.addHeader({
+							element: initialHeaderElement
+						});
+						initialHeaders.push(initialHeader);
+					}
+				}
 			}
 			
-			// content
-			if (contentSelector) {
-				for (const initialItem of initialItems) {}
+			// panel
+			if (panelSelector) {
+				for (const initialItem of initialItems) {
+					let initialPanelElement = initialItem.element.querySelector(panelSelector);
+					if (initialPanelElement) {
+						const initialPanel = initialItem.addPanel({
+							element:initialPanelElement
+						});
+						initialPanels.push(initialPanel);
+					}
+				}
 			}
 			
-			// content inner
-			if (contentInnerSelector) {
-				for (const initialItem of initialItems) {}
+			// panel inner
+			if (panelInnerSelector) {
+				for (const initialPanel of initialPanels) {
+					let initialPanelInnerElement = initialPanel.element.querySelector(panelInnerSelector);
+					if (initialPanelInnerElement) {
+						const initialPanelInner = initialPanel.addPanelInner({
+							element: initialPanelInnerElement
+						});
+						initialPanelInners.push(initialPanelInner);
+					}
+				}
 			}
 
 			this.initialized = true;
@@ -382,8 +402,12 @@ module.exports = class Accordion {
 		this._bundles = bundles;
 	}
 
-	addBundle(element) {
-		const bundle = new Bundle(this, element);
+	addBundle({element, items}) {
+		const bundle = new Bundle({
+			accordion: this,
+			element: element,
+			items: items
+		});
 		this.bundles.push(bundle);
 		return bundle;
 	}
@@ -425,15 +449,33 @@ module.exports = class Bundle {
 		return (bundle instanceof this);
 	}
 
-	constructor(accordion, element) {
+	constructor({accordion, element, items}) {
 		this.accordion = accordion;
 		this.element = element;
+		if (Array.isArray(items)) {
+			this.addItems(items);
+		}
 	}
 
 	get options() {
 		if (this.accordion) {
 			return this.accordion.options;
 		}
+	}
+
+	get accordion() {
+		return this._accordion;
+	}
+
+	set accordion(accordion) {
+		if (this.initialized) {
+			throw new Error(`The 'accordion' property should not be changed after construction. Instead, destroy the instance and create a new one.`);
+		}
+		const Accordion = __webpack_require__(662);
+		if (!Accordion.isAccordion(accordion)) {
+			throw new Error(`'accordion' must be an instance of the 'Accordion' class.`);
+		}
+		this._accordion = accordion;
 	}
 
 	get element() {
@@ -476,17 +518,35 @@ module.exports = class Bundle {
 		this._items = items;
 	}
 	
-	addItem(element) {
-		const item = new Item(this, element);
+	addItem({element, header, panel, panelInner}) {
+		const item = new Item({
+			bundle: this,
+			element: element,
+			header: header,
+			panel: panel,
+			panelInner: panelInner
+		});
 		this.items.push(item);
+		return item;
+	}
+
+	addItems(items) {
+		const addedItems = [];
+		if (!Array.isArray(items)) {
+			throw new Error(`'items' must be an array.`);
+		}
+		for (const item of items) {
+			const addedItem = this.addItem(item);
+			addedItems.push(addedItem);
+		}
+		return addedItems;
 	}
 	
 	removeItem(item) {
-		if (Item.isItem(item)) {
-			const itemIndex = this.items.indexOf(item);
-			if (itemIndex >= 0) {
-				this.items.splice(itemIndex, 1);
-			}
+		const itemIndex = this.items.indexOf(item);
+		if (itemIndex >= 0) {
+			this.items.splice(itemIndex, 1);
+			return item;
 		}
 	}
 
@@ -502,20 +562,27 @@ module.exports = class Bundle {
 
 /***/ }),
 
-/***/ 87:
+/***/ 239:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const isElement = __webpack_require__(683);
 
-module.exports = class Item {
+module.exports = class Header {
 
-	static isItem(item) {
-		return (item instanceof this);
+	static isHeader(header) {
+		return (header instanceof this);
 	}
 
-	constructor(bundle, element) {
-		this.bundle = bundle;
+	constructor({item, element}) {
+		this.item = item;
 		this.element = element;
+		this.initialized = true;
+	}
+
+	get options() {
+		if (this.accordion) {
+			return this.accordion.options;
+		}
 	}
 
 	get accordion() {
@@ -524,10 +591,25 @@ module.exports = class Item {
 		}
 	}
 
-	get options() {
-		if (this.accordion) {
-			return this.accordion.options;
+	get bundle() {
+		if (this.item) {
+			return this.item.bundle;
 		}
+	}
+
+	get item() {
+		return this._item;
+	}
+
+	set item(item) {
+		if (this.initialized) {
+			throw new Error(`The 'item' property should not be changed after construction. Instead, destroy the instance and create a new one.`);
+		}
+		const Item = __webpack_require__(87);
+		if (!Item.isItem(item)) {
+			throw new Error(`'item' must be an instance of the 'Item' class.`);
+		}
+		this._item = item;
 	}
 
 	get element() {
@@ -539,7 +621,98 @@ module.exports = class Item {
 			throw new Error(`'element' must be an element.`);
 		}
 		if (this.accordion.constructor.getAccordionObject(element)) {
-			throw new Error(`'element' is already used in another accordion.`);
+			throw new Error(`'element' is already used in an accordion.`);
+		}
+		element.setAttribute(this.accordion.options.get('dataAttributes.elementType'), 'header');
+		this._unsetElement();
+		this._element = element;
+	}
+
+	_unsetElement(element) {
+		if (isElement(this.element)) {
+			element.removeAttribute(this.accordion.options.get('dataAttributes.elementType'));
+		}
+		this._element = undefined;
+	}
+
+	destroy() {
+		this._unsetElement();
+		if (this.item && this.item.header === this) {
+			this.item.header = undefined;
+		}
+	}
+
+};
+
+/***/ }),
+
+/***/ 87:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const isElement = __webpack_require__(683);
+const Header = __webpack_require__(239);
+const Panel = __webpack_require__(426);
+
+module.exports = class Item {
+
+	static isItem(item) {
+		return (item instanceof this);
+	}
+
+	constructor({bundle, element, header, panel, panelInner}) {
+		this.bundle = bundle;
+		this.element = element;
+		if (isElement(header)) {
+			this.addHeader({
+				element: header
+			});
+		}
+		if (isElement(panel)) {
+			this.addPanel({
+				element: panel,
+				panelInner: panelInner
+			});
+		}
+		this.initialized = true;
+	}
+
+	get options() {
+		if (this.accordion) {
+			return this.accordion.options;
+		}
+	}
+
+	get accordion() {
+		if (this.bundle) {
+			return this.bundle.accordion;
+		}
+	}
+
+	get bundle() {
+		return this._bundle;
+	}
+
+	set bundle(bundle) {
+		if (this.initialized) {
+			throw new Error(`The 'bundle' property should not be changed after construction. Instead, destroy the instance and create a new one.`);
+		}
+		const Bundle = __webpack_require__(768);
+		if (!Bundle.isBundle(bundle)) {
+			throw new Error(`'bundle' must be an instance of the 'Bundle' class.`);
+		}
+		this._bundle = bundle;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.accordion.constructor.getAccordionObject(element)) {
+			throw new Error(`'element' is already used in an accordion.`);
 		}
 		element.setAttribute(this.accordion.options.get('dataAttributes.elementType'), 'item');
 		this._unsetElement();
@@ -553,7 +726,66 @@ module.exports = class Item {
 		this._element = undefined;
 	}
 
+	get header() {
+		return this._header;
+	}
+
+	set header(header) {
+		if (!Header.isHeader(header) && typeof header !== undefined) {
+			throw new Error(`'header' must be an instance of Header or undefined.`);
+		}
+		const existingHeader = this._header;
+		if (header !== existingHeader) {
+			this._header = header;
+			if (Header.isHeader(existingHeader)) {
+				existingHeader.destroy();
+			}
+		}
+	}
+
+	addHeader({element}) {
+		const header = new Header({
+			item: this,
+			element: element,
+		});
+		this.header = header;
+		return header;
+	}
+
+	get panel() {
+		return this._panel;
+	}
+
+	set panel(panel) {
+		if (!Panel.isPanel(panel) && typeof panel !== undefined) {
+			throw new Error(`'panel' must be an instance of Panel or undefined.`);
+		}
+		const existingPanel = this._panel;
+		if (panel !== existingPanel) {
+			this._panel = panel;
+			if (Panel.isPanel(existingPanel)) {
+				existingPanel.destroy();
+			}
+		}
+	}
+
+	addPanel({element, panelInner}) {
+		const panel = new Panel({
+			item: this,
+			element: element,
+			panelInner: panelInner
+		});
+		this.panel = panel;
+		return panel;
+	}
+
 	destroy() {
+		if (this.header) {
+			this.header.destroy();
+		}
+		if (this.panel) {
+			this.panel.destroy();
+		}
 		this._unsetElement();
 		this.bundle.removeItem(this);
 	}
@@ -811,6 +1043,215 @@ module.exports = class ObjectManager {
 					this.eventListeners[pathId].splice(eventListenerIndex, 1);
 				}
 			}
+		}
+	}
+
+};
+
+/***/ }),
+
+/***/ 813:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const isElement = __webpack_require__(683);
+
+module.exports = class PanelInner {
+
+	static isPanelInner(panelInner) {
+		return (panelInner instanceof this);
+	}
+
+	constructor({panel, element}) {
+		this.panel = panel;
+		this.element = element;
+		this.initialized = true;
+	}
+
+	get options() {
+		if (this.accordion) {
+			return this.accordion.options;
+		}
+	}
+
+	get accordion() {
+		if (this.bundle) {
+			return this.bundle.accordion;
+		}
+	}
+
+	get bundle() {
+		if (this.item) {
+			return this.item.bundle;
+		}
+	}
+
+	get item() {
+		if (this.panel) {
+			return this.panel.item;
+		}
+	}
+
+	get panel() {
+		return this._panel;
+	}
+
+	set panel(panel) {
+		if (this.initialized) {
+			throw new Error(`The 'panel' property should not be changed after construction. Instead, destroy the instance and create a new one.`);
+		}
+		const Panel = __webpack_require__(426);
+		if (!Panel.isPanel(panel)) {
+			throw new Error(`'panel' must be an instance of the 'Panel' class.`);
+		}
+		this._panel = panel;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.accordion.constructor.getAccordionObject(element)) {
+			throw new Error(`'element' is already used in an accordion.`);
+		}
+		element.setAttribute(this.accordion.options.get('dataAttributes.elementType'), 'panel-inner');
+		this._unsetElement();
+		this._element = element;
+	}
+
+	_unsetElement(element) {
+		if (isElement(this.element)) {
+			element.removeAttribute(this.accordion.options.get('dataAttributes.elementType'));
+		}
+		this._element = undefined;
+	}
+
+	destroy() {
+		this._unsetElement();
+		if (this.panel && this.panel.panelInner === this) {
+			this.panel.panelInner = undefined;
+		}
+	}
+
+};
+
+/***/ }),
+
+/***/ 426:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const isElement = __webpack_require__(683);
+const PanelInner = __webpack_require__(813);
+
+module.exports = class Panel {
+
+	static isPanel(panel) {
+		return (panel instanceof this);
+	}
+
+	constructor({item, element, panelInner}) {
+		this.item = item;
+		this.element = element;
+		if (isElement(panelInner)) {
+			this.addPanelInner({
+				element: panelInner
+			});
+		}
+		this.initialized = true;
+	}
+
+	get options() {
+		if (this.accordion) {
+			return this.accordion.options;
+		}
+	}
+
+	get accordion() {
+		if (this.bundle) {
+			return this.bundle.accordion;
+		}
+	}
+
+	get bundle() {
+		if (this.item) {
+			return this.item.bundle;
+		}
+	}
+
+	get item() {
+		return this._item;
+	}
+
+	set item(item) {
+		if (this.initialized) {
+			throw new Error(`The 'item' property should not be changed after construction. Instead, destroy the instance and create a new one.`);
+		}
+		const Item = __webpack_require__(87);
+		if (!Item.isItem(item)) {
+			throw new Error(`'item' must be an instance of the 'Item' class.`);
+		}
+		this._item = item;
+	}
+
+	get element() {
+		return this._element;
+	}
+
+	set element(element) {
+		if (!isElement(element)) {
+			throw new Error(`'element' must be an element.`);
+		}
+		if (this.accordion.constructor.getAccordionObject(element)) {
+			throw new Error(`'element' is already used in an accordion.`);
+		}
+		element.setAttribute(this.accordion.options.get('dataAttributes.elementType'), 'panel');
+		this._unsetElement();
+		this._element = element;
+	}
+
+	_unsetElement(element) {
+		if (isElement(this.element)) {
+			element.removeAttribute(this.accordion.options.get('dataAttributes.elementType'));
+		}
+		this._element = undefined;
+	}
+
+	get panelInner() {
+		return this._panelInner;
+	}
+
+	set panelInner(panelInner) {
+		if (!PanelInner.isPanelInner(panelInner) && typeof panelInner !== 'undefined') {
+			throw new Error(`'panelInner' must be an instance of PanelInner or undefined.`);
+		}
+		const existingPanelInner = this._panelInner;
+		if (panelInner !== existingPanelInner) {
+			this._panelInner = panelInner;
+			if (PanelInner.isPanelInner(existingPanelInner)) {
+				existingPanelInner.destroy();
+			}
+		}
+	}
+
+	addPanelInner({element}) {
+		const panelInner = new PanelInner({
+			panel: this,
+			element: element
+		});
+		this.panelInner = panelInner;
+		return panelInner;
+	}
+
+	destroy() {
+		if (PanelInner.isPanelInner(this.panelInner)) {
+			this.panelInner.destroy();
+		}
+		this._unsetElement();
+		if (this.item && this.item.panel === this) {
+			this.item.panel = undefined;
 		}
 	}
 

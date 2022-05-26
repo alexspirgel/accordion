@@ -1,9 +1,13 @@
 const ObjectManager = require('./object-manager.js');
-const Bundle = require('./bundle.js');
 const isElement = require('@alexspirgel/is-element');
 const normalizeElements = require('@alexspirgel/normalize-elements');
+const Bundle = require('./bundle.js');
 
 module.exports = class Accordion {
+
+	static isAccordion(accordion) {
+		return (accordion instanceof this);
+	}
 
 	static get accordions() {
 		if (!Array.isArray(this._accordions)) {
@@ -22,35 +26,20 @@ module.exports = class Accordion {
 		this._accordions = accordions;
 	}
 
-	static isAccordion(accordion) {
-		return (accordion instanceof this);
-	}
-
-	static getAccordion(accordion) {
-		if (this.isAccordion(accordion)) {
-			return this.accordions.find((item) => {
-				return item === accordion;
-			});
-		}
-	}
-
 	static addAccordion(accordion) {
 		if (!this.isAccordion(accordion)) {
 			throw new Error(`'accordion' must be an accordion.`);
 		}
-		const existingAccordion = this.getAccordion(accordion);
-		if (!existingAccordion) {
-			this.accordions.push(accordion);
+		if (this.accordions.includes(accordion)) {
+			throw new Error(`'accordion' already exists in the array of accordions.`);
 		}
+		this.accordions.push(accordion);
 	}
 
 	static removeAccordion(accordion) {
-		const existingAccordion = this.getAccordion(accordion);
-		if (existingAccordion) {
-			const existingAccordionIndex = this.accordions.indexOf(existingAccordionIndex);
-			if (existingAccordionIndex >= 0) {
-				this.accordions.splice(existingAccordionIndex, 1);
-			}
+		const accordionIndex = this.accordions.indexOf(accordion);
+		if (accordionIndex >= 0) {
+			this.accordions.splice(accordionIndex, 1);
 		}
 	}
 
@@ -64,18 +53,18 @@ module.exports = class Accordion {
 					if (element === item.element) {
 						return item;
 					}
-					if (item.trigger) {
-						if (element === item.trigger.element) {
-							return item.trigger;
+					if (item.header) {
+						if (element === item.header.element) {
+							return item.header;
 						}
 					}
-					if (item.content) {
-						if (element === item.content.element) {
-							return item.content;
+					if (item.panel) {
+						if (element === item.panel.element) {
+							return item.panel;
 						}
-						if (item.content.contentInner) {
-							if (element === item.content.contentInner.element) {
-								return item.content.contentInner;
+						if (item.panel.panelInner) {
+							if (element === item.panel.panelInner.element) {
+								return item.panel.panelInner;
 							}
 						}
 					}
@@ -146,9 +135,9 @@ module.exports = class Accordion {
 			selectors: {
 				bundle: undefined,
 				item: undefined,
-				trigger: undefined,
-				content: undefined,
-				contentInner: undefined
+				header: undefined,
+				panel: undefined,
+				panelInner: undefined
 			},
 			defaultOpenItems: undefined,
 			accessibilityWarnings: true,
@@ -187,9 +176,9 @@ module.exports = class Accordion {
 			},
 			'selectors.bundle': validateSelector,
 			'selectors.item': validateSelector,
-			'selectors.trigger': validateSelector,
-			'selectors.content': validateSelector,
-			'selectors.contentInner': validateSelector,
+			'selectors.header': validateSelector,
+			'selectors.panel': validateSelector,
+			'selectors.panelInner': validateSelector,
 			'defaultOpenItems': ({value, pathId}) => {
 				if (typeof value !== 'number'
 				&& typeof value !== 'string'
@@ -224,19 +213,24 @@ module.exports = class Accordion {
 
 			const bundleSelector = this.options.get('selectors.bundle');
 			const itemSelector = this.options.get('selectors.item');
-			const triggerSelector = this.options.get('selectors.trigger');
-			const contentSelector = this.options.get('selectors.content');
-			const contentInnerSelector = this.options.get('selectors.contentInner');
+			const headerSelector = this.options.get('selectors.header');
+			const panelSelector = this.options.get('selectors.panel');
+			const panelInnerSelector = this.options.get('selectors.panelInner');
 
 			const initialBundles = [];
 			const initialItems = [];
+			const initialHeaders = [];
+			const initialPanels = [];
+			const initialPanelInners = [];
 
 			// bundle
 			if (bundleSelector) {
 				let initialBundleElements = Array.from(document.querySelectorAll(bundleSelector));
 				initialBundleElements = this.constructor.removeExistingAccordionObjectElementsFromArray(initialBundleElements);
 				for (const initialBundleElement of initialBundleElements) {
-					const initialBundle = this.addBundle(initialBundleElement);
+					const initialBundle = this.addBundle({
+						element: initialBundleElement
+					});
 					initialBundles.push(initialBundle);
 				}
 			}
@@ -257,25 +251,51 @@ module.exports = class Accordion {
 						return !this.constructor.isElementContainedBy(element, nestedBundleElements, 'or');
 					});
 					for (const initialItemElement of initialItemElements) {
-						const initialItem = initialBundle.addItem(initialItemElement);
+						const initialItem = initialBundle.addItem({
+							element: initialItemElement
+						});
 						initialItems.push(initialItem);
 					}
 				}
 			}
 
-			// trigger
-			if (triggerSelector) {
-				for (const initialItem of initialItems) {}
+			// header
+			if (headerSelector) {
+				for (const initialItem of initialItems) {
+					let initialHeaderElement = initialItem.element.querySelector(headerSelector);
+					if (initialHeaderElement) {
+						const initialHeader = initialItem.addHeader({
+							element: initialHeaderElement
+						});
+						initialHeaders.push(initialHeader);
+					}
+				}
 			}
 			
-			// content
-			if (contentSelector) {
-				for (const initialItem of initialItems) {}
+			// panel
+			if (panelSelector) {
+				for (const initialItem of initialItems) {
+					let initialPanelElement = initialItem.element.querySelector(panelSelector);
+					if (initialPanelElement) {
+						const initialPanel = initialItem.addPanel({
+							element:initialPanelElement
+						});
+						initialPanels.push(initialPanel);
+					}
+				}
 			}
 			
-			// content inner
-			if (contentInnerSelector) {
-				for (const initialItem of initialItems) {}
+			// panel inner
+			if (panelInnerSelector) {
+				for (const initialPanel of initialPanels) {
+					let initialPanelInnerElement = initialPanel.element.querySelector(panelInnerSelector);
+					if (initialPanelInnerElement) {
+						const initialPanelInner = initialPanel.addPanelInner({
+							element: initialPanelInnerElement
+						});
+						initialPanelInners.push(initialPanelInner);
+					}
+				}
 			}
 
 			this.initialized = true;
@@ -303,8 +323,12 @@ module.exports = class Accordion {
 		this._bundles = bundles;
 	}
 
-	addBundle(element) {
-		const bundle = new Bundle(this, element);
+	addBundle({element, items}) {
+		const bundle = new Bundle({
+			accordion: this,
+			element: element,
+			items: items
+		});
 		this.bundles.push(bundle);
 		return bundle;
 	}
